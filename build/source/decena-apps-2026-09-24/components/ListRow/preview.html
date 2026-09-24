@@ -1,0 +1,12 @@
+<!-- @dsCard group="Layout" height=230 subtitle="Clip rows, one selected" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ListRow</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.Decena, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render((function(){function L(){var s=React.useState(1);return h('div',{className:'dc-list',role:'listbox','aria-label':'Clips',style:{maxWidth:520}},[['DJI_0412','Mini 4 Pro, 4K 60','0:48'],['OSMO_1187','Osmo Pocket 3, 4K 30','2:14'],['C0093','Sony a7 IV, 4K 24','0:31']].map(function(r,i){return h(D.ListRow,{key:r[0],title:r[0],subtitle:r[1],trailing:r[2],thumb:'4K',selected:s[0]===i,onClick:function(){s[1](i)}})}));}return h(L)})());
+</script>
+</body>
+</html>

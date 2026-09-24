@@ -1,0 +1,12 @@
+<!-- @dsCard group="Status" height=110 subtitle="Warn, bad, accent" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Flag</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'dc-stack',style:{alignItems:'flex-start'}},h(D.Flag,{tone:'warn'},'Card is 94% full. Offload before the next shoot.'),h(D.Flag,{tone:'bad'},'Sync failed: iCloud quota reached.'),h(D.Flag,{tone:'accent'},'3 clips need a keep-or-delete call.')));
+</script>
+</body>
+</html>

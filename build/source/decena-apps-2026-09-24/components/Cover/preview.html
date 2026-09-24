@@ -1,0 +1,42 @@
+<!-- @dsCard height=320 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Cover</title>
+<style>
+  html, body { margin: 0; padding: 0; background: var(--ground); }
+  .cv { position: relative; width: 960px; height: 320px; overflow: hidden; background: var(--ground); }
+  .cv svg { position: absolute; left: 0; top: 0; }
+  .clay { fill: var(--clay); } .ink { fill: var(--ink); } .signal { fill: var(--signal); }
+  .wash { fill: var(--clay-wash); } .surf { fill: var(--surface); stroke: var(--edge); stroke-width: 1; }
+  .blk { rx: var(--radius-lg); }
+  .txt { position: absolute; left: 40px; bottom: 36px; width: 420px; display: flex; flex-direction: column; gap: 16px; }
+  .name { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 112px; line-height: .95; letter-spacing: -1.5px; color: var(--ink); }
+  .tag { margin: 0; font-family: var(--font-sans); font-size: 14px; line-height: 20px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<div class="cv">
+  <svg width="960" height="320" viewBox="0 0 960 320" aria-hidden="true">
+    <!--
+      blocks: clay 256x222 (radius-lg), ink 208x134 (radius-lg), signal 120x72 (radius-lg), clay-wash band 480x96 (radius-lg)
+      arrangement: one tall clay slab bleeding off the top with an ink satellite bleeding right, signal tucked under it, a clay-wash band along the bottom
+      pattern: pills from radius-pill ("soft, friendly, large radii" row) set as a row of on/off filter pills, because the filter pill is the system's signature control
+      steps: gaps space-6 (16); pills 32 tall with rx 16 (half the short side), gap space-5 (12); corners radius-lg (14)
+    -->
+    <rect class="clay blk" x="480" y="-14" width="256" height="222" rx="14"/>
+    <rect class="ink blk" x="752" y="-14" width="222" height="134" rx="14"/>
+    <rect class="signal blk" x="752" y="136" width="120" height="72" rx="14"/>
+    <rect class="wash blk" x="480" y="224" width="494" height="110" rx="14"/>
+    <rect class="clay" x="504" y="256" width="96" height="32" rx="16"/>
+    <rect class="surf" x="612" y="256" width="72" height="32" rx="16"/>
+    <rect class="clay" x="696" y="256" width="120" height="32" rx="16"/>
+    <rect class="surf" x="828" y="256" width="56" height="32" rx="16"/>
+    <rect class="surf" x="896" y="256" width="88" height="32" rx="16"/>
+  </svg>
+  <div class="txt">
+    <h1 class="name">Decena<br>Apps</h1>
+    <p class="tag">Warm paper, one clay accent, Apple-native bones.</p>
+  </div>
+</div>
+</body>
+</html>

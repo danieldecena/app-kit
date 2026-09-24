@@ -1,0 +1,15 @@
+<!-- @dsCard group="Content" height=130 subtitle="Purple, pink, orange, mint, blue" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Highlight</title></head>
+<body>
+<div id="root" style="max-width:620px;font:400 16px/28px var(--font-sans);color:var(--ink)"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('p', {style:{margin:0}},
+    'At ', h(D.Highlight,{color:'purple'},'PitchBook'), ' the dedupe cut storage ', h(D.Highlight,{color:'pink'},'25%'),
+    ' and lifted email ', h(D.Highlight,{color:'mint'},'+12%'), '. The call is ', h(D.Highlight,{color:'blue'},'Fri Sep 25, 1:30'),
+    ', and the range is ', h(D.Highlight,{color:'orange'},'$160-180K'), '.'));
+</script>
+</body>
+</html>

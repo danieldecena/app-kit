@@ -1,0 +1,14 @@
+{
+  "$comment": "Publish with the recorded url; omitting it creates a SECOND artifact.",
+  "design_system": {
+    "url": "https://claude.ai/artifact/Vd5LAqkkX2HHeAFMSB556u",
+    "type": "Design System",
+    "title": "App Kit",
+    "formerly": "Decena Apps",
+    "source": "design-system/project/"
+  },
+  "siblings": {
+    "artifact_kit": "~/developer/artifact-kit",
+    "terminal_kit": "~/developer/terminal-kit"
+  }
+}

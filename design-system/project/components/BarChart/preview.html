@@ -1,0 +1,27 @@
+<!-- @dsCard group="Data" height=720 subtitle="Stacked with a legend; emphasis with one highlighted bar" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>BarChart</title></head>
+<body>
+<div id="root" style="max-width:620px;display:flex;flex-direction:column;gap:16px"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null, h(D.BarChart, {
+    title: 'Backup by shoot day',
+    summary: 'Sep 17 is the big day, and most of its clips still have one copy.',
+    unit: 'clips',
+    series: [{ name: 'Backed up' }, { name: 'One copy' }],
+    data: [
+      { label: 'Sep 14', values: [1, 0] }, { label: 'Sep 15', values: [4, 0] }, { label: 'Sep 16', values: [3, 0] },
+      { label: 'Sep 17', values: [21, 8] }, { label: 'Sep 18', values: [0, 7] }, { label: 'Sep 19', values: [2, 17] }
+    ]
+  }), h(D.BarChart, {
+    title: 'Readiness by segment',
+    summary: 'The role is the weakest segment, with 1 of 6 items mastered.',
+    unit: 'items',
+    highlight: 'The role', highlightName: 'Weakest segment', restName: 'Other segments',
+    data: [{ label: 'Front', value: 2 }, { label: 'The role', value: 1 }, { label: 'Stories', value: 2 }, { label: 'Tricky', value: 2 }]
+  })));
+</script>
+</body>
+</html>

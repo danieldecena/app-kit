@@ -1,0 +1,15 @@
+<!-- @dsCard group="Actions" height=190 subtitle="Tinted in six colours, filled, gray, plain, glass, destructive" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Button</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'dc-stack'},
+    h('div',{className:'dc-row'},h(D.Button,null,'Preview'),h(D.Button,{tint:'purple'},'Tag'),h(D.Button,{tint:'pink'},'Favorite'),h(D.Button,{tint:'orange'},'Flag'),h(D.Button,{tint:'mint'},'Share'),h(D.Button,{tint:'blue'},'Info')),
+    h('div',{className:'dc-row'},h(D.Button,{variant:'filled'},'Import 42 clips'),h(D.Button,{variant:'gray'},'Cancel'),h(D.Button,{variant:'plain'},'Show all'),h(D.Button,{variant:'destructive'},'Delete'),
+      h('span',{style:{display:'inline-flex',padding:10,borderRadius:22,background:'linear-gradient(120deg,#5AC8FA,#AF52DE 60%,#FF2D55)'}},h(D.Button,{variant:'glass'},'Play')))));
+</script>
+</body>
+</html>

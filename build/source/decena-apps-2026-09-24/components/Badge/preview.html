@@ -1,0 +1,12 @@
+<!-- @dsCard group="Status" height=80 subtitle="Neutral, hollow, clay, signal, ok, warn, bad" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Badge</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.Decena, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'dc-row'},h(D.Badge,null,'4K 60'),h(D.Badge,{tone:'hollow'},'HLG'),h(D.Badge,{tone:'clay'},'Selected'),h(D.Badge,{tone:'signal'},'Needs you'),h(D.Badge,{tone:'ok'},'Synced'),h(D.Badge,{tone:'warn'},'Stale'),h(D.Badge,{tone:'bad'},'Failed')));
+</script>
+</body>
+</html>

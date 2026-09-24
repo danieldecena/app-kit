@@ -1,0 +1,12 @@
+<!-- @dsCard group="Actions" height=80 subtitle="Off, on, with count" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>FilterPill</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render((function(){function P(){var s=React.useState({osmo:true,a7:false,dji:true,flag:false});var v=s[0];function t(k){var n=Object.assign({},v);n[k]=!n[k];s[1](n);}return h('div',{className:'dc-row'},h(D.FilterPill,{selected:v.osmo,count:128,onClick:function(){t('osmo')}},'Osmo Pocket 3'),h(D.FilterPill,{selected:v.a7,count:44,onClick:function(){t('a7')}},'Sony a7 IV'),h(D.FilterPill,{selected:v.dji,count:9,onClick:function(){t('dji')}},'Mini 4 Pro'),h(D.FilterPill,{selected:v.flag,onClick:function(){t('flag')}},'Flagged'));}return h(P)})());
+</script>
+</body>
+</html>

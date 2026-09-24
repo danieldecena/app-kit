@@ -1,0 +1,12 @@
+<!-- @dsCard group="Data" height=150 subtitle="Plain, with meter, needs attention" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>StatTile</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.Decena, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'dc-row',style:{alignItems:'stretch'}},h(D.StatTile,{label:'Clips today',value:'42'}),h(D.StatTile,{label:'Card used',value:'94',unit:'%',meter:0.94,attention:true}),h(D.StatTile,{label:'Library',value:'1.8',unit:'TB',meter:0.36})));
+</script>
+</body>
+</html>
