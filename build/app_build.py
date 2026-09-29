@@ -79,11 +79,17 @@ for g in tok['type']['groups']:
 tok['type']['groups'] = [g for g in tok['type']['groups'] if g['name'] != 'Figures'] + [
  {'name': 'Figures', 'family': 'round', 'styles': [
    {'name': 'figure', 'family': 'round', 'fontSize': '34px', 'lineHeight': '40px', 'fontWeight': 700, 'sample': '7 of 24', 'usage': 'Health-style big number: .system(.largeTitle, design: .rounded).bold().'},
+   {'name': 'figure-md', 'family': 'round', 'fontSize': '28px', 'lineHeight': '32px', 'fontWeight': 700, 'sample': '1,284', 'usage': 'Stat tile values: .system(.title, design: .rounded).bold().'},
    {'name': 'figure-sm', 'family': 'round', 'fontSize': '22px', 'lineHeight': '26px', 'fontWeight': 700, 'sample': '90 sec', 'usage': 'Values in a comparison: .system(.title2, design: .rounded).bold().'}]},
  {'name': 'Reading', 'family': 'sans', 'styles': [
    {'name': 'script', 'family': 'sans', 'fontSize': '17px', 'lineHeight': '28px', 'fontWeight': 400, 'sample': 'I build the systems behind campaigns.', 'usage': 'Long reading in SF Pro Text: .body with .lineSpacing(6).'}]},
  {'name': 'Glance', 'family': 'compact', 'styles': [
    {'name': 'glance', 'family': 'compact', 'fontSize': '15px', 'lineHeight': '18px', 'fontWeight': 600, 'sample': '1d 7h', 'usage': 'watchOS and widgets only; SF Compact is the watch face.'}]}]
+text = next(g for g in tok['type']['groups'] if g['name'] == 'Text')['styles']
+text.insert([s['name'] for s in text].index('caption') + 1, {'name': 'caption-2', 'fontSize': '11px', 'lineHeight': '13px', 'fontWeight': 400, 'sample': 'Mon', 'usage': 'Chart ticks and the smallest labels, never sentences: .caption2.'})
+tok['motion'] = {'note': 'State changes on controls. Under prefers-reduced-motion they drop to none.', 'tokens': [
+ {'name': 'motion-fast', 'value': '150ms', 'usage': 'Hover and press feedback. SwiftUI: .easeOut(duration: 0.15).'},
+ {'name': 'motion-ease', 'value': 'ease-out', 'usage': 'The curve for every control transition: quick to respond, soft to settle.'}]}
 for t in tok['shadow']['tokens']:
     for th in ('light', 'dark'):
         t['value'][th] = t['value'][th].replace('rgba(27,26,24,', 'rgba(0,0,0,')
@@ -102,7 +108,7 @@ for a, b in R: css = css.replace(a, b)
 BTN_OLD = css[css.index('/* Button */'):css.index('/* FilterPill */')]
 BTN = '''/* Button: iOS 26 capsules in the Notes highlight colours, translucent */
 .dc-btn { --tint: var(--accent); --tint-ink: var(--accent-ink); --tint-wash: var(--accent-wash); --tint-fill: var(--accent-fill); --tint-on: var(--on-accent);
-  min-height: var(--touch); padding: 0 20px; border-radius: var(--radius-pill); font: 600 15px/20px var(--font-sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-4); border: 0; transition: background-color 150ms ease-out, filter 150ms ease-out; }
+  min-height: var(--touch); padding: 0 20px; border-radius: var(--radius-pill); font: 600 15px/20px var(--font-sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-4); border: 0; transition: background-color var(--motion-fast) var(--motion-ease), filter var(--motion-fast) var(--motion-ease); }
 .dc-btn-tinted { background: var(--tint-wash); color: var(--tint-ink); }
 .dc-btn-tinted:hover { background: color-mix(in srgb, var(--tint) 18%, transparent); }
 .dc-btn-filled, .dc-btn-primary { background: var(--tint-fill); color: var(--tint-on); }
@@ -135,6 +141,21 @@ css = css.replace('.dc-tile-meter > span { display: block; height: 100%; border-
 css = css.replace('.dc-tile-meter { height: 6px; border-radius: 3px; background: var(--surface-sunk);', '.dc-tile-meter { height: 6px; border-radius: 3px; background: var(--accent-wash);')
 assert 'clay' not in re.sub(r'dc-(badge|flag)-(clay|signal)', '', css), [l for l in css.split('\n') if 'clay' in l]
 assert '--signal' not in css
+# Every font size reaches the stylesheet as a tokens.json type style: --type-<style>, with a weight
+# override where a control sets a style semibold, as SwiftUI does with .weight(.semibold).
+TYPE = {s['name']: (s['fontWeight'], s['fontSize'], s['lineHeight'], s.get('family', g['family'])) for g in tok['type']['groups'] for s in g['styles']}
+css = css.replace('font-family: var(--font-sans); font-size: 16px; line-height: 21px;', 'font: 400 16px/21px var(--font-sans);')
+# The thumbnail placeholder was 10/12, the only size below the scale; it takes label, one step up.
+css = css.replace('font: 600 10px/12px var(--font-mono);', 'font: 600 11px/14px var(--font-mono);')
+def type_var(m):
+    wt, size, line, fam = int(m[1]), m[2], m[3], m[4]
+    hits = [n for n, (_, sz, lh, f) in TYPE.items() if (sz, f) == (size, fam) and line in (None, lh)]
+    assert hits, m[0]
+    exact = [n for n in hits if TYPE[n][0] == wt]
+    return f'font: var(--type-{exact[0]})' if exact else f'font: var(--type-{hits[0]}); font-weight: {wt}'
+css = re.sub(r'font: (\d+) (\d+px)(?:/(\d+px))? var\(--font-(\w+)\)', type_var, css)
+assert not re.search(r'font(-size)?:[^;}]*\d+px', css), re.findall(r'font(?:-size)?:[^;}]*\d+px', css)
+css = ':root {\n' + ''.join(f'  --type-{n}: {wt} {sz}/{lh} var(--font-{f});\n' for n, (wt, sz, lh, f) in TYPE.items()) + '}\n' + css
 w('components/bundle.css', css)
 
 # ------------------------------------------------------------------ bundle.js
