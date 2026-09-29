@@ -33,6 +33,8 @@ public extension Color {
         public static let edge = dyn((0.525, 0.525, 0.545, 1.00), (0.486, 0.486, 0.502, 1.00))
         /// The system fill: gray buttons, off filter pills, hover and pressed rows. Translucent.
         public static let fill = dyn((0.463, 0.463, 0.502, 0.12), (0.463, 0.463, 0.502, 0.24))
+        /// The system fill one step stronger: hover on gray buttons.
+        public static let fillHover = dyn((0.463, 0.463, 0.502, 0.20), (0.463, 0.463, 0.502, 0.32))
         /// The app's accent: Color.accentColor, System Blue by default; follows the person's accent on the Mac. Tints, se
         public static let accent = dyn((0.000, 0.478, 1.000, 1.00), (0.039, 0.518, 1.000, 1.00))
         /// Filled (borderedProminent) buttons: the accent stepped 20% toward black so white text passes 4.5:1.
@@ -83,22 +85,42 @@ public extension Color {
         public static let hlPurple = dyn((0.537, 0.267, 0.671, 1.00), (0.855, 0.561, 1.000, 1.00))
         /// The system purple at 10% (16% dark), translucent: highlight and purple tinted-button fill.
         public static let hlPurpleWash = dyn((0.686, 0.322, 0.871, 0.10), (0.749, 0.353, 0.949, 0.16))
+        /// Filled purple button: 4.5:1 or better under hl-purple-on in both themes.
+        public static let hlPurpleFill = dyn((0.549, 0.259, 0.698, 1.00), (0.600, 0.282, 0.761, 1.00))
+        /// Label on hl-purple-fill.
+        public static let hlPurpleOn = dyn((1.000, 1.000, 1.000, 1.00), (1.000, 1.000, 1.000, 1.00))
         /// Highlighted text in pink, as in Apple Notes: bold, on hl-pink-wash (4.5:1 or better in both themes). Also the 
         public static let hlPink = dyn((0.776, 0.055, 0.255, 1.00), (1.000, 0.392, 0.510, 1.00))
         /// The system pink at 10% (16% dark), translucent: highlight and pink tinted-button fill.
         public static let hlPinkWash = dyn((1.000, 0.176, 0.333, 0.10), (1.000, 0.216, 0.373, 0.16))
+        /// Filled pink button: 4.5:1 or better under hl-pink-on in both themes.
+        public static let hlPinkFill = dyn((0.800, 0.141, 0.267, 1.00), (0.800, 0.173, 0.298, 1.00))
+        /// Label on hl-pink-fill.
+        public static let hlPinkOn = dyn((1.000, 1.000, 1.000, 1.00), (1.000, 1.000, 1.000, 1.00))
         /// Highlighted text in orange, as in Apple Notes: bold, on hl-orange-wash (4.5:1 or better in both themes). Also 
         public static let hlOrange = dyn((0.780, 0.200, 0.000, 1.00), (1.000, 0.702, 0.251, 1.00))
         /// The system orange at 10% (16% dark), translucent: highlight and orange tinted-button fill.
         public static let hlOrangeWash = dyn((1.000, 0.584, 0.000, 0.10), (1.000, 0.624, 0.039, 0.16))
+        /// Filled orange button: 4.5:1 or better under hl-orange-on in both themes.
+        public static let hlOrangeFill = dyn((1.000, 0.584, 0.000, 1.00), (1.000, 0.624, 0.039, 1.00))
+        /// Label on hl-orange-fill.
+        public static let hlOrangeOn = dyn((0.114, 0.114, 0.122, 1.00), (0.114, 0.114, 0.122, 1.00))
         /// Highlighted text in mint, as in Apple Notes: bold, on hl-mint-wash (4.5:1 or better in both themes). Also the 
         public static let hlMint = dyn((0.043, 0.467, 0.443, 1.00), (0.400, 0.831, 0.812, 1.00))
         /// The system mint at 10% (16% dark), translucent: highlight and mint tinted-button fill.
         public static let hlMintWash = dyn((0.000, 0.780, 0.745, 0.10), (0.388, 0.902, 0.886, 0.16))
+        /// Filled mint button: 4.5:1 or better under hl-mint-on in both themes.
+        public static let hlMintFill = dyn((0.000, 0.780, 0.745, 1.00), (0.388, 0.902, 0.886, 1.00))
+        /// Label on hl-mint-fill.
+        public static let hlMintOn = dyn((0.114, 0.114, 0.122, 1.00), (0.114, 0.114, 0.122, 1.00))
         /// Highlighted text in blue, as in Apple Notes: bold, on hl-blue-wash (4.5:1 or better in both themes). Also the 
         public static let hlBlue = dyn((0.000, 0.251, 0.867, 1.00), (0.259, 0.616, 1.000, 1.00))
         /// The system blue at 10% (16% dark), translucent: highlight and blue tinted-button fill.
         public static let hlBlueWash = dyn((0.000, 0.478, 1.000, 0.10), (0.039, 0.518, 1.000, 0.16))
+        /// Filled blue button: 4.5:1 or better under hl-blue-on in both themes.
+        public static let hlBlueFill = dyn((0.000, 0.384, 0.800, 1.00), (0.031, 0.416, 0.800, 1.00))
+        /// Label on hl-blue-fill.
+        public static let hlBlueOn = dyn((1.000, 1.000, 1.000, 1.00), (1.000, 1.000, 1.000, 1.00))
         /// Web stand-in for Liquid Glass (with a 16px blur): toolbars and controls floating over content. In SwiftUI use 
         public static let glass = dyn((1.000, 1.000, 1.000, 0.55), (0.173, 0.173, 0.180, 0.55))
         /// The 0.5px inner edge of glass.

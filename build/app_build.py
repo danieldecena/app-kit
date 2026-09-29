@@ -24,6 +24,7 @@ colors = [
  T('hair', '#D1D1D6', '#38383A', 'Hairline dividers (separator). Decorative only: never the only boundary of a control.'),
  T('edge', '#86868B', '#7C7C80', 'Outlines of interactive controls (3:1 or better on ground and surface).'),
  T('fill', 'rgba(118, 118, 128, 0.12)', 'rgba(118, 118, 128, 0.24)', 'The system fill: gray buttons, off filter pills, hover and pressed rows. Translucent.'),
+ T('fill-hover', 'rgba(118, 118, 128, 0.20)', 'rgba(118, 118, 128, 0.32)', 'The system fill one step stronger: hover on gray buttons.'),
  T('accent', '#007AFF', '#0A84FF', "The app's accent: Color.accentColor, System Blue by default; follows the person's accent on the Mac. Tints, selection, rings, marks."),
  T('accent-fill', '#0062CC', '#086ACC', 'Filled (borderedProminent) buttons: the accent stepped 20% toward black so white text passes 4.5:1.'),
  T('on-accent', '#FFFFFF', '#FFFFFF', 'Text and symbols on accent-fill.'),
@@ -47,9 +48,16 @@ colors += [
 HL = {'purple': ('#8944AB', 'rgba(175, 82, 222, 0.10)', '#DA8FFF', 'rgba(191, 90, 242, 0.16)'), 'pink': ('#C60E41', 'rgba(255, 45, 85, 0.10)', '#FF6482', 'rgba(255, 55, 95, 0.16)'),
       'orange': ('#C73300', 'rgba(255, 149, 0, 0.10)', '#FFB340', 'rgba(255, 159, 10, 0.16)'), 'mint': ('#0B7771', 'rgba(0, 199, 190, 0.10)', '#66D4CF', 'rgba(99, 230, 226, 0.16)'),
       'blue': ('#0040DD', 'rgba(0, 122, 255, 0.10)', '#429DFF', 'rgba(10, 132, 255, 0.16)')}
+# Filled-button fill and label per colour. Purple, pink and blue are the system colour stepped 20% toward
+# black so white passes 4.5:1; orange and mint stay the system colour with ink labels.
+HL_FILL = {'purple': ('#8C42B2', '#9948C2', '#FFFFFF'), 'pink': ('#CC2444', '#CC2C4C', '#FFFFFF'), 'orange': ('#FF9500', '#FF9F0A', '#1D1D1F'),
+           'mint': ('#00C7BE', '#63E6E2', '#1D1D1F'), 'blue': ('#0062CC', '#086ACC', '#FFFFFF')}
 for k, (lt, lw, dt, dw) in HL.items():
     colors.append(T(f'hl-{k}', lt, dt, f'Highlighted text in {k}, as in Apple Notes: bold, on hl-{k}-wash (4.5:1 or better in both themes). Also the ink of a {k} tinted button.'))
     colors.append(T(f'hl-{k}-wash', lw, dw, f'The system {k} at 10% (16% dark), translucent: highlight and {k} tinted-button fill.'))
+    fl, fd, on = HL_FILL[k]
+    colors.append(T(f'hl-{k}-fill', fl, fd, f'Filled {k} button: 4.5:1 or better under hl-{k}-on in both themes.'))
+    colors.append(T(f'hl-{k}-on', on, on, f'Label on hl-{k}-fill.'))
 colors += [
  T('glass', 'rgba(255, 255, 255, 0.55)', 'rgba(44, 44, 46, 0.55)', 'Web stand-in for Liquid Glass (with a 16px blur): toolbars and controls floating over content. In SwiftUI use .glassEffect() or .buttonStyle(.glass).'),
  T('glass-edge', 'rgba(255, 255, 255, 0.70)', 'rgba(255, 255, 255, 0.14)', 'The 0.5px inner edge of glass.'),
@@ -98,16 +106,16 @@ BTN = '''/* Button: iOS 26 capsules in the Notes highlight colours, translucent 
 .dc-btn-filled, .dc-btn-primary { background: var(--tint-fill); color: var(--tint-on); }
 .dc-btn-filled:hover, .dc-btn-primary:hover { filter: brightness(1.08); }
 .dc-btn-gray, .dc-btn-secondary { background: var(--fill); color: var(--ink); }
-.dc-btn-gray:hover, .dc-btn-secondary:hover { background: rgba(118, 118, 128, .2); }
+.dc-btn-gray:hover, .dc-btn-secondary:hover { background: var(--fill-hover); }
 .dc-btn-plain { background: transparent; color: var(--tint-ink); padding: 0 var(--space-4); }
 .dc-btn-plain:hover { background: var(--fill); }
 .dc-btn-glass { background: var(--glass); color: var(--ink); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); }
-.dc-btn-destructive { --tint: #FF3B30; --tint-ink: var(--bad); --tint-wash: var(--bad-wash); background: var(--tint-wash); color: var(--tint-ink); }
-.dc-tint-purple { --tint: #AF52DE; --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: #8C42B2; --tint-on: #FFFFFF; }
-.dc-tint-pink { --tint: #FF2D55; --tint-ink: var(--hl-pink); --tint-wash: var(--hl-pink-wash); --tint-fill: #CC2444; --tint-on: #FFFFFF; }
-.dc-tint-orange { --tint: #FF9500; --tint-ink: var(--hl-orange); --tint-wash: var(--hl-orange-wash); --tint-fill: #FF9500; --tint-on: #1D1D1F; }
-.dc-tint-mint { --tint: #00C7BE; --tint-ink: var(--hl-mint); --tint-wash: var(--hl-mint-wash); --tint-fill: #00C7BE; --tint-on: #1D1D1F; }
-.dc-tint-blue { --tint: #007AFF; --tint-ink: var(--hl-blue); --tint-wash: var(--hl-blue-wash); --tint-fill: #0062CC; --tint-on: #FFFFFF; }
+.dc-btn-destructive { --tint: var(--bad); --tint-ink: var(--bad); --tint-wash: var(--bad-wash); background: var(--tint-wash); color: var(--tint-ink); }
+.dc-tint-purple { --tint: var(--hl-purple-fill); --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: var(--hl-purple-fill); --tint-on: var(--hl-purple-on); }
+.dc-tint-pink { --tint: var(--hl-pink-fill); --tint-ink: var(--hl-pink); --tint-wash: var(--hl-pink-wash); --tint-fill: var(--hl-pink-fill); --tint-on: var(--hl-pink-on); }
+.dc-tint-orange { --tint: var(--hl-orange-fill); --tint-ink: var(--hl-orange); --tint-wash: var(--hl-orange-wash); --tint-fill: var(--hl-orange-fill); --tint-on: var(--hl-orange-on); }
+.dc-tint-mint { --tint: var(--hl-mint-fill); --tint-ink: var(--hl-mint); --tint-wash: var(--hl-mint-wash); --tint-fill: var(--hl-mint-fill); --tint-on: var(--hl-mint-on); }
+.dc-tint-blue { --tint: var(--hl-blue-fill); --tint-ink: var(--hl-blue); --tint-wash: var(--hl-blue-wash); --tint-fill: var(--hl-blue-fill); --tint-on: var(--hl-blue-on); }
 .dc-btn:disabled { opacity: .4; cursor: default; filter: none; }
 
 '''
@@ -185,6 +193,32 @@ docs['Flag/preview.html'] = ns(rd('components/Flag/preview.html')).replace("{ton
 docs['StatTile/README.md'] = rd('components/StatTile/README.md').replace('value in `value` (mono 28, tabular figures)', 'value in `figure` (SF Pro Rounded 28 bold, tabular figures, as in Health)').replace('`attention` draws a 1.5px `signal` ring and turns the meter `signal`', '`attention` draws a 1.5px `accent` ring').replace("From Charts Tab's instrument panel and Footage Review Board.", 'The meter is `accent` on `accent-wash`.')
 docs['ListRow/README.md'] = rd('components/ListRow/README.md').replace('Selected rows take `clay-wash`.', 'Selected rows take `accent-wash`, translucent.')
 docs['BarChart/README.md'] = rd('components/BarChart/README.md').replace('A single-series chart is mint, because blue is `signal`. Orange comes last since it sits close to clay.', 'A single-series chart is mint, so it never reads as the blue accent.')
+docs['SegmentedControl/README.md'] = '''# SegmentedControl
+
+Picks exactly one of 2-5 views of the same content: Day / Week / Season.
+
+- A `surface-sunk` track (`radius-md`, 3px inset); the chosen segment lifts to `surface` with `ink` text and `shadow-segment`, the rest sit in `ink-soft`. SwiftUI: `Picker(...).pickerStyle(.segmented)`.
+- Segments are 38px tall, `space-6` side padding, 600 15/20. Keep labels to one or two words, all roughly the same length.
+- `label` is required: it names the group for screen readers (`role="radiogroup"`). Pass `value` + `onChange` to control it, or `defaultValue` to let it hold its own state.
+- `options` are strings, or `{ value, label }` when the label is not plain text.
+- Several filters at once, or more than 5 choices: use FilterPill instead.
+'''
+docs['Panel/README.md'] = '''# Panel
+
+Groups related content on a `surface` card over the `ground`.
+
+- `radius-lg`, `space-6` padding, `space-5` between children. Separate panels with `space-7`, not shadows or borders.
+- `title` is the `title-3` style (20/25 semibold); `meta` sits on the trailing edge in `ink-soft` 13/18 for freshness or counts ("Updated 6 min ago"). Both are optional.
+- Content goes straight in; use `.dc-row` / `.dc-stack` inside for layout. Nest a `.dc-list` for rows, not another Panel.
+'''
+docs['Highlight/README.md'] = '''# Highlight
+
+Marks the few words in running text that carry the point, like Apple Notes' highlighter.
+
+- `color`: `purple` (default), `pink`, `orange`, `mint`, `blue`. Each is `hl-<color>` text on its `hl-<color>-wash`, semibold, tabular figures, `4px` radius; wraps cleanly across lines.
+- Give each colour one meaning per document (for example numbers in pink, dates in blue) and keep it; colour alone must not carry the meaning.
+- A word or short phrase, a few per paragraph at most. Renders as `<mark>`.
+'''
 for comp in ('FilterPill', 'SegmentedControl', 'StatTile', 'Panel', 'ListRow', 'Highlight', 'BarChart'):
     docs[f'{comp}/preview.html'] = ns(rd(f'components/{comp}/preview.html'))
 for rel, text in docs.items():

@@ -11,16 +11,16 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-btn-filled, .dc-btn-primary { background: var(--tint-fill); color: var(--tint-on); }
 .dc-btn-filled:hover, .dc-btn-primary:hover { filter: brightness(1.08); }
 .dc-btn-gray, .dc-btn-secondary { background: var(--fill); color: var(--ink); }
-.dc-btn-gray:hover, .dc-btn-secondary:hover { background: rgba(118, 118, 128, .2); }
+.dc-btn-gray:hover, .dc-btn-secondary:hover { background: var(--fill-hover); }
 .dc-btn-plain { background: transparent; color: var(--tint-ink); padding: 0 var(--space-4); }
 .dc-btn-plain:hover { background: var(--fill); }
 .dc-btn-glass { background: var(--glass); color: var(--ink); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); }
-.dc-btn-destructive { --tint: #FF3B30; --tint-ink: var(--bad); --tint-wash: var(--bad-wash); background: var(--tint-wash); color: var(--tint-ink); }
-.dc-tint-purple { --tint: #AF52DE; --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: #8C42B2; --tint-on: #FFFFFF; }
-.dc-tint-pink { --tint: #FF2D55; --tint-ink: var(--hl-pink); --tint-wash: var(--hl-pink-wash); --tint-fill: #CC2444; --tint-on: #FFFFFF; }
-.dc-tint-orange { --tint: #FF9500; --tint-ink: var(--hl-orange); --tint-wash: var(--hl-orange-wash); --tint-fill: #FF9500; --tint-on: #1D1D1F; }
-.dc-tint-mint { --tint: #00C7BE; --tint-ink: var(--hl-mint); --tint-wash: var(--hl-mint-wash); --tint-fill: #00C7BE; --tint-on: #1D1D1F; }
-.dc-tint-blue { --tint: #007AFF; --tint-ink: var(--hl-blue); --tint-wash: var(--hl-blue-wash); --tint-fill: #0062CC; --tint-on: #FFFFFF; }
+.dc-btn-destructive { --tint: var(--bad); --tint-ink: var(--bad); --tint-wash: var(--bad-wash); background: var(--tint-wash); color: var(--tint-ink); }
+.dc-tint-purple { --tint: var(--hl-purple-fill); --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: var(--hl-purple-fill); --tint-on: var(--hl-purple-on); }
+.dc-tint-pink { --tint: var(--hl-pink-fill); --tint-ink: var(--hl-pink); --tint-wash: var(--hl-pink-wash); --tint-fill: var(--hl-pink-fill); --tint-on: var(--hl-pink-on); }
+.dc-tint-orange { --tint: var(--hl-orange-fill); --tint-ink: var(--hl-orange); --tint-wash: var(--hl-orange-wash); --tint-fill: var(--hl-orange-fill); --tint-on: var(--hl-orange-on); }
+.dc-tint-mint { --tint: var(--hl-mint-fill); --tint-ink: var(--hl-mint); --tint-wash: var(--hl-mint-wash); --tint-fill: var(--hl-mint-fill); --tint-on: var(--hl-mint-on); }
+.dc-tint-blue { --tint: var(--hl-blue-fill); --tint-ink: var(--hl-blue); --tint-wash: var(--hl-blue-wash); --tint-fill: var(--hl-blue-fill); --tint-on: var(--hl-blue-on); }
 .dc-btn:disabled { opacity: .4; cursor: default; filter: none; }
 
 /* FilterPill */
