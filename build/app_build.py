@@ -163,9 +163,39 @@ js = rd('components/bundle.js')
 js = js.replace('"namespace":"Decena"', '"namespace":"AppKit"')
 js = js.replace('var variant = p.variant || "secondary";\n    return h("button", Object.assign({ type: "button" }, omit(p, ["variant", "className", "children"]), {\n      className: cx("dc-btn", "dc-btn-" + variant, p.className)',
                 'var variant = p.variant || "tinted";\n    return h("button", Object.assign({ type: "button" }, omit(p, ["variant", "tint", "className", "children"]), {\n      className: cx("dc-btn", "dc-btn-" + variant, p.tint && p.tint !== "accent" && "dc-tint-" + p.tint, p.className)')
+SEG_OLD = js[js.index('  function SegmentedControl(p) {'):js.index('  function Badge(p) {')]
+SEG = '''  function SegmentedControl(p) {
+    var st = React.useState(p.value != null ? p.value : p.defaultValue);
+    var value = p.value != null ? p.value : st[0];
+    function pick(v) { if (p.value == null) st[1](v); if (p.onChange) p.onChange(v); }
+    var vals = (p.options || []).map(function (o) { return typeof o === "string" ? o : o.value; });
+    var stop = Math.max(vals.indexOf(value), 0);
+    // Radio group keys: one tab stop, on the chosen segment; arrows move and choose, wrapping; Home and End jump.
+    function onKey(e, i) {
+      var n = vals.length, j = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: n - 1 }[e.key];
+      if (j == null) return;
+      e.preventDefault();
+      j = (j + n) % n;
+      e.currentTarget.parentNode.children[j].focus();
+      pick(vals[j]);
+    }
+    return h("div", { className: "dc-seg", role: "radiogroup", "aria-label": p.label },
+      (p.options || []).map(function (o, i) {
+        var v = vals[i];
+        var label = typeof o === "string" ? o : o.label;
+        return h("button", {
+          key: v, type: "button", role: "radio", className: "dc-seg-opt",
+          "aria-checked": v === value ? "true" : "false", tabIndex: i === stop ? 0 : -1,
+          onClick: function () { pick(v); }, onKeyDown: function (e) { onKey(e, i); }
+        }, label);
+      }));
+  }
+
+'''
+js = js.replace(SEG_OLD, SEG)
 js = js.replace('var FLAG_GLYPH = { warn: "!", bad: "x", signal: "->" };', 'var FLAG_GLYPH = { warn: "!", bad: "x", accent: "->", signal: "->" };')
 js = js.replace('window.Decena = Object.assign(window.Decena || {}, {', 'window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {')
-assert 'dc-tint-' in js and 'window.AppKit' in js
+assert 'dc-tint-' in js and 'window.AppKit' in js and 'onKeyDown' in js
 w('components/bundle.js', js)
 
 # ------------------------------------------------------------------ index.d.ts
@@ -224,6 +254,7 @@ Picks exactly one of 2-5 views of the same content: Day / Week / Season.
 - Segments are 38px tall, `space-6` side padding, 600 15/20. Keep labels to one or two words, all roughly the same length.
 - `label` is required: it names the group for screen readers (`role="radiogroup"`). Pass `value` + `onChange` to control it, or `defaultValue` to let it hold its own state.
 - `options` are strings, or `{ value, label }` when the label is not plain text.
+- Keyboard, as a radio group: Tab lands on the chosen segment only; the arrow keys move and choose (wrapping), Home and End jump to the ends.
 - Several filters at once, or more than 5 choices: use FilterPill instead.
 '''
 docs['Panel/README.md'] = '''# Panel

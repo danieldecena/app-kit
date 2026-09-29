@@ -27,14 +27,25 @@
     var st = React.useState(p.value != null ? p.value : p.defaultValue);
     var value = p.value != null ? p.value : st[0];
     function pick(v) { if (p.value == null) st[1](v); if (p.onChange) p.onChange(v); }
+    var vals = (p.options || []).map(function (o) { return typeof o === "string" ? o : o.value; });
+    var stop = Math.max(vals.indexOf(value), 0);
+    // Radio group keys: one tab stop, on the chosen segment; arrows move and choose, wrapping; Home and End jump.
+    function onKey(e, i) {
+      var n = vals.length, j = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: n - 1 }[e.key];
+      if (j == null) return;
+      e.preventDefault();
+      j = (j + n) % n;
+      e.currentTarget.parentNode.children[j].focus();
+      pick(vals[j]);
+    }
     return h("div", { className: "dc-seg", role: "radiogroup", "aria-label": p.label },
-      (p.options || []).map(function (o) {
-        var v = typeof o === "string" ? o : o.value;
+      (p.options || []).map(function (o, i) {
+        var v = vals[i];
         var label = typeof o === "string" ? o : o.label;
         return h("button", {
           key: v, type: "button", role: "radio", className: "dc-seg-opt",
-          "aria-checked": v === value ? "true" : "false",
-          onClick: function () { pick(v); }
+          "aria-checked": v === value ? "true" : "false", tabIndex: i === stop ? 0 : -1,
+          onClick: function () { pick(v); }, onKeyDown: function (e) { onKey(e, i); }
         }, label);
       }));
   }

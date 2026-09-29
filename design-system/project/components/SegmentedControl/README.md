@@ -6,4 +6,5 @@ Picks exactly one of 2-5 views of the same content: Day / Week / Season.
 - Segments are 38px tall, `space-6` side padding, 600 15/20. Keep labels to one or two words, all roughly the same length.
 - `label` is required: it names the group for screen readers (`role="radiogroup"`). Pass `value` + `onChange` to control it, or `defaultValue` to let it hold its own state.
 - `options` are strings, or `{ value, label }` when the label is not plain text.
+- Keyboard, as a radio group: Tab lands on the chosen segment only; the arrow keys move and choose (wrapping), Home and End jump to the ends.
 - Several filters at once, or more than 5 choices: use FilterPill instead.
