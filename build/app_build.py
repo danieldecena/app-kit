@@ -58,6 +58,8 @@ for k, (lt, lw, dt, dw) in HL.items():
     fl, fd, on = HL_FILL[k]
     colors.append(T(f'hl-{k}-fill', fl, fd, f'Filled {k} button: 4.5:1 or better under hl-{k}-on in both themes.'))
     colors.append(T(f'hl-{k}-on', on, on, f'Label on hl-{k}-fill.'))
+# Purple alone hovers from the system colour rather than its darker fill, as it did before the tint tokens.
+colors.append(T('hl-purple-tint', '#AF52DE', '#BF5AF2', 'The system purple: what a purple tinted button mixes its hover wash from.'))
 colors += [
  T('glass', 'rgba(255, 255, 255, 0.55)', 'rgba(44, 44, 46, 0.55)', 'Web stand-in for Liquid Glass (with a 16px blur): toolbars and controls floating over content. In SwiftUI use .glassEffect() or .buttonStyle(.glass).'),
  T('glass-edge', 'rgba(255, 255, 255, 0.70)', 'rgba(255, 255, 255, 0.14)', 'The 0.5px inner edge of glass.'),
@@ -111,7 +113,7 @@ BTN = '''/* Button: iOS 26 capsules in the Notes highlight colours, translucent 
 .dc-btn-plain:hover { background: var(--fill); }
 .dc-btn-glass { background: var(--glass); color: var(--ink); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); }
 .dc-btn-destructive { --tint: var(--bad); --tint-ink: var(--bad); --tint-wash: var(--bad-wash); background: var(--tint-wash); color: var(--tint-ink); }
-.dc-tint-purple { --tint: var(--hl-purple-fill); --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: var(--hl-purple-fill); --tint-on: var(--hl-purple-on); }
+.dc-tint-purple { --tint: var(--hl-purple-tint); --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: var(--hl-purple-fill); --tint-on: var(--hl-purple-on); }
 .dc-tint-pink { --tint: var(--hl-pink-fill); --tint-ink: var(--hl-pink); --tint-wash: var(--hl-pink-wash); --tint-fill: var(--hl-pink-fill); --tint-on: var(--hl-pink-on); }
 .dc-tint-orange { --tint: var(--hl-orange-fill); --tint-ink: var(--hl-orange); --tint-wash: var(--hl-orange-wash); --tint-fill: var(--hl-orange-fill); --tint-on: var(--hl-orange-on); }
 .dc-tint-mint { --tint: var(--hl-mint-fill); --tint-ink: var(--hl-mint); --tint-wash: var(--hl-mint-wash); --tint-fill: var(--hl-mint-fill); --tint-on: var(--hl-mint-on); }

@@ -121,6 +121,8 @@ public extension Color {
         public static let hlBlueFill = dyn((0.000, 0.384, 0.800, 1.00), (0.031, 0.416, 0.800, 1.00))
         /// Label on hl-blue-fill.
         public static let hlBlueOn = dyn((1.000, 1.000, 1.000, 1.00), (1.000, 1.000, 1.000, 1.00))
+        /// The system purple: what a purple tinted button mixes its hover wash from.
+        public static let hlPurpleTint = dyn((0.686, 0.322, 0.871, 1.00), (0.749, 0.353, 0.949, 1.00))
         /// Web stand-in for Liquid Glass (with a 16px blur): toolbars and controls floating over content. In SwiftUI use 
         public static let glass = dyn((1.000, 1.000, 1.000, 0.55), (0.173, 0.173, 0.180, 0.55))
         /// The 0.5px inner edge of glass.
