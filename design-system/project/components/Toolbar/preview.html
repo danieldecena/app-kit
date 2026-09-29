@@ -1,0 +1,25 @@
+<!-- @dsCard group="Navigation" height=300 subtitle="Search, tools, one primary action; a notice after Export" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Toolbar</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  var s = { width: 16, height: 16, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' };
+  var tools = [
+    { title: 'Import', icon: h('svg', s, h('path', { d: 'M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10' })) },
+    { title: 'Reveal in Finder', icon: h('svg', s, h('path', { d: 'M2.5 4.5h4l1.5 1.5h5.5v6.5h-11z' })), disabled: 'No clip selected' }];
+  function Demo(props) {
+    var n = React.useState(props.notice || null);
+    var rows = ['C0042 dawn, north shore', 'C0043 dawn, launch', 'C0044 midday, dock', 'C0045 dusk, point', 'C0046 dusk, point'];
+    return h('div', { style: { height: 132, overflow: 'auto', borderRadius: 14, background: 'var(--ground)' } },
+      h(D.Toolbar, { searchLabel: 'Search clips', tools: tools, notice: n[0],
+        primary: h(D.Button, { variant: 'filled', onClick: function () { n[1]('Exported 42 clips'); } }, 'Export') },
+        h(D.SegmentedControl, { label: 'View', options: ['Grid', 'List'], defaultValue: 'Grid' })),
+      h('div', { style: { padding: '8px 16px' } }, rows.map(function (r) { return h('div', { key: r, style: { padding: '6px 0', color: 'var(--ink-soft)' } }, r); })));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'dc-stack' }, h(Demo), h(Demo, { notice: 'Exported 42 clips' })));
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
+/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -73,11 +73,54 @@
   }
 
   function Panel(p) {
-    return h("section", { className: cx("dc-panel", p.className) },
+    var tone = p.tone && p.tone !== "plain" ? p.tone : null;
+    return h("section", { className: cx("dc-panel", tone && "dc-panel-" + tone, p.className) },
+      tone === "empty" ? h("svg", { className: "dc-panel-dash", "aria-hidden": "true" }, h("rect", { width: "100%", height: "100%", rx: 13.25 })) : null,
       p.title || p.meta ? h("header", { className: "dc-panel-head" },
         p.title ? h("h3", { className: "dc-panel-title" }, p.title) : null,
         p.meta ? h("span", { className: "dc-panel-meta" }, p.meta) : null) : null,
       p.children);
+  }
+
+  // One <dt>/<dd> pair; place inside <dl class="dc-facts">. oneLine truncates in the middle, keeping the tail.
+  function Fact(p) {
+    var none = p.value == null || p.value === "";
+    var text = none ? "not recorded" : String(p.value);
+    var tail = p.oneLine && !none ? Math.min(12, Math.floor(text.length / 2)) : 0;
+    return h(React.Fragment, null,
+      h("dt", { className: "dc-fact-label" }, p.label),
+      h("dd", { className: cx("dc-fact-value", (none || p.muted) && "dc-fact-muted", p.oneLine && "dc-fact-line"), title: p.oneLine ? text : undefined },
+        tail ? [h("span", { key: "head" }, text.slice(0, -tail)), h("span", { key: "tail" }, text.slice(-tail))] : text));
+  }
+
+  function Eyebrow(p) {
+    return h("span", { className: cx("dc-eyebrow", p.act && "dc-eyebrow-act", p.className) }, p.children);
+  }
+
+  function Toolbar(p) {
+    var st = React.useState("");
+    var query = p.query != null ? p.query : st[0];
+    function setQuery(v) { if (p.query == null) st[1](v); if (p.onQueryChange) p.onQueryChange(v); }
+    var icon = { width: 14, height: 14, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", "aria-hidden": "true" };
+    return h("div", { className: cx("dc-toolbar", p.className) },
+      h("div", { className: "dc-toolbar-row" },
+        p.children,
+        p.searchLabel ? h("label", { className: "dc-search" },
+          h("svg", icon, h("circle", { cx: 7, cy: 7, r: 4.75 }), h("path", { d: "M10.5 10.5 14 14" })),
+          h("input", { type: "text", value: query, placeholder: p.searchLabel, "aria-label": p.searchLabel, onChange: function (e) { setQuery(e.target.value); } }),
+          query ? h("button", { type: "button", className: "dc-search-clear", "aria-label": "Clear search", onClick: function () { setQuery(""); } },
+            h("svg", icon, h("path", { d: "M4.5 4.5l7 7M11.5 4.5l-7 7" }))) : null) : null,
+        h("span", { className: "dc-toolbar-spacer" }),
+        (p.tools || []).map(function (t) {
+          // aria-disabled, not disabled, so the reason still shows as the tooltip.
+          return h("button", {
+            key: t.title, type: "button", className: "dc-btn dc-btn-gray dc-toolbar-icon", title: t.disabled || t.title, "aria-label": t.title,
+            "aria-disabled": t.disabled ? "true" : undefined, onClick: t.disabled ? undefined : t.onClick
+          }, t.icon);
+        }),
+        p.primary || null),
+      h("div", { role: "status" },
+        p.notice ? h("p", { className: cx("dc-toolbar-notice", p.noticeTone === "bad" && "dc-toolbar-notice-bad") }, p.notice) : null));
   }
 
   function ListRow(p) {
@@ -161,6 +204,6 @@
 
   window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {
     Button: Button, FilterPill: FilterPill, SegmentedControl: SegmentedControl, Badge: Badge,
-    Flag: Flag, StatTile: StatTile, Panel: Panel, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
+    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
   });
 })();

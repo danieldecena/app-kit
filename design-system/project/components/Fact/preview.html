@@ -1,0 +1,17 @@
+<!-- @dsCard group="Data" height=170 subtitle="Values, not recorded, and a middle-truncated path" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Fact</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('dl',{className:'dc-facts',style:{maxWidth:340}},
+    h(D.Fact,{label:'Camera',value:'Sony FX3'}),
+    h(D.Fact,{label:'Duration',value:'00:04:12:08'}),
+    h(D.Fact,{label:'Location',value:null}),
+    h(D.Fact,{label:'Codec',value:'Default (XAVC S-I)',muted:true}),
+    h(D.Fact,{label:'File',value:'/Volumes/A001/PRIVATE/M4ROOT/CLIP/C0042_2026-09-12_dawn.MP4',oneLine:true})));
+</script>
+</body>
+</html>

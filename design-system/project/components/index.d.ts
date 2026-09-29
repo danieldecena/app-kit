@@ -43,7 +43,33 @@ export function StatTile(props: {
 }): JSX.Element;
 
 /** A surface grouping related content on the ground. */
-export function Panel(props: { title?: ReactNode; meta?: ReactNode; children: ReactNode }): JSX.Element;
+/** Detail card: uppercase caption title, surface one step off the ground. `tone` marks a slot: `act` needs the person, `live` is working, `empty` has nothing yet. */
+export function Panel(props: { title?: ReactNode; meta?: ReactNode; tone?: "plain" | "act" | "live" | "empty"; children?: ReactNode }): JSX.Element;
+/** One label and value row, inside `<dl className="dc-facts">`. A null or empty value reads "not recorded" in ink-faint. */
+export function Fact(props: { label: ReactNode; value?: string | number | null; muted?: boolean; oneLine?: boolean }): JSX.Element;
+/** Spaced mono capitals naming a figure or a slot; `act` when it needs the person. */
+export function Eyebrow(props: { act?: boolean; children: ReactNode }): JSX.Element;
+export interface ToolbarTool {
+  /** The tooltip and accessible name. */
+  title: string;
+  icon: ReactNode;
+  onClick?: () => void;
+  /** Why the tool is unavailable; replaces the tooltip. */
+  disabled?: string;
+}
+/** One row pinned above scrolling content: search, icon tools, one filled primary action, and a notice after an action. */
+export function Toolbar(props: {
+  searchLabel?: string;
+  query?: string;
+  onQueryChange?: (query: string) => void;
+  tools?: ToolbarTool[];
+  /** One filled Button. */
+  primary?: ReactNode;
+  notice?: ReactNode;
+  noticeTone?: "neutral" | "bad";
+  /** Leading controls, such as a SegmentedControl. */
+  children?: ReactNode;
+}): JSX.Element;
 
 /** Selectable row with optional thumbnail and trailing value. Place inside a `.dc-list` with role="listbox". */
 export function ListRow(props: ButtonHTMLAttributes<HTMLButtonElement> & {

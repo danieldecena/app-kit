@@ -1,0 +1,13 @@
+<!-- @dsCard group="Status" height=80 subtitle="Plain and act" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Eyebrow</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'dc-row',style:{gap:24}},
+    h(D.Eyebrow,null,'Importing'),h(D.Eyebrow,null,'Idle'),h(D.Eyebrow,{act:true},'Blocked')));
+</script>
+</body>
+</html>

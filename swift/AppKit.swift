@@ -27,6 +27,8 @@ public extension Color {
         public static let ink = dyn((0.114, 0.114, 0.122, 1.00), (0.961, 0.961, 0.969, 1.00))
         /// Secondary text (secondaryLabel, opaque). 4.7:1 or better on ground, surface and surface-sunk.
         public static let inkSoft = dyn((0.388, 0.388, 0.400, 1.00), (0.596, 0.596, 0.616, 1.00))
+        /// Tertiary text (tertiaryLabel, translucent): absences ("not recorded"), panel titles, the empty-slot outline. U
+        public static let inkFaint = dyn((0.235, 0.235, 0.263, 0.30), (0.922, 0.922, 0.961, 0.30))
         /// Hairline dividers (separator). Decorative only: never the only boundary of a control.
         public static let hair = dyn((0.820, 0.820, 0.839, 1.00), (0.220, 0.220, 0.227, 1.00))
         /// Outlines of interactive controls (3:1 or better on ground and surface).
@@ -141,5 +143,23 @@ public extension Font {
         public static let script = Font.body
         /// Mono uppercase key above a value.
         public static let label = Font.caption2.monospaced().weight(.semibold)
+        /// Panel title: uppercased, .tracking(CGFloat.Kit.trackingPanelTitle), .foregroundStyle(.tertiary).
+        public static let panelTitle = Font.caption2.weight(.semibold)
+        /// Eyebrow: uppercased, .tracking(CGFloat.Kit.trackingEyebrow).
+        public static let eyebrow = Font.caption2.monospaced().weight(.semibold)
+        /// Fact value, beside a .caption label in .secondary.
+        public static let factValue = Font.system(.caption, design: .monospaced)
+    }
+}
+
+public extension CGFloat {
+    enum Kit {
+        /// State outlines: act and live panels, the empty slot, a selected filter pill, an attention tile. SwiftUI: .stro
+        public static let strokeOutline: CGFloat = 1.5
+        /// The empty slot: 6 on, 4 off, in ink-faint. SwiftUI: StrokeStyle(lineWidth: 1.5, dash: [6, 4]).
+        public static let strokeDash: [CGFloat] = [6, 4]
+        public static let trackingDisplay: CGFloat = -0.5
+        public static let trackingPanelTitle: CGFloat = 0.8
+        public static let trackingEyebrow: CGFloat = 1.2
     }
 }
