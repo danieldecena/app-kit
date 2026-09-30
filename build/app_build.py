@@ -149,7 +149,7 @@ css = css.replace(PANEL_OLD, '''/* Panel: Footage Library's detail card, and its
 .dc-panel-empty { background: transparent; }
 .dc-panel-dash { position: absolute; top: calc(var(--stroke-outline) / 2); left: calc(var(--stroke-outline) / 2); width: calc(100% - var(--stroke-outline)); height: calc(100% - var(--stroke-outline)); overflow: visible; pointer-events: none; }
 .dc-panel-dash rect { rx: calc(var(--radius-lg) - var(--stroke-outline) / 2); fill: none; stroke: var(--ink-faint); stroke-width: var(--stroke-outline); stroke-dasharray: var(--stroke-dash); }
-.dc-panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); grid-auto-rows: 1fr; gap: var(--space-5); }
+.dc-panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--space-5); }
 
 /* Fact: label and value rows */
 .dc-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-4) 18px; align-items: baseline; margin: 0; }
@@ -409,7 +409,7 @@ Groups related content on a `surface` card, one step off the `ground`: Footage L
   - `live`: work in progress. The same ring in `accent`.
   - `empty`: nothing yet. No fill, a `stroke-dash` (6 on, 4 off) outline in `ink-faint`.
 - Content goes straight in: Fact rows in a `.dc-facts` list, `.dc-row` / `.dc-stack` for layout. Nest a `.dc-list` for rows, not another Panel.
-- Equal tiles: put panels in `.dc-panel-grid`, adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in the grid. Stack single panels `space-7` apart.
+- Equal tiles: put panels in `.dc-panel-grid`, adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in its row. Stack single panels `space-7` apart.
 
 SwiftUI:
 
@@ -425,7 +425,7 @@ VStack(alignment: .leading, spacing: 10) {
 // empty: no background; .strokeBorder(.tertiary, style: StrokeStyle(lineWidth: CGFloat.Kit.strokeOutline, dash: CGFloat.Kit.strokeDash))
 ```
 
-The equal-tile grid (Claude Spinner's detail pane): `LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 12)], spacing: 12)`. Each card reports its natural height through a `PreferenceKey` that keeps the max, and every card takes `.frame(minHeight: tallest, alignment: .top)`. A plain grid would leave ragged bottoms.
+The equal-tile grid (Claude Spinner's detail pane): a custom `Layout` (`TileGrid(minimum: 250, spacing: 12)`) that fits as many columns as it can, measures each card at the column width, and places every card in a row at that row's tallest height; the card itself takes `.frame(maxHeight: .infinity, alignment: .topLeading)`. `LazyVGrid` can't do it, since it leaves each cell at its own height, and equalising across the whole grid instead stretches a short card to match a chart two rows away. On the web, `.dc-panel-grid` gets the same result from CSS grid's default row stretch.
 '''
 docs['Panel/preview.html'] = r'''<!-- @dsCard group="Layout" height=420 subtitle="Detail card, act, live and empty, in an equal-tile grid" -->
 <!doctype html>
@@ -650,7 +650,7 @@ body = edit(body, '| Tile value | `value` mono 28/32 600 | `.system(size: 28, we
   '| Tile value | `value` mono 28/32 600 | `.system(size: 28, weight: .semibold, design: .monospaced)` |\n| Eyebrow | `eyebrow` mono 11/13 600, +1.2, uppercase | `.caption2.monospaced().weight(.semibold)` + `.tracking(1.2)` |\n| Fact label, value | `caption` 12/16 · `fact` mono 12/16 | `.caption` · `.system(.caption, design: .monospaced)` |\n')
 body = edit(body, 'gaps between panels `space-7`;', 'gaps between stacked panels `space-7`, between tiles in a panel grid `space-5`;')
 body = edit(body, 'Nest one step down: a `radius-md` row inside a `radius-lg` panel.\n',
-  'Nest one step down: a `radius-md` row inside a `radius-lg` panel.\n- Detail cards tile in an equal grid: adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest (see Panel).\n- A state outline is `stroke-outline` (1.5) inside the edge; the empty slot dashes it `stroke-dash` (6 on, 4 off) in `ink-faint`.\n')
+  'Nest one step down: a `radius-md` row inside a `radius-lg` panel.\n- Detail cards tile in an equal grid: adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in its row (see Panel).\n- A state outline is `stroke-outline` (1.5) inside the edge; the empty slot dashes it `stroke-dash` (6 on, 4 off) in `ink-faint`.\n')
 body = edit(body, 'StatTile, Panel, ListRow, Highlight, BarChart. Each card below', 'StatTile, Panel, Fact, Eyebrow, Toolbar, ListRow, Highlight, BarChart. Each card below')
 w('README.md', intro + body)
 w('paper-documents.md', '''# Web

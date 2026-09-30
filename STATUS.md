@@ -18,6 +18,7 @@
 ## Decision log
 
 ### 2026-09-29
+- Decided: Panel tiles equalise per row, not across the grid. `.dc-panel-grid` drops `grid-auto-rows: 1fr` (CSS grid's default row stretch does the rest) and the Panel README describes Spinner's `TileGrid` Layout. Grid-wide equal heights stretched a short card to a chart two rows away (Spinner a39aa82).
 - Decided: type styles ship as `--type-<name>` shorthand vars prepended to `bundle.css`, and component rules reference them, adding a `font-weight` override where a component needs a heavier cut than the style. Keeps one source of truth for size/leading while letting buttons and pills stay semibold.
 - Decided: added `caption-2` (11/13) for chart ticks and `figure-md` (28/32 Rounded) for stat tiles rather than leaving those as raw sizes; the ListRow thumbnail moved from 10/12 to the `label` style (11/14), the only intended visual change.
 - Decided: motion is a `motion` token group (`motion-fast` 150ms, `motion-ease` ease-out). The Design System page accepts that family natively; reduced motion still drops button transitions to none.

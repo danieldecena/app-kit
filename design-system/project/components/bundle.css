@@ -101,7 +101,7 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-panel-empty { background: transparent; }
 .dc-panel-dash { position: absolute; top: calc(var(--stroke-outline) / 2); left: calc(var(--stroke-outline) / 2); width: calc(100% - var(--stroke-outline)); height: calc(100% - var(--stroke-outline)); overflow: visible; pointer-events: none; }
 .dc-panel-dash rect { rx: calc(var(--radius-lg) - var(--stroke-outline) / 2); fill: none; stroke: var(--ink-faint); stroke-width: var(--stroke-outline); stroke-dasharray: var(--stroke-dash); }
-.dc-panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); grid-auto-rows: 1fr; gap: var(--space-5); }
+.dc-panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--space-5); }
 
 /* Fact: label and value rows */
 .dc-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-4) 18px; align-items: baseline; margin: 0; }

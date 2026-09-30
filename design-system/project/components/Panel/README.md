@@ -9,7 +9,7 @@ Groups related content on a `surface` card, one step off the `ground`: Footage L
   - `live`: work in progress. The same ring in `accent`.
   - `empty`: nothing yet. No fill, a `stroke-dash` (6 on, 4 off) outline in `ink-faint`.
 - Content goes straight in: Fact rows in a `.dc-facts` list, `.dc-row` / `.dc-stack` for layout. Nest a `.dc-list` for rows, not another Panel.
-- Equal tiles: put panels in `.dc-panel-grid`, adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in the grid. Stack single panels `space-7` apart.
+- Equal tiles: put panels in `.dc-panel-grid`, adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in its row. Stack single panels `space-7` apart.
 
 SwiftUI:
 
@@ -25,4 +25,4 @@ VStack(alignment: .leading, spacing: 10) {
 // empty: no background; .strokeBorder(.tertiary, style: StrokeStyle(lineWidth: CGFloat.Kit.strokeOutline, dash: CGFloat.Kit.strokeDash))
 ```
 
-The equal-tile grid (Claude Spinner's detail pane): `LazyVGrid(columns: [GridItem(.adaptive(minimum: 250), spacing: 12)], spacing: 12)`. Each card reports its natural height through a `PreferenceKey` that keeps the max, and every card takes `.frame(minHeight: tallest, alignment: .top)`. A plain grid would leave ragged bottoms.
+The equal-tile grid (Claude Spinner's detail pane): a custom `Layout` (`TileGrid(minimum: 250, spacing: 12)`) that fits as many columns as it can, measures each card at the column width, and places every card in a row at that row's tallest height; the card itself takes `.frame(maxHeight: .infinity, alignment: .topLeading)`. `LazyVGrid` can't do it, since it leaves each cell at its own height, and equalising across the whole grid instead stretches a short card to match a chart two rows away. On the web, `.dc-panel-grid` gets the same result from CSS grid's default row stretch.

@@ -56,7 +56,7 @@ Web pages and artifacts use **Artifact Kit**, the same palette for the browser; 
 - Hit targets are at least `touch` (44px). Pills are 40px tall with the rest of the 44 as gap.
 - Page gutters: `space-6` (16) on phone, `space-7` (20) on iPad and desktop. Panels pad `space-6`; gaps between stacked panels `space-7`, between tiles in a panel grid `space-5`; sections `space-8`.
 - Radii: buttons and pills are capsules (`radius-pill`, as in iOS 26); `radius-sm` (6) thumbnails and badges, `radius-md` (10) inputs and rows, `radius-lg` (14) panels and sheets, `radius-pill` for pills and toasts. Nest one step down: a `radius-md` row inside a `radius-lg` panel.
-- Detail cards tile in an equal grid: adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest (see Panel).
+- Detail cards tile in an equal grid: adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in its row (see Panel).
 - A state outline is `stroke-outline` (1.5) inside the edge; the empty slot dashes it `stroke-dash` (6 on, 4 off) in `ink-faint`.
 
 ## Components
