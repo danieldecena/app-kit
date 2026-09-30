@@ -6,5 +6,5 @@
 - [x] Add arrow-key navigation to SegmentedControl -- 854ddcb
 - [x] Port Footage detail-card patterns: Fact, Eyebrow, Toolbar, Panel -- 68565a7
 - [x] Sync Panel grid and docs to per-row tiles -- de84451
-- [ ] Publish Footage patterns to the App Kit artifact
+- [x] Publish Footage patterns to the App Kit artifact -- v19
 - [ ] Decide StatTile attention ring: accent or warn

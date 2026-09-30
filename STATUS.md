@@ -12,7 +12,6 @@
 
 ## Next Up
 
-- Publish the Footage patterns (Fact, Eyebrow, Toolbar, Panel tones) to the artifact in `artifacts.json`, index last.
 - Decide whether StatTile `attention` keeps its `accent` ring or moves to `warn` like the Panel `act` tone.
 
 ## Decision log
