@@ -83,13 +83,14 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 
 /* StatTile */
 .dc-tile { background: var(--surface); border-radius: var(--radius-md); padding: var(--space-5) var(--space-6); display: flex; flex-direction: column; gap: var(--space-3); min-width: 148px; }
-.dc-tile-attn { box-shadow: inset 0 0 0 var(--stroke-outline) var(--accent); }
+.dc-tile-attn { box-shadow: inset 0 0 0 var(--stroke-outline) var(--warn); }
 .dc-tile-key { font: var(--type-label); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
 .dc-tile-value { font: var(--type-figure-md); color: var(--ink); font-variant-numeric: tabular-nums; }
 .dc-tile-unit { font: var(--type-footnote); color: var(--ink-soft); margin-left: var(--space-2); }
 .dc-tile-meter { height: 6px; border-radius: 3px; background: var(--accent-wash); overflow: hidden; }
 .dc-tile-meter > span { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
-.dc-tile-attn .dc-tile-meter > span { background: var(--accent); }
+.dc-tile-attn .dc-tile-meter { background: var(--warn-wash); }
+.dc-tile-attn .dc-tile-meter > span { background: var(--warn); }
 
 /* Panel: Footage Library's detail card, and its Charts plate states */
 .dc-panel { position: relative; background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-6); display: flex; flex-direction: column; gap: 10px; }

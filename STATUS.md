@@ -12,11 +12,12 @@
 
 ## Next Up
 
-- Decide whether StatTile `attention` keeps its `accent` ring or moves to `warn` like the Panel `act` tone.
+- Nothing queued: every App Kit task is done.
 
 ## Decision log
 
 ### 2026-09-29
+- Decided: StatTile `attention` moves from an `accent` ring to `warn`, ring and meter (track `warn-wash`), so "needs the person" reads as one colour with the Panel `act` tone. Computed ring `#C73300` in a headless Chrome render; published as artifact version 20, the three files read back byte-identical.
 - Decided: Panel tiles equalise per row, not across the grid. `.dc-panel-grid` drops `grid-auto-rows: 1fr` (CSS grid's default row stretch does the rest) and the Panel README describes Spinner's `TileGrid` Layout. Grid-wide equal heights stretched a short card to a chart two rows away (Spinner a39aa82). Published as artifact version 19, the four files read back byte-identical.
 - Decided: type styles ship as `--type-<name>` shorthand vars prepended to `bundle.css`, and component rules reference them, adding a `font-weight` override where a component needs a heavier cut than the style. Keeps one source of truth for size/leading while letting buttons and pills stay semibold.
 - Decided: added `caption-2` (11/13) for chart ticks and `figure-md` (28/32 Rounded) for stat tiles rather than leaving those as raw sizes; the ListRow thumbnail moved from 10/12 to the `label` style (11/14), the only intended visual change.

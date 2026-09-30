@@ -114,6 +114,9 @@ css = rd('components/bundle.css')
 css = re.sub(r'@import url\([^)]*\);\n\n', '', css)
 R = [('var(--signal)', 'var(--accent)'), ('var(--clay-wash)', 'var(--accent-wash)'), ('var(--clay-ink)', 'var(--accent-ink)'),
      ('var(--on-clay)', 'var(--on-accent)'), ('var(--signal-wash)', 'var(--accent-wash)')]
+for a in ('.dc-tile-attn { box-shadow: inset 0 0 0 1.5px var(--signal); }', '.dc-tile-attn .dc-tile-meter > span { background: var(--signal); }'):
+    assert a in css, a; css = css.replace(a, a.replace('--signal', '--warn'))
+css = css.replace('.dc-tile-attn .dc-tile-meter > span', '.dc-tile-attn .dc-tile-meter { background: var(--warn-wash); }\n.dc-tile-attn .dc-tile-meter > span')
 for a, b in R: css = css.replace(a, b)
 BTN_OLD = css[css.index('/* Button */'):css.index('/* FilterPill */')]
 BTN = '''/* Button: iOS 26 capsules in the Notes highlight colours, translucent */
@@ -384,7 +387,7 @@ docs['Badge/README.md'] = rd('components/Badge/README.md').replace('`clay`, `sig
 docs['Badge/preview.html'] = ns(rd('components/Badge/preview.html')).replace("h(D.Badge,{tone:'clay'},'Selected'),h(D.Badge,{tone:'signal'},'Needs you'),", "h(D.Badge,{tone:'accent'},'Selected'),").replace('Neutral, hollow, clay, signal, ok, warn, bad', 'Neutral, hollow, accent, ok, warn, bad')
 docs['Flag/README.md'] = rd('components/Flag/README.md').replace('`signal`: something needs the person.', '`accent`: something needs the person.')
 docs['Flag/preview.html'] = ns(rd('components/Flag/preview.html')).replace("{tone:'signal'}", "{tone:'accent'}").replace('Warn, bad, signal', 'Warn, bad, accent')
-docs['StatTile/README.md'] = rd('components/StatTile/README.md').replace('value in `value` (mono 28, tabular figures)', 'value in `figure` (SF Pro Rounded 28 bold, tabular figures, as in Health)').replace('`attention` draws a 1.5px `signal` ring and turns the meter `signal`', '`attention` draws a 1.5px `accent` ring').replace("From Charts Tab's instrument panel and Footage Review Board.", 'The meter is `accent` on `accent-wash`.')
+docs['StatTile/README.md'] = rd('components/StatTile/README.md').replace('value in `value` (mono 28, tabular figures)', 'value in `figure` (SF Pro Rounded 28 bold, tabular figures, as in Health)').replace('`attention` draws a 1.5px `signal` ring and turns the meter `signal`', '`attention` draws a 1.5px `warn` ring and turns the meter `warn`, like a Panel `act` tone').replace("From Charts Tab's instrument panel and Footage Review Board.", 'The meter is `accent` on `accent-wash`.')
 docs['ListRow/README.md'] = rd('components/ListRow/README.md').replace('Selected rows take `clay-wash`.', 'Selected rows take `accent-wash`, translucent.')
 docs['BarChart/README.md'] = rd('components/BarChart/README.md').replace('A single-series chart is mint, because blue is `signal`. Orange comes last since it sits close to clay.', 'A single-series chart is mint, so it never reads as the blue accent.')
 docs['SegmentedControl/README.md'] = '''# SegmentedControl
