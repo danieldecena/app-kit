@@ -107,9 +107,44 @@ Consequence for the variant: do not build an animated page transition. Build an
 empty state for the content region and an async artwork placeholder. An
 animated push would be *more* work and *less* faithful.
 
-Not yet measured: the 9.942-10.575s event (0.633s, 22 frames, peak 63) which is
-a different and genuinely animated change, and the shelf horizontal scroll in
-`motion-02`, which is what answers "does it snap to a card?".
+### Measured motion: the shelf DOES snap to a card
+
+Tool: `build/source/motion-track.py`, which tracks a band's horizontal
+displacement frame by frame via 1-D cross-correlation and reports position
+against the container's real timestamps.
+
+```
+swift-free:  uv run --with pillow python motion-track.py <mov> <w:h:x:y>
+```
+
+From `motion-02-dark-shelf-hscroll.mov`, tracking the Stations shelf:
+
+```
+ t=5.58s      0.0pt
+ t=5.79s    306.3pt    1808 pt/s
+ t=6.00s    699.1pt    1886 pt/s   <- peak
+ t=6.21s    853.6pt     742 pt/s
+ t=6.42s    878.9pt     121 pt/s
+ motion ends t=6.308s
+```
+
+**Final displacement 878.9pt against a 219.5pt card pitch = 4.00 cards**, landing
+within 0.9pt (0.1%). The velocity profile rises then decays smoothly to zero:
+a clean ease-out over roughly **0.73s**, with no overshoot and no spring return.
+
+So `music-motion-shelf` is an ease-out of ~0.73s that settles on a card
+boundary. Caveat worth keeping: this is **one** scroll event. Landing within
+0.1% of an exact multiple is strong evidence of snapping rather than chance, but
+a second event would turn it from strong evidence into a confirmed rule, and
+would also show whether 4 cards is fixed or just how far that flick went.
+
+Also visible: a small -81pt excursion at 4.95s that returns to -70.6pt and
+holds, before the main movement. That looks like a drag that was released below
+the snap threshold, which would be worth confirming as the rubber-band
+behaviour.
+
+Not yet identified: the 9.942-10.575s event in `motion-04` (0.633s, 22 frames,
+peak delta 63), which is genuinely animated, unlike the page navigation.
 
 ## Measured
 
