@@ -4,122 +4,548 @@ Apple's own system neutrals and colours (the same palette as Artifact Kit).
 Reads the live Decena files from <src>/project, writes the new files to
 <out>/project, and a SwiftUI token file to <out>/swift/AppKit.swift.
 """
+
 import json, os, re, sys
-SRC = sys.argv[1]; OUT = sys.argv[2]
-P = os.path.join(OUT, 'project'); os.makedirs(P, exist_ok=True)
-def rd(rel): return open(os.path.join(SRC, 'project', rel)).read()
+
+SRC = sys.argv[1]
+OUT = sys.argv[2]
+P = os.path.join(OUT, "project")
+os.makedirs(P, exist_ok=True)
+
+
+def rd(rel):
+    return open(os.path.join(SRC, "project", rel)).read()
+
+
 def w(rel, text, base=P):
-    path = os.path.join(base, rel); os.makedirs(os.path.dirname(path), exist_ok=True); open(path, 'w').write(text)
+    path = os.path.join(base, rel)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    open(path, "w").write(text)
+
 
 # ------------------------------------------------------------------ tokens
-tok = json.loads(rd('tokens.json'))
-old = {t['name']: t for t in tok['color']['tokens']}
-def T(name, light, dark, usage): return {'name': name, 'value': {'light': light, 'dark': dark} if dark else light, 'usage': usage}
+tok = json.loads(rd("tokens.json"))
+old = {t["name"]: t for t in tok["color"]["tokens"]}
+
+
+def T(name, light, dark, usage):
+    return {
+        "name": name,
+        "value": {"light": light, "dark": dark} if dark else light,
+        "usage": usage,
+    }
+
+
 colors = [
- T('ground', '#F2F2F7', '#000000', 'Screen background behind grouped content: systemGroupedBackground.'),
- T('surface', '#FFFFFF', '#1C1C1E', 'Panels, cards, list rows, sheets: secondarySystemGroupedBackground.'),
- T('surface-sunk', '#E5E5EA', '#2C2C2E', 'Segmented tracks, neutral badges, thumbnail placeholders: systemGray5 / tertiary grouped.'),
- T('ink', '#1D1D1F', '#F5F5F7', 'Primary text and icons (label). 13:1 or better on ground, surface and surface-sunk.'),
- T('ink-soft', '#636366', '#98989D', 'Secondary text (secondaryLabel, opaque). 4.7:1 or better on ground, surface and surface-sunk.'),
- T('ink-faint', 'rgba(60, 60, 67, 0.30)', 'rgba(235, 235, 245, 0.30)', 'Tertiary text (tertiaryLabel, translucent): absences ("not recorded"), panel titles, the empty-slot outline. Under 3:1, so never the only copy of a reading.'),
- T('hair', '#D1D1D6', '#38383A', 'Hairline dividers (separator). Decorative only: never the only boundary of a control.'),
- T('edge', '#86868B', '#7C7C80', 'Outlines of interactive controls (3:1 or better on ground and surface).'),
- T('fill', 'rgba(118, 118, 128, 0.12)', 'rgba(118, 118, 128, 0.24)', 'The system fill: gray buttons, off filter pills, hover and pressed rows. Translucent.'),
- T('fill-hover', 'rgba(118, 118, 128, 0.20)', 'rgba(118, 118, 128, 0.32)', 'The system fill one step stronger: hover on gray buttons.'),
- T('accent', '#007AFF', '#0A84FF', "The app's accent: Color.accentColor, System Blue by default; follows the person's accent on the Mac. Tints, selection, rings, marks."),
- T('accent-fill', '#0062CC', '#086ACC', 'Filled (borderedProminent) buttons: the accent stepped 20% toward black so white text passes 4.5:1.'),
- T('on-accent', '#FFFFFF', '#FFFFFF', 'Text and symbols on accent-fill.'),
- T('accent-wash', 'rgba(0, 122, 255, 0.12)', 'rgba(10, 132, 255, 0.20)', 'Translucent accent tint: tinted (bordered) buttons, selected pills and rows.'),
- T('accent-ink', '#0058B9', '#5DABFF', 'Accent text on accent-wash or on any ground (4.5:1 or better): links, plain buttons.'),
- T('ok', '#207936', '#30DB5B', 'Status: done, healthy, synced (system green, text step). Always with a word or glyph.'),
- T('ok-wash', '#DCF4E1', '#1F4527', 'Fill behind ok text.'),
- T('warn', '#C73300', '#FFB340', 'Status: needs a look soon, stale, partial (system orange, text step).'),
- T('warn-wash', '#FCECD3', '#513914', 'Fill behind warn text.'),
- T('warn-ink', '#C73300', '#FFB340', 'Warn text on warn-wash (4.6:1 or better).'),
- T('bad', '#CC0014', '#FF6A63', 'Status: failed, over limit, destructive (system red, text step). Never a high value on a data scale.'),
- T('bad-wash', '#FCDDDB', '#51241F', 'Fill behind bad text.'),
+    T(
+        "ground",
+        "#F2F2F7",
+        "#000000",
+        "Screen background behind grouped content: systemGroupedBackground.",
+    ),
+    T(
+        "surface",
+        "#FFFFFF",
+        "#1C1C1E",
+        "Panels, cards, list rows, sheets: secondarySystemGroupedBackground.",
+    ),
+    T(
+        "surface-sunk",
+        "#E5E5EA",
+        "#2C2C2E",
+        "Segmented tracks, neutral badges, thumbnail placeholders: systemGray5 / tertiary grouped.",
+    ),
+    T(
+        "ink",
+        "#1D1D1F",
+        "#F5F5F7",
+        "Primary text and icons (label). 13:1 or better on ground, surface and surface-sunk.",
+    ),
+    T(
+        "ink-soft",
+        "#636366",
+        "#98989D",
+        "Secondary text (secondaryLabel, opaque). 4.7:1 or better on ground, surface and surface-sunk.",
+    ),
+    T(
+        "ink-faint",
+        "rgba(60, 60, 67, 0.30)",
+        "rgba(235, 235, 245, 0.30)",
+        'Tertiary text (tertiaryLabel, translucent): absences ("not recorded"), panel titles, the empty-slot outline. Under 3:1, so never the only copy of a reading.',
+    ),
+    T(
+        "hair",
+        "#D1D1D6",
+        "#38383A",
+        "Hairline dividers (separator). Decorative only: never the only boundary of a control.",
+    ),
+    T(
+        "edge",
+        "#86868B",
+        "#7C7C80",
+        "Outlines of interactive controls (3:1 or better on ground and surface).",
+    ),
+    T(
+        "fill",
+        "rgba(118, 118, 128, 0.12)",
+        "rgba(118, 118, 128, 0.24)",
+        "The system fill: gray buttons, off filter pills, hover and pressed rows. Translucent.",
+    ),
+    T(
+        "fill-hover",
+        "rgba(118, 118, 128, 0.20)",
+        "rgba(118, 118, 128, 0.32)",
+        "The system fill one step stronger: hover on gray buttons.",
+    ),
+    T(
+        "accent",
+        "#007AFF",
+        "#0A84FF",
+        "The app's accent: Color.accentColor, System Blue by default; follows the person's accent on the Mac. Tints, selection, rings, marks.",
+    ),
+    T(
+        "accent-fill",
+        "#0062CC",
+        "#086ACC",
+        "Filled (borderedProminent) buttons: the accent stepped 20% toward black so white text passes 4.5:1.",
+    ),
+    T("on-accent", "#FFFFFF", "#FFFFFF", "Text and symbols on accent-fill."),
+    T(
+        "accent-wash",
+        "rgba(0, 122, 255, 0.12)",
+        "rgba(10, 132, 255, 0.20)",
+        "Translucent accent tint: tinted (bordered) buttons, selected pills and rows.",
+    ),
+    T(
+        "accent-ink",
+        "#0058B9",
+        "#5DABFF",
+        "Accent text on accent-wash or on any ground (4.5:1 or better): links, plain buttons.",
+    ),
+    T(
+        "ok",
+        "#207936",
+        "#30DB5B",
+        "Status: done, healthy, synced (system green, text step). Always with a word or glyph.",
+    ),
+    T("ok-wash", "#DCF4E1", "#1F4527", "Fill behind ok text."),
+    T(
+        "warn",
+        "#C73300",
+        "#FFB340",
+        "Status: needs a look soon, stale, partial (system orange, text step).",
+    ),
+    T("warn-wash", "#FCECD3", "#513914", "Fill behind warn text."),
+    T("warn-ink", "#C73300", "#FFB340", "Warn text on warn-wash (4.6:1 or better)."),
+    T(
+        "bad",
+        "#CC0014",
+        "#FF6A63",
+        "Status: failed, over limit, destructive (system red, text step). Never a high value on a data scale.",
+    ),
+    T("bad-wash", "#FCDDDB", "#51241F", "Fill behind bad text."),
 ]
-for k in ('heat-1', 'heat-2', 'heat-3', 'heat-4', 'series-1', 'series-2', 'series-3', 'series-4', 'series-5'):
-    t = dict(old[k]); t['usage'] = t['usage'].replace(' because blue is `signal`', '').replace('Never on a chart that also shows signal. ', 'Reads as the accent; avoid beside accent controls. ').replace(' Last on purpose: it sits 1.15:1 from clay, so never beside a clay control.', '').replace('Chart series 1, Apple mint. First, and the colour of a single-series chart: blue is taken by signal, so a lone blue series would read as "needs you".', 'Chart series 1, Apple mint. First, and the colour of a single-series chart.')
+for k in (
+    "heat-1",
+    "heat-2",
+    "heat-3",
+    "heat-4",
+    "series-1",
+    "series-2",
+    "series-3",
+    "series-4",
+    "series-5",
+):
+    t = dict(old[k])
+    t["usage"] = (
+        t["usage"]
+        .replace(" because blue is `signal`", "")
+        .replace(
+            "Never on a chart that also shows signal. ",
+            "Reads as the accent; avoid beside accent controls. ",
+        )
+        .replace(
+            " Last on purpose: it sits 1.15:1 from clay, so never beside a clay control.",
+            "",
+        )
+        .replace(
+            'Chart series 1, Apple mint. First, and the colour of a single-series chart: blue is taken by signal, so a lone blue series would read as "needs you".',
+            "Chart series 1, Apple mint. First, and the colour of a single-series chart.",
+        )
+    )
     colors.append(t)
 colors += [
- T('chart-base', '#C7C7CC', '#48484A', 'Emphasis charts: every mark that is not the point (systemGray3). Under 3:1, so those marks carry a value label or sit beside a table.'),
- T('chart-mid', '#8E8E93', '#8E8E93', 'A lone series with nothing to single out (systemGray); hover on grey marks.'),
+    T(
+        "chart-base",
+        "#C7C7CC",
+        "#48484A",
+        "Emphasis charts: every mark that is not the point (systemGray3). Under 3:1, so those marks carry a value label or sit beside a table.",
+    ),
+    T(
+        "chart-mid",
+        "#8E8E93",
+        "#8E8E93",
+        "A lone series with nothing to single out (systemGray); hover on grey marks.",
+    ),
 ]
-HL = {'purple': ('#8944AB', 'rgba(175, 82, 222, 0.10)', '#DA8FFF', 'rgba(191, 90, 242, 0.16)'), 'pink': ('#C60E41', 'rgba(255, 45, 85, 0.10)', '#FF6482', 'rgba(255, 55, 95, 0.16)'),
-      'orange': ('#C73300', 'rgba(255, 149, 0, 0.10)', '#FFB340', 'rgba(255, 159, 10, 0.16)'), 'mint': ('#0B7771', 'rgba(0, 199, 190, 0.10)', '#66D4CF', 'rgba(99, 230, 226, 0.16)'),
-      'blue': ('#0040DD', 'rgba(0, 122, 255, 0.10)', '#429DFF', 'rgba(10, 132, 255, 0.16)')}
+HL = {
+    "purple": (
+        "#8944AB",
+        "rgba(175, 82, 222, 0.10)",
+        "#DA8FFF",
+        "rgba(191, 90, 242, 0.16)",
+    ),
+    "pink": (
+        "#C60E41",
+        "rgba(255, 45, 85, 0.10)",
+        "#FF6482",
+        "rgba(255, 55, 95, 0.16)",
+    ),
+    "orange": (
+        "#C73300",
+        "rgba(255, 149, 0, 0.10)",
+        "#FFB340",
+        "rgba(255, 159, 10, 0.16)",
+    ),
+    "mint": (
+        "#0B7771",
+        "rgba(0, 199, 190, 0.10)",
+        "#66D4CF",
+        "rgba(99, 230, 226, 0.16)",
+    ),
+    "blue": (
+        "#0040DD",
+        "rgba(0, 122, 255, 0.10)",
+        "#429DFF",
+        "rgba(10, 132, 255, 0.16)",
+    ),
+}
 # Filled-button fill and label per colour. Purple, pink and blue are the system colour stepped 20% toward
 # black so white passes 4.5:1; orange and mint stay the system colour with ink labels.
-HL_FILL = {'purple': ('#8C42B2', '#9948C2', '#FFFFFF'), 'pink': ('#CC2444', '#CC2C4C', '#FFFFFF'), 'orange': ('#FF9500', '#FF9F0A', '#1D1D1F'),
-           'mint': ('#00C7BE', '#63E6E2', '#1D1D1F'), 'blue': ('#0062CC', '#086ACC', '#FFFFFF')}
+HL_FILL = {
+    "purple": ("#8C42B2", "#9948C2", "#FFFFFF"),
+    "pink": ("#CC2444", "#CC2C4C", "#FFFFFF"),
+    "orange": ("#FF9500", "#FF9F0A", "#1D1D1F"),
+    "mint": ("#00C7BE", "#63E6E2", "#1D1D1F"),
+    "blue": ("#0062CC", "#086ACC", "#FFFFFF"),
+}
 for k, (lt, lw, dt, dw) in HL.items():
-    colors.append(T(f'hl-{k}', lt, dt, f'Highlighted text in {k}, as in Apple Notes: bold, on hl-{k}-wash (4.5:1 or better in both themes). Also the ink of a {k} tinted button.'))
-    colors.append(T(f'hl-{k}-wash', lw, dw, f'The system {k} at 10% (16% dark), translucent: highlight and {k} tinted-button fill.'))
+    colors.append(
+        T(
+            f"hl-{k}",
+            lt,
+            dt,
+            f"Highlighted text in {k}, as in Apple Notes: bold, on hl-{k}-wash (4.5:1 or better in both themes). Also the ink of a {k} tinted button.",
+        )
+    )
+    colors.append(
+        T(
+            f"hl-{k}-wash",
+            lw,
+            dw,
+            f"The system {k} at 10% (16% dark), translucent: highlight and {k} tinted-button fill.",
+        )
+    )
     fl, fd, on = HL_FILL[k]
-    colors.append(T(f'hl-{k}-fill', fl, fd, f'Filled {k} button: 4.5:1 or better under hl-{k}-on in both themes.'))
-    colors.append(T(f'hl-{k}-on', on, on, f'Label on hl-{k}-fill.'))
+    colors.append(
+        T(
+            f"hl-{k}-fill",
+            fl,
+            fd,
+            f"Filled {k} button: 4.5:1 or better under hl-{k}-on in both themes.",
+        )
+    )
+    colors.append(T(f"hl-{k}-on", on, on, f"Label on hl-{k}-fill."))
 # Purple alone hovers from the system colour rather than its darker fill, as it did before the tint tokens.
-colors.append(T('hl-purple-tint', '#AF52DE', '#BF5AF2', 'The system purple: what a purple tinted button mixes its hover wash from.'))
+colors.append(
+    T(
+        "hl-purple-tint",
+        "#AF52DE",
+        "#BF5AF2",
+        "The system purple: what a purple tinted button mixes its hover wash from.",
+    )
+)
 colors += [
- T('glass', 'rgba(255, 255, 255, 0.55)', 'rgba(44, 44, 46, 0.55)', 'Web stand-in for Liquid Glass (with a 16px blur): toolbars and controls floating over content. In SwiftUI use .glassEffect() or .buttonStyle(.glass).'),
- T('glass-edge', 'rgba(255, 255, 255, 0.70)', 'rgba(255, 255, 255, 0.14)', 'The 0.5px inner edge of glass.'),
- T('scrim', 'rgba(0, 0, 0, 0.80)', 'rgba(0, 0, 0, 0.78)', 'Toasts and hints over content, white text.'),
+    T(
+        "glass",
+        "rgba(255, 255, 255, 0.55)",
+        "rgba(44, 44, 46, 0.55)",
+        "Web stand-in for Liquid Glass (with a 16px blur): toolbars and controls floating over content. In SwiftUI use .glassEffect() or .buttonStyle(.glass).",
+    ),
+    T(
+        "glass-edge",
+        "rgba(255, 255, 255, 0.70)",
+        "rgba(255, 255, 255, 0.14)",
+        "The 0.5px inner edge of glass.",
+    ),
+    T(
+        "scrim",
+        "rgba(0, 0, 0, 0.80)",
+        "rgba(0, 0, 0, 0.78)",
+        "Toasts and hints over content, white text.",
+    ),
 ]
-tok['name'] = 'App Kit'
-tok['color']['tokens'] = colors
-tok['type']['families'] = {
- 'sans': '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, sans-serif',
- 'display': '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", system-ui, sans-serif',
- 'round': 'ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
- 'mono': 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace',
- 'compact': '"SF Compact Text", "SF Compact", -apple-system, system-ui, sans-serif'}
-for g in tok['type']['groups']:
-    for s in g['styles']:
-        s['usage'] = s['usage'].replace(' SF Pro Display everywhere (Instrument Sans off Apple devices).', ' SF Pro Display.')
-tok['type']['groups'] = [g for g in tok['type']['groups'] if g['name'] != 'Figures'] + [
- {'name': 'Figures', 'family': 'round', 'styles': [
-   {'name': 'figure', 'family': 'round', 'fontSize': '34px', 'lineHeight': '40px', 'fontWeight': 700, 'sample': '7 of 24', 'usage': 'Health-style big number: .system(.largeTitle, design: .rounded).bold().'},
-   {'name': 'figure-md', 'family': 'round', 'fontSize': '28px', 'lineHeight': '32px', 'fontWeight': 700, 'sample': '1,284', 'usage': 'Stat tile values: .system(.title, design: .rounded).bold().'},
-   {'name': 'figure-sm', 'family': 'round', 'fontSize': '22px', 'lineHeight': '26px', 'fontWeight': 700, 'sample': '90 sec', 'usage': 'Values in a comparison: .system(.title2, design: .rounded).bold().'}]},
- {'name': 'Reading', 'family': 'sans', 'styles': [
-   {'name': 'script', 'family': 'sans', 'fontSize': '17px', 'lineHeight': '28px', 'fontWeight': 400, 'sample': 'I build the systems behind campaigns.', 'usage': 'Long reading in SF Pro Text: .body with .lineSpacing(6).'}]},
- {'name': 'Glance', 'family': 'compact', 'styles': [
-   {'name': 'glance', 'family': 'compact', 'fontSize': '15px', 'lineHeight': '18px', 'fontWeight': 600, 'sample': '1d 7h', 'usage': 'watchOS and widgets only; SF Compact is the watch face.'}]}]
-text = next(g for g in tok['type']['groups'] if g['name'] == 'Text')['styles']
-text.insert([s['name'] for s in text].index('caption') + 1, {'name': 'caption-2', 'fontSize': '11px', 'lineHeight': '13px', 'fontWeight': 400, 'sample': 'Mon', 'usage': 'Chart ticks and the smallest labels, never sentences: .caption2.'})
+tok["name"] = "App Kit"
+tok["color"]["tokens"] = colors
+tok["type"]["families"] = {
+    "sans": '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, sans-serif',
+    "display": '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", system-ui, sans-serif',
+    "round": 'ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+    "mono": 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace',
+    "compact": '"SF Compact Text", "SF Compact", -apple-system, system-ui, sans-serif',
+}
+for g in tok["type"]["groups"]:
+    for s in g["styles"]:
+        s["usage"] = s["usage"].replace(
+            " SF Pro Display everywhere (Instrument Sans off Apple devices).",
+            " SF Pro Display.",
+        )
+tok["type"]["groups"] = [g for g in tok["type"]["groups"] if g["name"] != "Figures"] + [
+    {
+        "name": "Figures",
+        "family": "round",
+        "styles": [
+            {
+                "name": "figure",
+                "family": "round",
+                "fontSize": "34px",
+                "lineHeight": "40px",
+                "fontWeight": 700,
+                "sample": "7 of 24",
+                "usage": "Health-style big number: .system(.largeTitle, design: .rounded).bold().",
+            },
+            {
+                "name": "figure-md",
+                "family": "round",
+                "fontSize": "28px",
+                "lineHeight": "32px",
+                "fontWeight": 700,
+                "sample": "1,284",
+                "usage": "Stat tile values: .system(.title, design: .rounded).bold().",
+            },
+            {
+                "name": "figure-sm",
+                "family": "round",
+                "fontSize": "22px",
+                "lineHeight": "26px",
+                "fontWeight": 700,
+                "sample": "90 sec",
+                "usage": "Values in a comparison: .system(.title2, design: .rounded).bold().",
+            },
+        ],
+    },
+    {
+        "name": "Reading",
+        "family": "sans",
+        "styles": [
+            {
+                "name": "script",
+                "family": "sans",
+                "fontSize": "17px",
+                "lineHeight": "28px",
+                "fontWeight": 400,
+                "sample": "I build the systems behind campaigns.",
+                "usage": "Long reading in SF Pro Text: .body with .lineSpacing(6).",
+            }
+        ],
+    },
+    {
+        "name": "Glance",
+        "family": "compact",
+        "styles": [
+            {
+                "name": "glance",
+                "family": "compact",
+                "fontSize": "15px",
+                "lineHeight": "18px",
+                "fontWeight": 600,
+                "sample": "1d 7h",
+                "usage": "watchOS and widgets only; SF Compact is the watch face.",
+            }
+        ],
+    },
+]
+text = next(g for g in tok["type"]["groups"] if g["name"] == "Text")["styles"]
+text.insert(
+    [s["name"] for s in text].index("caption") + 1,
+    {
+        "name": "caption-2",
+        "fontSize": "11px",
+        "lineHeight": "13px",
+        "fontWeight": 400,
+        "sample": "Mon",
+        "usage": "Chart ticks and the smallest labels, never sentences: .caption2.",
+    },
+)
 # From Footage Library's detail cards. letterSpacing in px is the SwiftUI .tracking value in points.
-text.insert([s['name'] for s in text].index('caption-2') + 1, {'name': 'panel-title', 'fontSize': '11px', 'lineHeight': '13px', 'fontWeight': 600, 'letterSpacing': '0.8px', 'sample': 'CAPTURE', 'usage': 'Panel titles, uppercase in ink-faint: .caption2.weight(.semibold) + .tracking(0.8) + .foregroundStyle(.tertiary).'})
+text.insert(
+    [s["name"] for s in text].index("caption-2") + 1,
+    {
+        "name": "panel-title",
+        "fontSize": "11px",
+        "lineHeight": "13px",
+        "fontWeight": 600,
+        "letterSpacing": "0.8px",
+        "sample": "CAPTURE",
+        "usage": "Panel titles, uppercase in ink-faint: .caption2.weight(.semibold) + .tracking(0.8) + .foregroundStyle(.tertiary).",
+    },
+)
 # Appended after label, so a rule that matches both by size alone still resolves to label.
-next(g for g in tok['type']['groups'] if g['name'] == 'Mono')['styles'] += [
- {'name': 'eyebrow', 'fontSize': '11px', 'lineHeight': '13px', 'fontWeight': 600, 'letterSpacing': '1.2px', 'sample': 'IMPORTING', 'usage': 'Spaced capitals naming a figure or a slot: .caption2.monospaced().weight(.semibold) + .tracking(1.2), uppercased.'},
- {'name': 'fact', 'fontSize': '12px', 'lineHeight': '16px', 'fontWeight': 400, 'sample': '4.21 GB', 'usage': 'Fact values, so they line up down a panel: .system(.caption, design: .monospaced).'}]
-tok['motion'] = {'note': 'State changes on controls. Under prefers-reduced-motion they drop to none.', 'tokens': [
- {'name': 'motion-fast', 'value': '150ms', 'usage': 'Hover and press feedback. SwiftUI: .easeOut(duration: 0.15).'},
- {'name': 'motion-ease', 'value': 'ease-out', 'usage': 'The curve for every control transition: quick to respond, soft to settle.'}]}
-tok['stroke'] = {'note': 'Outlines that carry a state, drawn inside the edge. Separation between surfaces stays surface against ground.', 'tokens': [
- {'name': 'stroke-outline', 'value': '1.5px', 'usage': 'State outlines: act and live panels, the empty slot, a selected filter pill, an attention tile. SwiftUI: .strokeBorder(color, lineWidth: 1.5).'},
- {'name': 'stroke-dash', 'value': '6 4', 'usage': 'The empty slot: 6 on, 4 off, in ink-faint. SwiftUI: StrokeStyle(lineWidth: 1.5, dash: [6, 4]).'}]}
-for t in tok['shadow']['tokens']:
-    for th in ('light', 'dark'):
-        t['value'][th] = t['value'][th].replace('rgba(27,26,24,', 'rgba(0,0,0,')
-tok['shadow']['tokens'].append({'name': 'shadow-glass', 'value': {'light': '0 1px 3px rgba(0,0,0,0.12)', 'dark': '0 1px 3px rgba(0,0,0,0.4)'}, 'usage': 'Under glass controls, with the glass-edge ring.'})
-for t in tok['radius']['tokens']:
-    if t['name'] == 'radius-md': t['usage'] = 'Inputs, list rows, stat tiles, segments.'
-    if t['name'] == 'radius-pill': t['usage'] = 'Buttons (capsules, as in iOS 26), filter pills, chips, toasts.'
-w('tokens.json', json.dumps(tok, indent=2, ensure_ascii=False))
+next(g for g in tok["type"]["groups"] if g["name"] == "Mono")["styles"] += [
+    {
+        "name": "eyebrow",
+        "fontSize": "11px",
+        "lineHeight": "13px",
+        "fontWeight": 600,
+        "letterSpacing": "1.2px",
+        "sample": "IMPORTING",
+        "usage": "Spaced capitals naming a figure or a slot: .caption2.monospaced().weight(.semibold) + .tracking(1.2), uppercased.",
+    },
+    {
+        "name": "fact",
+        "fontSize": "12px",
+        "lineHeight": "16px",
+        "fontWeight": 400,
+        "sample": "4.21 GB",
+        "usage": "Fact values, so they line up down a panel: .system(.caption, design: .monospaced).",
+    },
+]
+tok["motion"] = {
+    "note": "State changes on controls. Under prefers-reduced-motion they drop to none.",
+    "tokens": [
+        {
+            "name": "motion-fast",
+            "value": "150ms",
+            "usage": "Hover and press feedback. SwiftUI: .easeOut(duration: 0.15).",
+        },
+        {
+            "name": "motion-ease",
+            "value": "ease-out",
+            "usage": "The curve for every control transition: quick to respond, soft to settle.",
+        },
+    ],
+}
+tok["stroke"] = {
+    "note": "Outlines that carry a state, drawn inside the edge. Separation between surfaces stays surface against ground.",
+    "tokens": [
+        {
+            "name": "stroke-outline",
+            "value": "1.5px",
+            "usage": "State outlines: act and live panels, the empty slot, a selected filter pill, an attention tile. SwiftUI: .strokeBorder(color, lineWidth: 1.5).",
+        },
+        {
+            "name": "stroke-dash",
+            "value": "6 4",
+            "usage": "The empty slot: 6 on, 4 off, in ink-faint. SwiftUI: StrokeStyle(lineWidth: 1.5, dash: [6, 4]).",
+        },
+    ],
+}
+for t in tok["shadow"]["tokens"]:
+    for th in ("light", "dark"):
+        t["value"][th] = t["value"][th].replace("rgba(27,26,24,", "rgba(0,0,0,")
+tok["shadow"]["tokens"].append(
+    {
+        "name": "shadow-glass",
+        "value": {
+            "light": "0 1px 3px rgba(0,0,0,0.12)",
+            "dark": "0 1px 3px rgba(0,0,0,0.4)",
+        },
+        "usage": "Under glass controls, with the glass-edge ring.",
+    }
+)
+for t in tok["radius"]["tokens"]:
+    if t["name"] == "radius-md":
+        t["usage"] = "Inputs, list rows, stat tiles, segments."
+    if t["name"] == "radius-pill":
+        t["usage"] = "Buttons (capsules, as in iOS 26), filter pills, chips, toasts."
+
+
+# Contrast gate. Until now every "4.5:1" in a usage string was hand-written and
+# nothing checked it. These pairs are asserted at build time instead.
+# Verified against known values before being trusted: white on black is 21.00,
+# a colour on itself is 1.00, white on #F4B63F is 1.81, and the gate separates
+# #777777 (4.48, fails) from #767676 (4.54, passes) on white.
+def _lin(c):
+    c /= 255
+    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def _lum(hexstr):
+    v = hexstr.strip().lstrip("#")
+    r, g, b = (int(v[i : i + 2], 16) for i in (0, 2, 4))
+    return 0.2126 * _lin(r) + 0.7152 * _lin(g) + 0.0722 * _lin(b)
+
+
+def contrast(a, b):
+    la, lb = _lum(a), _lum(b)
+    hi, lo = max(la, lb), min(la, lb)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+_by = {t["name"]: t for t in tok["color"]["tokens"]}
+
+
+def _val(name, theme):
+    v = _by[name]["value"]
+    return v[theme] if isinstance(v, dict) else v
+
+
+# Only solid pairs: a token whose value is rgba() would need compositing over a
+# ground first, and compositing the wrong ground is worse than not checking.
+CONTRAST_PAIRS = [
+    ("ink", "ground", 13.0),
+    ("ink", "surface", 13.0),
+    ("ink-soft", "ground", 4.7),
+    ("ink-soft", "surface", 4.7),
+    ("on-accent", "accent-fill", 4.5),
+    ("accent-ink", "ground", 4.5),
+    ("accent-ink", "surface", 4.5),
+    ("edge", "ground", 3.0),
+    ("edge", "surface", 3.0),
+] + [
+    (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
+    for c in ("purple", "pink", "orange", "mint", "blue")
+]
+
+assert abs(contrast("#FFFFFF", "#000000") - 21.0) < 0.01, (
+    "contrast() is broken at its maximum"
+)
+assert abs(contrast("#000000", "#000000") - 1.0) < 0.01, (
+    "contrast() is broken at its minimum"
+)
+for _fg, _bg, _min in CONTRAST_PAIRS:
+    for _th in ("light", "dark"):
+        _r = contrast(_val(_fg, _th), _val(_bg, _th))
+        assert _r >= _min - 0.005, (
+            f"{_fg} on {_bg} ({_th}) is {_r:.2f}:1, below the claimed {_min}:1"
+        )
+
+w("tokens.json", json.dumps(tok, indent=2, ensure_ascii=False))
 
 # ------------------------------------------------------------------ bundle.css
-css = rd('components/bundle.css')
-css = re.sub(r'@import url\([^)]*\);\n\n', '', css)
-R = [('var(--signal)', 'var(--accent)'), ('var(--clay-wash)', 'var(--accent-wash)'), ('var(--clay-ink)', 'var(--accent-ink)'),
-     ('var(--on-clay)', 'var(--on-accent)'), ('var(--signal-wash)', 'var(--accent-wash)')]
-for a in ('.dc-tile-attn { box-shadow: inset 0 0 0 1.5px var(--signal); }', '.dc-tile-attn .dc-tile-meter > span { background: var(--signal); }'):
-    assert a in css, a; css = css.replace(a, a.replace('--signal', '--warn'))
-css = css.replace('.dc-tile-attn .dc-tile-meter > span', '.dc-tile-attn .dc-tile-meter { background: var(--warn-wash); }\n.dc-tile-attn .dc-tile-meter > span')
-for a, b in R: css = css.replace(a, b)
-BTN_OLD = css[css.index('/* Button */'):css.index('/* FilterPill */')]
-BTN = '''/* Button: iOS 26 capsules in the Notes highlight colours, translucent */
+css = rd("components/bundle.css")
+css = re.sub(r"@import url\([^)]*\);\n\n", "", css)
+R = [
+    ("var(--signal)", "var(--accent)"),
+    ("var(--clay-wash)", "var(--accent-wash)"),
+    ("var(--clay-ink)", "var(--accent-ink)"),
+    ("var(--on-clay)", "var(--on-accent)"),
+    ("var(--signal-wash)", "var(--accent-wash)"),
+]
+for a in (
+    ".dc-tile-attn { box-shadow: inset 0 0 0 1.5px var(--signal); }",
+    ".dc-tile-attn .dc-tile-meter > span { background: var(--signal); }",
+):
+    assert a in css, a
+    css = css.replace(a, a.replace("--signal", "--warn"))
+css = css.replace(
+    ".dc-tile-attn .dc-tile-meter > span",
+    ".dc-tile-attn .dc-tile-meter { background: var(--warn-wash); }\n.dc-tile-attn .dc-tile-meter > span",
+)
+for a, b in R:
+    css = css.replace(a, b)
+BTN_OLD = css[css.index("/* Button */") : css.index("/* FilterPill */")]
+BTN = """/* Button: iOS 26 capsules in the Notes highlight colours, translucent */
 .dc-btn { --tint: var(--accent); --tint-ink: var(--accent-ink); --tint-wash: var(--accent-wash); --tint-fill: var(--accent-fill); --tint-on: var(--on-accent);
   min-height: var(--touch); padding: 0 20px; border-radius: var(--radius-pill); font: 600 15px/20px var(--font-sans); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-4); border: 0; transition: background-color var(--motion-fast) var(--motion-ease), filter var(--motion-fast) var(--motion-ease); }
 .dc-btn-tinted { background: var(--tint-wash); color: var(--tint-ink); }
@@ -139,10 +565,12 @@ BTN = '''/* Button: iOS 26 capsules in the Notes highlight colours, translucent 
 .dc-tint-blue { --tint: var(--hl-blue-fill); --tint-ink: var(--hl-blue); --tint-wash: var(--hl-blue-wash); --tint-fill: var(--hl-blue-fill); --tint-on: var(--hl-blue-on); }
 .dc-btn:disabled { opacity: .4; cursor: default; filter: none; }
 
-'''
+"""
 css = css.replace(BTN_OLD, BTN)
-PANEL_OLD = css[css.index('/* Panel */'):css.index('/* ListRow */')]
-css = css.replace(PANEL_OLD, '''/* Panel: Footage Library's detail card, and its Charts plate states */
+PANEL_OLD = css[css.index("/* Panel */") : css.index("/* ListRow */")]
+css = css.replace(
+    PANEL_OLD,
+    """/* Panel: Footage Library's detail card, and its Charts plate states */
 .dc-panel { position: relative; background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-6); display: flex; flex-direction: column; gap: 10px; }
 .dc-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-5); }
 .dc-panel-title { font: 600 11px/13px var(--font-sans); letter-spacing: var(--tracking-panel-title); text-transform: uppercase; color: var(--ink-faint); margin: 0; }
@@ -182,49 +610,114 @@ css = css.replace(PANEL_OLD, '''/* Panel: Footage Library's detail card, and its
 .dc-toolbar-notice { margin: var(--space-3) 0 0; padding: var(--space-3) var(--space-5); border-radius: var(--radius-sm); background: var(--surface); font: 400 13px/18px var(--font-sans); color: var(--ink-soft); }
 .dc-toolbar-notice-bad { color: var(--bad); }
 
-''')
-css = css.replace('.dc-pill { min-height: 40px; padding: 0 var(--space-5); border-radius: var(--radius-pill); font: 600 13px/18px var(--font-sans); border: 1px solid var(--edge); background: var(--surface); color: var(--ink);',
-                  '.dc-pill { min-height: 40px; padding: 0 var(--space-5); border-radius: var(--radius-pill); font: 600 13px/18px var(--font-sans); border: 0; background: var(--fill); color: var(--ink);')
-css = css.replace('.dc-pill[aria-pressed="true"] { background: var(--clay); border-color: var(--clay); color: var(--on-accent); }',
-                  '.dc-pill[aria-pressed="true"] { background: var(--accent-wash); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }')
-css = css.replace('.dc-badge-clay { background: var(--accent-wash); color: var(--accent-ink); }\n.dc-badge-signal { background: var(--accent-wash); color: var(--accent); }',
-                  '.dc-badge-accent, .dc-badge-clay, .dc-badge-signal { background: var(--accent-wash); color: var(--accent-ink); }')
-css = css.replace('.dc-flag-signal { background: var(--accent-wash); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }',
-                  '.dc-flag-accent, .dc-flag-signal { background: var(--accent-wash); color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent); }')
-css = css.replace('.dc-tile-value { font: 600 28px/32px var(--font-mono);', '.dc-tile-value { font: 700 28px/32px var(--font-round);')
-css = css.replace('.dc-tile-meter > span { display: block; height: 100%; border-radius: 3px; background: var(--ink); }', '.dc-tile-meter > span { display: block; height: 100%; border-radius: 3px; background: var(--accent); }')
-css = css.replace('.dc-tile-meter { height: 6px; border-radius: 3px; background: var(--surface-sunk);', '.dc-tile-meter { height: 6px; border-radius: 3px; background: var(--accent-wash);')
-assert css.count('inset 0 0 0 1.5px') == 2
-css = css.replace('inset 0 0 0 1.5px', 'inset 0 0 0 var(--stroke-outline)')
-assert 'clay' not in re.sub(r'dc-(badge|flag)-(clay|signal)', '', css), [l for l in css.split('\n') if 'clay' in l]
-assert '--signal' not in css
+""",
+)
+css = css.replace(
+    ".dc-pill { min-height: 40px; padding: 0 var(--space-5); border-radius: var(--radius-pill); font: 600 13px/18px var(--font-sans); border: 1px solid var(--edge); background: var(--surface); color: var(--ink);",
+    ".dc-pill { min-height: 40px; padding: 0 var(--space-5); border-radius: var(--radius-pill); font: 600 13px/18px var(--font-sans); border: 0; background: var(--fill); color: var(--ink);",
+)
+css = css.replace(
+    '.dc-pill[aria-pressed="true"] { background: var(--clay); border-color: var(--clay); color: var(--on-accent); }',
+    '.dc-pill[aria-pressed="true"] { background: var(--accent-wash); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }',
+)
+css = css.replace(
+    ".dc-badge-clay { background: var(--accent-wash); color: var(--accent-ink); }\n.dc-badge-signal { background: var(--accent-wash); color: var(--accent); }",
+    ".dc-badge-accent, .dc-badge-clay, .dc-badge-signal { background: var(--accent-wash); color: var(--accent-ink); }",
+)
+css = css.replace(
+    ".dc-flag-signal { background: var(--accent-wash); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }",
+    ".dc-flag-accent, .dc-flag-signal { background: var(--accent-wash); color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent); }",
+)
+css = css.replace(
+    ".dc-tile-value { font: 600 28px/32px var(--font-mono);",
+    ".dc-tile-value { font: 700 28px/32px var(--font-round);",
+)
+css = css.replace(
+    ".dc-tile-meter > span { display: block; height: 100%; border-radius: 3px; background: var(--ink); }",
+    ".dc-tile-meter > span { display: block; height: 100%; border-radius: 3px; background: var(--accent); }",
+)
+css = css.replace(
+    ".dc-tile-meter { height: 6px; border-radius: 3px; background: var(--surface-sunk);",
+    ".dc-tile-meter { height: 6px; border-radius: 3px; background: var(--accent-wash);",
+)
+assert css.count("inset 0 0 0 1.5px") == 2
+css = css.replace("inset 0 0 0 1.5px", "inset 0 0 0 var(--stroke-outline)")
+assert "clay" not in re.sub(r"dc-(badge|flag)-(clay|signal)", "", css), [
+    l for l in css.split("\n") if "clay" in l
+]
+assert "--signal" not in css
 # Every font size reaches the stylesheet as a tokens.json type style: --type-<style>, with a weight
 # override where a control sets a style semibold, as SwiftUI does with .weight(.semibold).
-TYPE = {s['name']: (s['fontWeight'], s['fontSize'], s['lineHeight'], s.get('family', g['family'])) for g in tok['type']['groups'] for s in g['styles']}
-css = css.replace('font-family: var(--font-sans); font-size: 16px; line-height: 21px;', 'font: 400 16px/21px var(--font-sans);')
+TYPE = {
+    s["name"]: (
+        s["fontWeight"],
+        s["fontSize"],
+        s["lineHeight"],
+        s.get("family", g["family"]),
+    )
+    for g in tok["type"]["groups"]
+    for s in g["styles"]
+}
+css = css.replace(
+    "font-family: var(--font-sans); font-size: 16px; line-height: 21px;",
+    "font: 400 16px/21px var(--font-sans);",
+)
 # The thumbnail placeholder was 10/12, the only size below the scale; it takes label, one step up.
-css = css.replace('font: 600 10px/12px var(--font-mono);', 'font: 600 11px/14px var(--font-mono);')
+css = css.replace(
+    "font: 600 10px/12px var(--font-mono);", "font: 600 11px/14px var(--font-mono);"
+)
+
+
 def type_var(m):
     wt, size, line, fam = int(m[1]), m[2], m[3], m[4]
-    hits = [n for n, (_, sz, lh, f) in TYPE.items() if (sz, f) == (size, fam) and line in (None, lh)]
+    hits = [
+        n
+        for n, (_, sz, lh, f) in TYPE.items()
+        if (sz, f) == (size, fam) and line in (None, lh)
+    ]
     assert hits, m[0]
     exact = [n for n in hits if TYPE[n][0] == wt]
-    return f'font: var(--type-{exact[0]})' if exact else f'font: var(--type-{hits[0]}); font-weight: {wt}'
-css = re.sub(r'font: (\d+) (\d+px)(?:/(\d+px))? var\(--font-(\w+)\)', type_var, css)
-assert not re.search(r'font(-size)?:[^;}]*\d+px', css), re.findall(r'font(?:-size)?:[^;}]*\d+px', css)
+    return (
+        f"font: var(--type-{exact[0]})"
+        if exact
+        else f"font: var(--type-{hits[0]}); font-weight: {wt}"
+    )
+
+
+css = re.sub(r"font: (\d+) (\d+px)(?:/(\d+px))? var\(--font-(\w+)\)", type_var, css)
+assert not re.search(r"font(-size)?:[^;}]*\d+px", css), re.findall(
+    r"font(?:-size)?:[^;}]*\d+px", css
+)
 # Tracking and stroke vars ride along in case the host page only maps the families it knows.
-css = (':root {\n' + ''.join(f'  --type-{n}: {wt} {sz}/{lh} var(--font-{f});\n' for n, (wt, sz, lh, f) in TYPE.items())
-       + ''.join(f"  --tracking-{s['name']}: {s['letterSpacing']};\n" for g in tok['type']['groups'] for s in g['styles'] if 'letterSpacing' in s)
-       + ''.join(f"  --{t['name']}: {t['value']};\n" for t in tok['stroke']['tokens']) + '}\n' + css)
-w('components/bundle.css', css)
+css = (
+    ":root {\n"
+    + "".join(
+        f"  --type-{n}: {wt} {sz}/{lh} var(--font-{f});\n"
+        for n, (wt, sz, lh, f) in TYPE.items()
+    )
+    + "".join(
+        f"  --tracking-{s['name']}: {s['letterSpacing']};\n"
+        for g in tok["type"]["groups"]
+        for s in g["styles"]
+        if "letterSpacing" in s
+    )
+    + "".join(f"  --{t['name']}: {t['value']};\n" for t in tok["stroke"]["tokens"])
+    + "}\n"
+    + css
+)
+w("components/bundle.css", css)
 
 # ------------------------------------------------------------------ bundle.js
-js = rd('components/bundle.js')
+js = rd("components/bundle.js")
 js = js.replace('"namespace":"Decena"', '"namespace":"AppKit"')
-js = js.replace('var variant = p.variant || "secondary";\n    return h("button", Object.assign({ type: "button" }, omit(p, ["variant", "className", "children"]), {\n      className: cx("dc-btn", "dc-btn-" + variant, p.className)',
-                'var variant = p.variant || "tinted";\n    return h("button", Object.assign({ type: "button" }, omit(p, ["variant", "tint", "className", "children"]), {\n      className: cx("dc-btn", "dc-btn-" + variant, p.tint && p.tint !== "accent" && "dc-tint-" + p.tint, p.className)')
-SEG_OLD = js[js.index('  function SegmentedControl(p) {'):js.index('  function Badge(p) {')]
-SEG = '''  function SegmentedControl(p) {
+js = js.replace(
+    'var variant = p.variant || "secondary";\n    return h("button", Object.assign({ type: "button" }, omit(p, ["variant", "className", "children"]), {\n      className: cx("dc-btn", "dc-btn-" + variant, p.className)',
+    'var variant = p.variant || "tinted";\n    return h("button", Object.assign({ type: "button" }, omit(p, ["variant", "tint", "className", "children"]), {\n      className: cx("dc-btn", "dc-btn-" + variant, p.tint && p.tint !== "accent" && "dc-tint-" + p.tint, p.className)',
+)
+SEG_OLD = js[
+    js.index("  function SegmentedControl(p) {") : js.index("  function Badge(p) {")
+]
+SEG = """  function SegmentedControl(p) {
     var st = React.useState(p.value != null ? p.value : p.defaultValue);
     var value = p.value != null ? p.value : st[0];
     function pick(v) { if (p.value == null) st[1](v); if (p.onChange) p.onChange(v); }
@@ -251,12 +744,20 @@ SEG = '''  function SegmentedControl(p) {
       }));
   }
 
-'''
+"""
 js = js.replace(SEG_OLD, SEG)
-js = js.replace('var FLAG_GLYPH = { warn: "!", bad: "x", signal: "->" };', 'var FLAG_GLYPH = { warn: "!", bad: "x", accent: "->", signal: "->" };')
-js = js.replace('window.Decena = Object.assign(window.Decena || {}, {', 'window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {')
-PANEL_OLD = js[js.index('  function Panel(p) {'):js.index('  function ListRow(p) {')]
-js = js.replace(PANEL_OLD, '''  function Panel(p) {
+js = js.replace(
+    'var FLAG_GLYPH = { warn: "!", bad: "x", signal: "->" };',
+    'var FLAG_GLYPH = { warn: "!", bad: "x", accent: "->", signal: "->" };',
+)
+js = js.replace(
+    "window.Decena = Object.assign(window.Decena || {}, {",
+    "window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {",
+)
+PANEL_OLD = js[js.index("  function Panel(p) {") : js.index("  function ListRow(p) {")]
+js = js.replace(
+    PANEL_OLD,
+    """  function Panel(p) {
     var tone = p.tone && p.tone !== "plain" ? p.tone : null;
     return h("section", { className: cx("dc-panel", tone && "dc-panel-" + tone, p.className) },
       tone === "empty" ? h("svg", { className: "dc-panel-dash", "aria-hidden": "true" }, h("rect", { width: "100%", height: "100%", rx: 13.25 })) : null,
@@ -307,20 +808,40 @@ js = js.replace(PANEL_OLD, '''  function Panel(p) {
         p.notice ? h("p", { className: cx("dc-toolbar-notice", p.noticeTone === "bad" && "dc-toolbar-notice-bad") }, p.notice) : null));
   }
 
-''')
-js = js.replace('{"name":"Panel"},', '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},')
-js = js.replace('Panel: Panel, ListRow: ListRow,', 'Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, ListRow: ListRow,')
-assert 'dc-tint-' in js and 'window.AppKit' in js and 'onKeyDown' in js and 'Toolbar: Toolbar' in js and '{"name":"Toolbar"}' in js
-w('components/bundle.js', js)
+""",
+)
+js = js.replace(
+    '{"name":"Panel"},',
+    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},',
+)
+js = js.replace(
+    "Panel: Panel, ListRow: ListRow,",
+    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, ListRow: ListRow,",
+)
+assert (
+    "dc-tint-" in js
+    and "window.AppKit" in js
+    and "onKeyDown" in js
+    and "Toolbar: Toolbar" in js
+    and '{"name":"Toolbar"}' in js
+)
+w("components/bundle.js", js)
 
 # ------------------------------------------------------------------ index.d.ts
-dts = rd('components/index.d.ts')
-dts = dts.replace('/** Action button. `primary` (clay) at most once per view. */\nexport function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {\n  variant?: "primary" | "secondary" | "plain" | "destructive";',
-                  '/** Action button, an iOS 26 capsule. `tinted` (translucent) is the default; `filled` at most once per view. */\nexport function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {\n  variant?: "tinted" | "filled" | "gray" | "plain" | "glass" | "destructive" | "primary" | "secondary";\n  /** The Notes highlight colours; accent by default. */\n  tint?: "accent" | "purple" | "pink" | "orange" | "mint" | "blue";')
-dts = dts.replace('tone?: "neutral" | "hollow" | "clay" | "signal" | "ok" | "warn" | "bad";', 'tone?: "neutral" | "hollow" | "accent" | "ok" | "warn" | "bad";')
-PANEL_DTS = 'export function Panel(props: { title?: ReactNode; meta?: ReactNode; children: ReactNode }): JSX.Element;'
+dts = rd("components/index.d.ts")
+dts = dts.replace(
+    '/** Action button. `primary` (clay) at most once per view. */\nexport function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {\n  variant?: "primary" | "secondary" | "plain" | "destructive";',
+    '/** Action button, an iOS 26 capsule. `tinted` (translucent) is the default; `filled` at most once per view. */\nexport function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {\n  variant?: "tinted" | "filled" | "gray" | "plain" | "glass" | "destructive" | "primary" | "secondary";\n  /** The Notes highlight colours; accent by default. */\n  tint?: "accent" | "purple" | "pink" | "orange" | "mint" | "blue";',
+)
+dts = dts.replace(
+    'tone?: "neutral" | "hollow" | "clay" | "signal" | "ok" | "warn" | "bad";',
+    'tone?: "neutral" | "hollow" | "accent" | "ok" | "warn" | "bad";',
+)
+PANEL_DTS = "export function Panel(props: { title?: ReactNode; meta?: ReactNode; children: ReactNode }): JSX.Element;"
 assert PANEL_DTS in dts
-dts = dts.replace(PANEL_DTS, '''/** Detail card: uppercase caption title, surface one step off the ground. `tone` marks a slot: `act` needs the person, `live` is working, `empty` has nothing yet. */
+dts = dts.replace(
+    PANEL_DTS,
+    """/** Detail card: uppercase caption title, surface one step off the ground. `tone` marks a slot: `act` needs the person, `live` is working, `empty` has nothing yet. */
 export function Panel(props: { title?: ReactNode; meta?: ReactNode; tone?: "plain" | "act" | "live" | "empty"; children?: ReactNode }): JSX.Element;
 /** One label and value row, inside `<dl className="dc-facts">`. A null or empty value reads "not recorded" in ink-faint. */
 export function Fact(props: { label: ReactNode; value?: string | number | null; muted?: boolean; oneLine?: boolean }): JSX.Element;
@@ -346,14 +867,22 @@ export function Toolbar(props: {
   noticeTone?: "neutral" | "bad";
   /** Leading controls, such as a SegmentedControl. */
   children?: ReactNode;
-}): JSX.Element;''')
-dts = dts.replace('export function Flag(props: { tone?: "warn" | "bad" | "signal"; children: ReactNode }): JSX.Element;', 'export function Flag(props: { tone?: "warn" | "bad" | "accent"; children: ReactNode }): JSX.Element;')
-w('components/index.d.ts', dts)
+}): JSX.Element;""",
+)
+dts = dts.replace(
+    'export function Flag(props: { tone?: "warn" | "bad" | "signal"; children: ReactNode }): JSX.Element;',
+    'export function Flag(props: { tone?: "warn" | "bad" | "accent"; children: ReactNode }): JSX.Element;',
+)
+w("components/index.d.ts", dts)
+
 
 # ------------------------------------------------------------------ component docs + previews
-def ns(s): return s.replace('window.Decena', 'window.AppKit')
+def ns(s):
+    return s.replace("window.Decena", "window.AppKit")
+
+
 docs = {}
-docs['Button/README.md'] = '''# Button
+docs["Button/README.md"] = """# Button
 
 Starts an action; verb first, sentence case ("Retry sync", "Import clips"). Capsules, as in iOS 26, in the Notes highlight colours.
 
@@ -365,8 +894,10 @@ Starts an action; verb first, sentence case ("Retry sync", "Import clips"). Caps
 - `destructive`: Delete, Remove, in system red; never `filled` by default. SwiftUI: `Button(role: .destructive)`.
 - `tint`: `accent` (default), `purple`, `pink`, `orange`, `mint`, `blue`. Every label passes 4.5:1 on its fill.
 - Height is `touch` (44px), `radius-pill`. The consumer provides the label and `onClick`.
-'''
-docs['Button/preview.html'] = '''<!-- @dsCard group="Actions" height=190 subtitle="Tinted in six colours, filled, gray, plain, glass, destructive" -->
+"""
+docs[
+    "Button/preview.html"
+] = """<!-- @dsCard group="Actions" height=190 subtitle="Tinted in six colours, filled, gray, plain, glass, destructive" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Button</title></head>
@@ -381,16 +912,56 @@ docs['Button/preview.html'] = '''<!-- @dsCard group="Actions" height=190 subtitl
 </script>
 </body>
 </html>
-'''
-docs['FilterPill/README.md'] = rd('components/FilterPill/README.md').replace('- Off: `surface` with an `edge` border. On: `clay` fill, `on-clay` text. From Footage Library.', '- Off: the system `fill` (translucent gray), `ink` text. On: `accent-wash` with `accent-ink` text and a 1.5px `accent` ring, translucent like the Mac. From Footage Library.')
-docs['Badge/README.md'] = rd('components/Badge/README.md').replace('`clay`, `signal`, `ok`, `warn`, `bad`', '`accent`, `ok`, `warn`, `bad`')
-docs['Badge/preview.html'] = ns(rd('components/Badge/preview.html')).replace("h(D.Badge,{tone:'clay'},'Selected'),h(D.Badge,{tone:'signal'},'Needs you'),", "h(D.Badge,{tone:'accent'},'Selected'),").replace('Neutral, hollow, clay, signal, ok, warn, bad', 'Neutral, hollow, accent, ok, warn, bad')
-docs['Flag/README.md'] = rd('components/Flag/README.md').replace('`signal`: something needs the person.', '`accent`: something needs the person.')
-docs['Flag/preview.html'] = ns(rd('components/Flag/preview.html')).replace("{tone:'signal'}", "{tone:'accent'}").replace('Warn, bad, signal', 'Warn, bad, accent')
-docs['StatTile/README.md'] = rd('components/StatTile/README.md').replace('value in `value` (mono 28, tabular figures)', 'value in `figure` (SF Pro Rounded 28 bold, tabular figures, as in Health)').replace('`attention` draws a 1.5px `signal` ring and turns the meter `signal`', '`attention` draws a 1.5px `warn` ring and turns the meter `warn`, like a Panel `act` tone').replace("From Charts Tab's instrument panel and Footage Review Board.", 'The meter is `accent` on `accent-wash`.')
-docs['ListRow/README.md'] = rd('components/ListRow/README.md').replace('Selected rows take `clay-wash`.', 'Selected rows take `accent-wash`, translucent.')
-docs['BarChart/README.md'] = rd('components/BarChart/README.md').replace('A single-series chart is mint, because blue is `signal`. Orange comes last since it sits close to clay.', 'A single-series chart is mint, so it never reads as the blue accent.')
-docs['SegmentedControl/README.md'] = '''# SegmentedControl
+"""
+docs["FilterPill/README.md"] = rd("components/FilterPill/README.md").replace(
+    "- Off: `surface` with an `edge` border. On: `clay` fill, `on-clay` text. From Footage Library.",
+    "- Off: the system `fill` (translucent gray), `ink` text. On: `accent-wash` with `accent-ink` text and a 1.5px `accent` ring, translucent like the Mac. From Footage Library.",
+)
+docs["Badge/README.md"] = rd("components/Badge/README.md").replace(
+    "`clay`, `signal`, `ok`, `warn`, `bad`", "`accent`, `ok`, `warn`, `bad`"
+)
+docs["Badge/preview.html"] = (
+    ns(rd("components/Badge/preview.html"))
+    .replace(
+        "h(D.Badge,{tone:'clay'},'Selected'),h(D.Badge,{tone:'signal'},'Needs you'),",
+        "h(D.Badge,{tone:'accent'},'Selected'),",
+    )
+    .replace(
+        "Neutral, hollow, clay, signal, ok, warn, bad",
+        "Neutral, hollow, accent, ok, warn, bad",
+    )
+)
+docs["Flag/README.md"] = rd("components/Flag/README.md").replace(
+    "`signal`: something needs the person.", "`accent`: something needs the person."
+)
+docs["Flag/preview.html"] = (
+    ns(rd("components/Flag/preview.html"))
+    .replace("{tone:'signal'}", "{tone:'accent'}")
+    .replace("Warn, bad, signal", "Warn, bad, accent")
+)
+docs["StatTile/README.md"] = (
+    rd("components/StatTile/README.md")
+    .replace(
+        "value in `value` (mono 28, tabular figures)",
+        "value in `figure` (SF Pro Rounded 28 bold, tabular figures, as in Health)",
+    )
+    .replace(
+        "`attention` draws a 1.5px `signal` ring and turns the meter `signal`",
+        "`attention` draws a 1.5px `warn` ring and turns the meter `warn`, like a Panel `act` tone",
+    )
+    .replace(
+        "From Charts Tab's instrument panel and Footage Review Board.",
+        "The meter is `accent` on `accent-wash`.",
+    )
+)
+docs["ListRow/README.md"] = rd("components/ListRow/README.md").replace(
+    "Selected rows take `clay-wash`.", "Selected rows take `accent-wash`, translucent."
+)
+docs["BarChart/README.md"] = rd("components/BarChart/README.md").replace(
+    "A single-series chart is mint, because blue is `signal`. Orange comes last since it sits close to clay.",
+    "A single-series chart is mint, so it never reads as the blue accent.",
+)
+docs["SegmentedControl/README.md"] = """# SegmentedControl
 
 Picks exactly one of 2-5 views of the same content: Day / Week / Season.
 
@@ -400,8 +971,8 @@ Picks exactly one of 2-5 views of the same content: Day / Week / Season.
 - `options` are strings, or `{ value, label }` when the label is not plain text.
 - Keyboard, as a radio group: Tab lands on the chosen segment only; the arrow keys move and choose (wrapping), Home and End jump to the ends.
 - Several filters at once, or more than 5 choices: use FilterPill instead.
-'''
-docs['Panel/README.md'] = r'''# Panel
+"""
+docs["Panel/README.md"] = r"""# Panel
 
 Groups related content on a `surface` card, one step off the `ground`: Footage Library's detail card.
 
@@ -429,8 +1000,10 @@ VStack(alignment: .leading, spacing: 10) {
 ```
 
 The equal-tile grid (Claude Spinner's detail pane): a custom `Layout` (`TileGrid(minimum: 250, spacing: 12)`) that fits as many columns as it can, measures each card at the column width, and places every card in a row at that row's tallest height; the card itself takes `.frame(maxHeight: .infinity, alignment: .topLeading)`. `LazyVGrid` can't do it, since it leaves each cell at its own height, and equalising across the whole grid instead stretches a short card to match a chart two rows away. On the web, `.dc-panel-grid` gets the same result from CSS grid's default row stretch.
-'''
-docs['Panel/preview.html'] = r'''<!-- @dsCard group="Layout" height=420 subtitle="Detail card, act, live and empty, in an equal-tile grid" -->
+"""
+docs[
+    "Panel/preview.html"
+] = r"""<!-- @dsCard group="Layout" height=420 subtitle="Detail card, act, live and empty, in an equal-tile grid" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Panel</title></head>
@@ -448,8 +1021,8 @@ docs['Panel/preview.html'] = r'''<!-- @dsCard group="Layout" height=420 subtitle
 </script>
 </body>
 </html>
-'''
-docs['Fact/README.md'] = r'''# Fact
+"""
+docs["Fact/README.md"] = r"""# Fact
 
 One label and its value, in the two-column grid of Footage Library's detail cards.
 
@@ -473,8 +1046,10 @@ Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 8) {
 ```
 
 With `oneLine`, add `.help(value)` and a Copy item in `.contextMenu`, since the middle of the value is hidden.
-'''
-docs['Fact/preview.html'] = r'''<!-- @dsCard group="Data" height=170 subtitle="Values, not recorded, and a middle-truncated path" -->
+"""
+docs[
+    "Fact/preview.html"
+] = r"""<!-- @dsCard group="Data" height=170 subtitle="Values, not recorded, and a middle-truncated path" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Fact</title></head>
@@ -491,8 +1066,8 @@ docs['Fact/preview.html'] = r'''<!-- @dsCard group="Data" height=170 subtitle="V
 </script>
 </body>
 </html>
-'''
-docs['Eyebrow/README.md'] = r'''# Eyebrow
+"""
+docs["Eyebrow/README.md"] = r"""# Eyebrow
 
 Spaced mono capitals over a figure or a slot, saying what state it is in: IMPORTING, BLOCKED, IDLE. From Footage Library's chart plates.
 
@@ -509,8 +1084,10 @@ Text(word.uppercased())
     .tracking(CGFloat.Kit.trackingEyebrow)
     .foregroundStyle(act ? Color.Kit.warn : .secondary)
 ```
-'''
-docs['Eyebrow/preview.html'] = r'''<!-- @dsCard group="Status" height=80 subtitle="Plain and act" -->
+"""
+docs[
+    "Eyebrow/preview.html"
+] = r"""<!-- @dsCard group="Status" height=80 subtitle="Plain and act" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Eyebrow</title></head>
@@ -523,8 +1100,8 @@ docs['Eyebrow/preview.html'] = r'''<!-- @dsCard group="Status" height=80 subtitl
 </script>
 </body>
 </html>
-'''
-docs['Toolbar/README.md'] = r'''# Toolbar
+"""
+docs["Toolbar/README.md"] = r"""# Toolbar
 
 One row pinned above the content it acts on, which scrolls under it. From Footage Library's library bar and Claude Spinner's session toolbar. A Mac pattern: on iPhone use the system toolbar and keep `touch` targets.
 
@@ -538,8 +1115,10 @@ One row pinned above the content it acts on, which scrolls under it. From Footag
 SwiftUI, docked (Footage Library): the row is an `HStack(spacing: 10)` padded 16 by 6 over `.background(.bar)` with a `Divider()` under it. Search is `HStack(spacing: 6) { Image(systemName: "magnifyingglass").foregroundStyle(.secondary); TextField(...) }` with `.padding(.horizontal, 10)`, `.frame(minHeight: 32)`, `.background(.quaternary.opacity(0.5), in: Capsule())`, `.frame(maxWidth: 360)`. Tools are `.buttonStyle(.bordered)` with `.help(title)`; the primary is `.buttonStyle(.borderedProminent)`.
 
 SwiftUI, native on macOS 26 and later (Claude Spinner's SessionToolbar): Liquid Glass instead of a bar. Wrap the row in `GlassEffectContainer(spacing: 8) { HStack(spacing: 8) { ... } }`, give the search field `.glassEffect(.regular, in: Capsule())` and the tools `.buttonStyle(.glass)` with `.help(reason ?? title)`, put the notice under it on a card (radius 6), and pin the whole stack with `.safeAreaInset(edge: .top, spacing: 0)` so content scrolls beneath.
-'''
-docs['Toolbar/preview.html'] = r'''<!-- @dsCard group="Navigation" height=300 subtitle="Search, tools, one primary action; a notice after Export" -->
+"""
+docs[
+    "Toolbar/preview.html"
+] = r"""<!-- @dsCard group="Navigation" height=300 subtitle="Search, tools, one primary action; a notice after Export" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Toolbar</title></head>
@@ -564,23 +1143,36 @@ docs['Toolbar/preview.html'] = r'''<!-- @dsCard group="Navigation" height=300 su
 </script>
 </body>
 </html>
-'''
-docs['Highlight/README.md'] = '''# Highlight
+"""
+docs["Highlight/README.md"] = """# Highlight
 
 Marks the few words in running text that carry the point, like Apple Notes' highlighter.
 
 - `color`: `purple` (default), `pink`, `orange`, `mint`, `blue`. Each is `hl-<color>` text on its `hl-<color>-wash`, semibold, tabular figures, `4px` radius; wraps cleanly across lines.
 - Give each colour one meaning per document (for example numbers in pink, dates in blue) and keep it; colour alone must not carry the meaning.
 - A word or short phrase, a few per paragraph at most. Renders as `<mark>`.
-'''
-for comp in ('FilterPill', 'SegmentedControl', 'StatTile', 'ListRow', 'Highlight', 'BarChart'):
-    docs[f'{comp}/preview.html'] = ns(rd(f'components/{comp}/preview.html'))
+"""
+for comp in (
+    "FilterPill",
+    "SegmentedControl",
+    "StatTile",
+    "ListRow",
+    "Highlight",
+    "BarChart",
+):
+    docs[f"{comp}/preview.html"] = ns(rd(f"components/{comp}/preview.html"))
 for rel, text in docs.items():
-    assert 'clay' not in text.lower() or rel.endswith('.html') is False and 'clay' not in text, (rel, [l for l in text.split('\n') if 'clay' in l.lower()])
-    w('components/' + rel, text)
+    assert (
+        "clay" not in text.lower()
+        or rel.endswith(".html") is False
+        and "clay" not in text
+    ), (rel, [l for l in text.split("\n") if "clay" in l.lower()])
+    w("components/" + rel, text)
 
 # ------------------------------------------------------------------ Cover
-w('components/Cover/preview.html', '''<!-- @dsCard height=320 -->
+w(
+    "components/Cover/preview.html",
+    """<!-- @dsCard height=320 -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Cover</title>
@@ -611,28 +1203,70 @@ w('components/Cover/preview.html', '''<!-- @dsCard height=320 -->
 </div>
 </body>
 </html>
-''')
+""",
+)
 
 # ------------------------------------------------------------------ README + web section
-readme = rd('README.md')
-readme = readme[readme.index('Warm paper'):] if readme.startswith('> **Archived') else readme
-body = readme[readme.index('## Content'):]
-body = body.replace('''- `ink` on `surface` for body text; `ink-soft` for secondary lines. Both pass on `ground`, `surface` and `surface-sunk` in both themes.''', '''- Neutrals are Apple's: `ground` is the grouped background (#F2F2F7, black in dark), `surface` the grouped cell (white, #1C1C1E), `surface-sunk` systemGray5. `ink` and `ink-soft` pass 4.5:1 on all three in both themes.''')
-body = re.sub(r'- Tinted fills pair with their own ink:.*\n', '- Tinted fills pair with their own ink: `accent-ink` on `accent-wash`, `warn-ink` on `warn-wash`, `ok` on `ok-wash`, `bad` on `bad-wash`, `hl-<colour>` on `hl-<colour>-wash`.\n', body)
-body = re.sub(r'- On a `clay` fill.*\n', '- On `accent-fill` use `on-accent`. `accent-fill` is the accent stepped 20% toward black so white labels pass 4.5:1; `accent` itself stays the system colour for marks, rings and tints.\n', body)
-body = body.replace('(`series-1` unless the page already means something by mint)', '(`series-1` unless the screen already means something by mint)')
-body = re.sub(r'- `warn` is olive.*\n', '- Status uses the system green, orange and red, stepped for text. Each still comes with a word or glyph.\n', body)
-body = re.sub(r'- Dark is designed, not inverted:.*\n', "- Dark is Apple's: a black `ground`, `surface` one step up at #1C1C1E, every system colour at its dark value.\n", body)
-body = body.replace('One family: SF. `display` (SF Pro Display, `.largeTitle` weight on Apple) is for one hero figure or page headline per screen, at most. It never sets UI chrome. Off Apple devices every role falls back to Instrument Sans and JetBrains Mono.',
-  'One family: SF, in the cuts the system gives you. `design: .default` for UI, `.rounded` (SF Pro Rounded) for Health-style figures (`figure`), `.monospaced` (SF Mono) for codes and timers, SF Pro Text with extra leading for long reading (`script`); SF Compact is the watch face and only appears on watchOS and widgets. Nothing lighter than Regular.')
-body = body.replace('Long-read web pages (prep sheets, briefs, study guides) use the Paper profile: see the Paper documents section.', 'Web pages and artifacts use **Artifact Kit**, the same palette for the browser; see the Web section.')
-body = body.replace('- Radii: `radius-sm` (6) thumbnails and badges, `radius-md` (10) controls and rows,', '- Radii: buttons and pills are capsules (`radius-pill`, as in iOS 26); `radius-sm` (6) thumbnails and badges, `radius-md` (10) inputs and rows,')
-body = body.replace('- Focus ring: 2px solid `signal`, offset 2px, on every interactive element (3:1 or better on every surface).', '- Focus ring: 2px solid `accent`, offset 2px (the system focus ring follows the accent).')
-body = body.replace('Button, FilterPill, SegmentedControl, Badge, Flag, StatTile, Panel, ListRow, Highlight, BarChart. Each card below has its guidelines and a live preview. In SwiftUI, build each as a `View` or `ButtonStyle` reading these tokens from an asset catalog color set per color token.',
-  'Button, FilterPill, SegmentedControl, Badge, Flag, StatTile, Panel, ListRow, Highlight, BarChart. Each card below has its guidelines and a live preview. In SwiftUI prefer the system control (`.bordered`, `.borderedProminent`, `.glass`, `Picker(.segmented)`) and read colours from `AppKit.swift` in `~/developer/app-kit/swift`, which mirrors these tokens.')
-body = body.replace("SF Symbols on Apple, regular weight, sized to the text beside them. On the web, no icon font is shipped: use plain glyphs (`->`, `+`, `x`) in the mono face, or inline SVGs drawn at 1.5px stroke in `currentColor`. There is no logo; apps set their name in `title-3` sans.",
-  "SF Symbols, regular weight, sized to the text beside them, hierarchical rendering in the tint. There is no logo; apps set their name in `title-3`.")
-intro = '''SwiftUI on Apple's own neutrals and system colours: capsule buttons tinted like Notes highlights, Rounded figures, glass for controls that float over content. The native half of three kits: **App Kit** (Mac, iPhone, iPad and Watch apps: WA Fish Map, Footage Library, Claude Spinner), **Artifact Kit** (web pages and artifacts, same palette) and **Terminal Kit** (the macOS Terminal look). Source: `~/developer/app-kit`.
+readme = rd("README.md")
+readme = (
+    readme[readme.index("Warm paper") :]
+    if readme.startswith("> **Archived")
+    else readme
+)
+body = readme[readme.index("## Content") :]
+body = body.replace(
+    """- `ink` on `surface` for body text; `ink-soft` for secondary lines. Both pass on `ground`, `surface` and `surface-sunk` in both themes.""",
+    """- Neutrals are Apple's: `ground` is the grouped background (#F2F2F7, black in dark), `surface` the grouped cell (white, #1C1C1E), `surface-sunk` systemGray5. `ink` and `ink-soft` pass 4.5:1 on all three in both themes.""",
+)
+body = re.sub(
+    r"- Tinted fills pair with their own ink:.*\n",
+    "- Tinted fills pair with their own ink: `accent-ink` on `accent-wash`, `warn-ink` on `warn-wash`, `ok` on `ok-wash`, `bad` on `bad-wash`, `hl-<colour>` on `hl-<colour>-wash`.\n",
+    body,
+)
+body = re.sub(
+    r"- On a `clay` fill.*\n",
+    "- On `accent-fill` use `on-accent`. `accent-fill` is the accent stepped 20% toward black so white labels pass 4.5:1; `accent` itself stays the system colour for marks, rings and tints.\n",
+    body,
+)
+body = body.replace(
+    "(`series-1` unless the page already means something by mint)",
+    "(`series-1` unless the screen already means something by mint)",
+)
+body = re.sub(
+    r"- `warn` is olive.*\n",
+    "- Status uses the system green, orange and red, stepped for text. Each still comes with a word or glyph.\n",
+    body,
+)
+body = re.sub(
+    r"- Dark is designed, not inverted:.*\n",
+    "- Dark is Apple's: a black `ground`, `surface` one step up at #1C1C1E, every system colour at its dark value.\n",
+    body,
+)
+body = body.replace(
+    "One family: SF. `display` (SF Pro Display, `.largeTitle` weight on Apple) is for one hero figure or page headline per screen, at most. It never sets UI chrome. Off Apple devices every role falls back to Instrument Sans and JetBrains Mono.",
+    "One family: SF, in the cuts the system gives you. `design: .default` for UI, `.rounded` (SF Pro Rounded) for Health-style figures (`figure`), `.monospaced` (SF Mono) for codes and timers, SF Pro Text with extra leading for long reading (`script`); SF Compact is the watch face and only appears on watchOS and widgets. Nothing lighter than Regular.",
+)
+body = body.replace(
+    "Long-read web pages (prep sheets, briefs, study guides) use the Paper profile: see the Paper documents section.",
+    "Web pages and artifacts use **Artifact Kit**, the same palette for the browser; see the Web section.",
+)
+body = body.replace(
+    "- Radii: `radius-sm` (6) thumbnails and badges, `radius-md` (10) controls and rows,",
+    "- Radii: buttons and pills are capsules (`radius-pill`, as in iOS 26); `radius-sm` (6) thumbnails and badges, `radius-md` (10) inputs and rows,",
+)
+body = body.replace(
+    "- Focus ring: 2px solid `signal`, offset 2px, on every interactive element (3:1 or better on every surface).",
+    "- Focus ring: 2px solid `accent`, offset 2px (the system focus ring follows the accent).",
+)
+body = body.replace(
+    "Button, FilterPill, SegmentedControl, Badge, Flag, StatTile, Panel, ListRow, Highlight, BarChart. Each card below has its guidelines and a live preview. In SwiftUI, build each as a `View` or `ButtonStyle` reading these tokens from an asset catalog color set per color token.",
+    "Button, FilterPill, SegmentedControl, Badge, Flag, StatTile, Panel, ListRow, Highlight, BarChart. Each card below has its guidelines and a live preview. In SwiftUI prefer the system control (`.bordered`, `.borderedProminent`, `.glass`, `Picker(.segmented)`) and read colours from `AppKit.swift` in `~/developer/app-kit/swift`, which mirrors these tokens.",
+)
+body = body.replace(
+    "SF Symbols on Apple, regular weight, sized to the text beside them. On the web, no icon font is shipped: use plain glyphs (`->`, `+`, `x`) in the mono face, or inline SVGs drawn at 1.5px stroke in `currentColor`. There is no logo; apps set their name in `title-3` sans.",
+    "SF Symbols, regular weight, sized to the text beside them, hierarchical rendering in the tint. There is no logo; apps set their name in `title-3`.",
+)
+intro = """SwiftUI on Apple's own neutrals and system colours: capsule buttons tinted like Notes highlights, Rounded figures, glass for controls that float over content. The native half of three kits: **App Kit** (Mac, iPhone, iPad and Watch apps: WA Fish Map, Footage Library, Claude Spinner), **Artifact Kit** (web pages and artifacts, same palette) and **Terminal Kit** (the macOS Terminal look). Source: `~/developer/app-kit`.
 
 ## Principles
 
@@ -642,21 +1276,53 @@ intro = '''SwiftUI on Apple's own neutrals and system colours: capsule buttons t
 - **Glass floats, content doesn't.** Liquid Glass is for toolbars, tab bars and controls over content. Lists, charts and reading text stay on opaque `surface`.
 - **A scale is not a status.** `heat-1` to `heat-4` rank data. `bad` means something failed.
 
-'''
+"""
+
+
 def edit(s, a, b):
     assert s.count(a) == 1, a
     return s.replace(a, b)
-body = edit(body, 'Uppercase only in the mono `label` style.', 'Uppercase only in the mono `label` and `eyebrow` styles and in panel titles.')
-body = edit(body, 'pass 4.5:1 on all three in both themes.\n', 'pass 4.5:1 on all three in both themes.\n- `ink-faint` (tertiaryLabel) is for absences and chrome: "not recorded", panel titles, the empty-slot outline. It sits under 3:1, so it never carries the only copy of a reading.\n')
-body = edit(body, '| Panel title | `title-3` 20/25 semibold | `.title3.weight(.semibold)` |', '| Panel title | `panel-title` 11/13 semibold, +0.8, uppercase, `ink-faint` | `.caption2.weight(.semibold)` + `.tracking(0.8)` + `.foregroundStyle(.tertiary)` |')
-body = edit(body, '| Tile value | `value` mono 28/32 600 | `.system(size: 28, weight: .semibold, design: .monospaced)` |\n',
-  '| Tile value | `value` mono 28/32 600 | `.system(size: 28, weight: .semibold, design: .monospaced)` |\n| Eyebrow | `eyebrow` mono 11/13 600, +1.2, uppercase | `.caption2.monospaced().weight(.semibold)` + `.tracking(1.2)` |\n| Fact label, value | `caption` 12/16 · `fact` mono 12/16 | `.caption` · `.system(.caption, design: .monospaced)` |\n')
-body = edit(body, 'gaps between panels `space-7`;', 'gaps between stacked panels `space-7`, between tiles in a panel grid `space-5`;')
-body = edit(body, 'Nest one step down: a `radius-md` row inside a `radius-lg` panel.\n',
-  'Nest one step down: a `radius-md` row inside a `radius-lg` panel.\n- Detail cards tile in an equal grid: adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in its row (see Panel).\n- A state outline is `stroke-outline` (1.5) inside the edge; the empty slot dashes it `stroke-dash` (6 on, 4 off) in `ink-faint`.\n')
-body = edit(body, 'StatTile, Panel, ListRow, Highlight, BarChart. Each card below', 'StatTile, Panel, Fact, Eyebrow, Toolbar, ListRow, Highlight, BarChart. Each card below')
-w('README.md', intro + body)
-w('paper-documents.md', '''# Web
+
+
+body = edit(
+    body,
+    "Uppercase only in the mono `label` style.",
+    "Uppercase only in the mono `label` and `eyebrow` styles and in panel titles.",
+)
+body = edit(
+    body,
+    "pass 4.5:1 on all three in both themes.\n",
+    'pass 4.5:1 on all three in both themes.\n- `ink-faint` (tertiaryLabel) is for absences and chrome: "not recorded", panel titles, the empty-slot outline. It sits under 3:1, so it never carries the only copy of a reading.\n',
+)
+body = edit(
+    body,
+    "| Panel title | `title-3` 20/25 semibold | `.title3.weight(.semibold)` |",
+    "| Panel title | `panel-title` 11/13 semibold, +0.8, uppercase, `ink-faint` | `.caption2.weight(.semibold)` + `.tracking(0.8)` + `.foregroundStyle(.tertiary)` |",
+)
+body = edit(
+    body,
+    "| Tile value | `value` mono 28/32 600 | `.system(size: 28, weight: .semibold, design: .monospaced)` |\n",
+    "| Tile value | `value` mono 28/32 600 | `.system(size: 28, weight: .semibold, design: .monospaced)` |\n| Eyebrow | `eyebrow` mono 11/13 600, +1.2, uppercase | `.caption2.monospaced().weight(.semibold)` + `.tracking(1.2)` |\n| Fact label, value | `caption` 12/16 · `fact` mono 12/16 | `.caption` · `.system(.caption, design: .monospaced)` |\n",
+)
+body = edit(
+    body,
+    "gaps between panels `space-7`;",
+    "gaps between stacked panels `space-7`, between tiles in a panel grid `space-5`;",
+)
+body = edit(
+    body,
+    "Nest one step down: a `radius-md` row inside a `radius-lg` panel.\n",
+    "Nest one step down: a `radius-md` row inside a `radius-lg` panel.\n- Detail cards tile in an equal grid: adaptive columns at least 250 wide, `space-5` (12) apart, every card as tall as the tallest in its row (see Panel).\n- A state outline is `stroke-outline` (1.5) inside the edge; the empty slot dashes it `stroke-dash` (6 on, 4 off) in `ink-faint`.\n",
+)
+body = edit(
+    body,
+    "StatTile, Panel, ListRow, Highlight, BarChart. Each card below",
+    "StatTile, Panel, Fact, Eyebrow, Toolbar, ListRow, Highlight, BarChart. Each card below",
+)
+w("README.md", intro + body)
+w(
+    "paper-documents.md",
+    """# Web
 
 Web pages and artifacts use **Artifact Kit**, built on the same neutrals, system colours and SF roles as App Kit, with Mac-sized controls (13px, 28px buttons) and the chart components (including the Health-style summary, highlight and range charts). Source: `~/developer/artifact-kit`.
 
@@ -673,51 +1339,89 @@ Web pages and artifacts use **Artifact Kit**, built on the same neutrals, system
 | `hl-*` | `--hl-*` |
 | `chart-base` · `chart-mid` | `--chart-base` · `--chart-mid` |
 | Button `tinted` / `filled` / `gray` / `plain` / `glass` | `.btn` / `.btn--filled` / `.btn--gray` / `.btn--plain` / `.btn--glass` |
-''')
+""",
+)
+
 
 # ------------------------------------------------------------------ SwiftUI mirror
 def rgba(v):
     v = v.strip()
-    if v.startswith('#'):
-        r, g, b = (int(v[i:i + 2], 16) / 255 for i in (1, 3, 5)); return r, g, b, 1.0
-    n = [float(x) for x in re.findall(r'[\d.]+', v)]; return n[0] / 255, n[1] / 255, n[2] / 255, n[3]
-def camel(s): return re.sub(r'-([a-z0-9])', lambda m: m.group(1).upper(), s)
-lines = ['// App Kit colours for SwiftUI. Generated from tokens.json by app_build.py; do not edit.',
-         '// Prefer system colours where one exists (Color.accentColor, .primary, .secondary);',
-         '// these cover the rest and match Artifact Kit on the web.', 'import SwiftUI', '',
-         '#if canImport(UIKit)', 'import UIKit',
-         'private func dyn(_ l: (Double, Double, Double, Double), _ d: (Double, Double, Double, Double)) -> Color {',
-         '    Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: d.0, green: d.1, blue: d.2, alpha: d.3) : UIColor(red: l.0, green: l.1, blue: l.2, alpha: l.3) })', '}',
-         '#else', 'import AppKit',
-         'private func dyn(_ l: (Double, Double, Double, Double), _ d: (Double, Double, Double, Double)) -> Color {',
-         '    Color(NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(red: d.0, green: d.1, blue: d.2, alpha: d.3) : NSColor(red: l.0, green: l.1, blue: l.2, alpha: l.3) })', '}',
-         '#endif', '', 'public extension Color {', '    enum Kit {']
+    if v.startswith("#"):
+        r, g, b = (int(v[i : i + 2], 16) / 255 for i in (1, 3, 5))
+        return r, g, b, 1.0
+    n = [float(x) for x in re.findall(r"[\d.]+", v)]
+    return n[0] / 255, n[1] / 255, n[2] / 255, n[3]
+
+
+def camel(s):
+    return re.sub(r"-([a-z0-9])", lambda m: m.group(1).upper(), s)
+
+
+lines = [
+    "// App Kit colours for SwiftUI. Generated from tokens.json by app_build.py; do not edit.",
+    "// Prefer system colours where one exists (Color.accentColor, .primary, .secondary);",
+    "// these cover the rest and match Artifact Kit on the web.",
+    "import SwiftUI",
+    "",
+    "#if canImport(UIKit)",
+    "import UIKit",
+    "private func dyn(_ l: (Double, Double, Double, Double), _ d: (Double, Double, Double, Double)) -> Color {",
+    "    Color(UIColor { $0.userInterfaceStyle == .dark ? UIColor(red: d.0, green: d.1, blue: d.2, alpha: d.3) : UIColor(red: l.0, green: l.1, blue: l.2, alpha: l.3) })",
+    "}",
+    "#else",
+    "import AppKit",
+    "private func dyn(_ l: (Double, Double, Double, Double), _ d: (Double, Double, Double, Double)) -> Color {",
+    "    Color(NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? NSColor(red: d.0, green: d.1, blue: d.2, alpha: d.3) : NSColor(red: l.0, green: l.1, blue: l.2, alpha: l.3) })",
+    "}",
+    "#endif",
+    "",
+    "public extension Color {",
+    "    enum Kit {",
+]
 for t in colors:
-    v = t['value']; l = v['light'] if isinstance(v, dict) else v; d = v.get('dark', l) if isinstance(v, dict) else v
-    f = lambda c: '(%.3f, %.3f, %.3f, %.2f)' % rgba(c)
+    v = t["value"]
+    l = v["light"] if isinstance(v, dict) else v
+    d = v.get("dark", l) if isinstance(v, dict) else v
+    f = lambda c: "(%.3f, %.3f, %.3f, %.2f)" % rgba(c)
     lines.append(f"        /// {t['usage'][:110]}")
     lines.append(f"        public static let {camel(t['name'])} = dyn({f(l)}, {f(d)})")
-lines += ['    }', '}', '', 'public extension Font {', '    enum Kit {',
-          '        /// Health-style figure: SF Pro Rounded, bold.',
-          '        public static let figure = Font.system(.largeTitle, design: .rounded).bold()',
-          '        public static let figureSmall = Font.system(.title2, design: .rounded).bold()',
-          '        /// Long reading: SF Pro Text body; add .lineSpacing(6).', '        public static let script = Font.body',
-          '        /// Mono uppercase key above a value.', '        public static let label = Font.caption2.monospaced().weight(.semibold)',
-          '        /// Panel title: uppercased, .tracking(CGFloat.Kit.trackingPanelTitle), .foregroundStyle(.tertiary).',
-          '        public static let panelTitle = Font.caption2.weight(.semibold)',
-          '        /// Eyebrow: uppercased, .tracking(CGFloat.Kit.trackingEyebrow).',
-          '        public static let eyebrow = Font.caption2.monospaced().weight(.semibold)',
-          '        /// Fact value, beside a .caption label in .secondary.',
-          '        public static let factValue = Font.system(.caption, design: .monospaced)',
-          '    }', '}', '', 'public extension CGFloat {', '    enum Kit {']
-for t in tok['stroke']['tokens']:
-    n = [x.rstrip('px') for x in t['value'].split()]
-    lines += [f"        /// {t['usage'][:110]}",
-              f"        public static let {camel(t['name'])}: {'CGFloat' if len(n) == 1 else '[CGFloat]'} = {n[0] if len(n) == 1 else '[' + ', '.join(n) + ']'}"]
-for g in tok['type']['groups']:
-    for st in g['styles']:
-        if st.get('letterSpacing', '').endswith('px'):
-            lines.append(f"        public static let {camel('tracking-' + st['name'])}: CGFloat = {st['letterSpacing'][:-2]}")
-lines += ['    }', '}', '']
-w('swift/AppKit.swift', '\n'.join(lines), OUT)
-print('App Kit written to', OUT)
+lines += [
+    "    }",
+    "}",
+    "",
+    "public extension Font {",
+    "    enum Kit {",
+    "        /// Health-style figure: SF Pro Rounded, bold.",
+    "        public static let figure = Font.system(.largeTitle, design: .rounded).bold()",
+    "        public static let figureSmall = Font.system(.title2, design: .rounded).bold()",
+    "        /// Long reading: SF Pro Text body; add .lineSpacing(6).",
+    "        public static let script = Font.body",
+    "        /// Mono uppercase key above a value.",
+    "        public static let label = Font.caption2.monospaced().weight(.semibold)",
+    "        /// Panel title: uppercased, .tracking(CGFloat.Kit.trackingPanelTitle), .foregroundStyle(.tertiary).",
+    "        public static let panelTitle = Font.caption2.weight(.semibold)",
+    "        /// Eyebrow: uppercased, .tracking(CGFloat.Kit.trackingEyebrow).",
+    "        public static let eyebrow = Font.caption2.monospaced().weight(.semibold)",
+    "        /// Fact value, beside a .caption label in .secondary.",
+    "        public static let factValue = Font.system(.caption, design: .monospaced)",
+    "    }",
+    "}",
+    "",
+    "public extension CGFloat {",
+    "    enum Kit {",
+]
+for t in tok["stroke"]["tokens"]:
+    n = [x.rstrip("px") for x in t["value"].split()]
+    lines += [
+        f"        /// {t['usage'][:110]}",
+        f"        public static let {camel(t['name'])}: {'CGFloat' if len(n) == 1 else '[CGFloat]'} = {n[0] if len(n) == 1 else '[' + ', '.join(n) + ']'}",
+    ]
+for g in tok["type"]["groups"]:
+    for st in g["styles"]:
+        if st.get("letterSpacing", "").endswith("px"):
+            lines.append(
+                f"        public static let {camel('tracking-' + st['name'])}: CGFloat = {st['letterSpacing'][:-2]}"
+            )
+lines += ["    }", "}", ""]
+w("swift/AppKit.swift", "\n".join(lines), OUT)
+print("App Kit written to", OUT)
