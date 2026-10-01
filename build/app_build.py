@@ -680,6 +680,26 @@ def _check_contrast(tokens):
                         "music-select-inactive", "on-music-primary")
     DARKER_IN_LIGHT = ("ink", "ink-soft", "music-ink", "music-ink-soft",
                        "music-primary")
+    # The reds do not follow the ground: they are deliberately near-equal in both
+    # themes, so neither direction applies and a swap would be close to a no-op.
+    # Assert that intent instead, which catches one drifting away from the other.
+    NEAR_EQUAL = {"music-accent": 0.05, "music-select": 0.05, "on-music-select": 0.01}
+    for name, tol in NEAR_EQUAL.items():
+        if name not in by:
+            continue
+        v = by[name]["value"]
+        if not isinstance(v, dict):
+            continue
+        try:
+            d = abs(_lum(v["light"]) - _lum(v["dark"]))
+        except ValueError:
+            continue
+        if d > tol:
+            failures.append(
+                f"  {name} is meant to be near-equal across themes but differs by "
+                f"{d:.3f} in luminance (tolerance {tol}): light {v['light']} / dark {v['dark']}"
+            )
+
     for name in LIGHTER_IN_LIGHT + DARKER_IN_LIGHT:
         if name not in by:
             continue
