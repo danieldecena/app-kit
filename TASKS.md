@@ -3,6 +3,7 @@
 - [x] Slice 6 spike gate: MiniPlayer judged against a real material, passes
 - [ ] [you] Contextual toolbar: deferred, not dropped. Music's is per-page (Home has none, a playlist has a back chevron, an action capsule and a search field), so it needs its own capture pass before it is a component
 - [ ] [you] Window chrome (unified titlebar, traffic-light inset, back/forward): deferred to the adopting app. It is contextual per page, so App Kit would be guessing; revisit if Spinner needs it
+- [x] Close eight bug-hunt findings: caption clipping, TrackList keyboard, grid roles, sidebar focus, toggle contradiction, shelf list role, unasserted css anchors, unfailable gate check
 - [x] Slice 7: document and publish -- design system artifact at v24
 - [x] TrackList -- taken into this plan rather than deferred; pill highlight, configurable columns
 - [x] Slice 6: MiniPlayer -- 700x54 stadium capsule, progress line scoped to the now-playing group
