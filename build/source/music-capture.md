@@ -112,10 +112,29 @@ The gap between Top Picks hero cards measures `#EEEEEE` in dark and
 this does not move. So it is **not** ground showing through, and modelling it as
 `ground` would be wrong in dark mode by a very visible margin.
 
-What it actually is remains unknown. It runs the full height of the hero row
-(478pt, between two 189.5pt artwork rows) and appears between every pair of hero
-cards. Measured in both appearances, explained in neither. Do not model it until
-someone looks at a hero card's edge directly at high zoom.
+A 1px-step line profile across the gap settles what it is *not*. Dark capture,
+y=490pt, sRGB:
+
+```
+ x=557.0pt  #DC9A2B   <- orange card, solid
+ x=558.0pt  #EDEDED   <- hard edge, no ramp
+ ...        #EEEEEE     flat for 20pt
+ x=577.0pt  #ECECEC
+ x=578.0pt  #4C1CAE   <- hard edge into the purple card
+```
+
+**Exactly 20pt wide, flat, with hard edges on both sides.** That rules out a
+drop shadow (a gradient, and it would darken rather than lighten), a border
+stroke (1-2pt, not 20), and antialiasing (a single-pixel ramp). It also runs the
+full height of the hero row.
+
+So the practical rule, whatever the cause: **a Shelf built with a 20pt gap
+showing `ground` will be wrong in dark mode by the full distance between
+`#1F1F20` and `#EEEEEE`.** The gap is its own fixed value, not the ground.
+
+Still unexplained, and it needs a human looking at a hero card edge at high zoom
+with Music in front. Until then, model the gap as a literal `#EEEEEE` in both
+themes rather than as any existing token.
 
 For reference, Apple's dark system colours in sRGB are `systemRed #FF453A` and
 `systemPink #FF375F`. The measured content accent sits between them and matches
