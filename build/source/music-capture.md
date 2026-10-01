@@ -143,6 +143,32 @@ neither, so do not substitute a system colour for it.
 The content ground is **flat**, not graded and not tinted by the top artwork.
 That closes the open question in the plan.
 
+## Geometry
+
+Measured off captures by edge detection, not Accessibility Inspector. Edges in
+this UI are hard, so a scanline resolves them to the half-point. Source:
+`playlist-tracklist-unfocused-light.png`.
+
+### TrackList
+
+| Dimension | Measured | How |
+|---|---|---|
+| row pitch | **56.0pt** | five consecutive separator hairlines, all exactly 56.0pt apart |
+| artwork thumbnail | **40 x 40pt** | ink run x 247.0-286.5pt, ink column y 680.0-719.5pt |
+| thumbnail padding | 8pt top and bottom | (56 - 40) / 2 |
+| favorited star | ~11pt wide, x 221.5-232.0pt | ink run |
+| title text starts | x ~309pt | first glyph ink after the thumbnail |
+| columns | Artist ~737pt, Album ~1050pt, Time right-aligned ~1465pt | header and cell ink runs |
+
+The header area above the rows is not on the 56pt grid: the gaps there measure
+68.5, 16.2, 15.5 and 67.8pt, so the description block has its own spacing.
+
+### Shelf
+
+| Dimension | Measured | How |
+|---|---|---|
+| hero card gap | **20.0pt** | 1px-step line profile, hard edges both sides |
+
 ## Not measured, and why
 
 - ~~The accent.~~ **Measured, see the table above.** Taken from large-title stroke
