@@ -1,6 +1,6 @@
 ## Tasks
 
-- [ ] [you] Capture dark Home at Concerts, for the dark CTA button fill
+- [x] Dark CTA button fill: #FA2E48, which is exactly the dark accent, so no separate token is needed
 - [ ] [you] Capture a row with the mouse held down, to settle whether a pressed state exists
 - [ ] [you] Capture the dark transport button with the window inactive, for music-primary-inactive
 - [x] Verify the Home AX dump was complete -- depth 9 reports no truncation; card size turned out to track the resizable sidebar width
