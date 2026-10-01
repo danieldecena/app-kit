@@ -394,6 +394,48 @@ neither, so do not substitute a system colour for it.
 The content ground is **flat**, not graded and not tinted by the top artwork.
 That closes the open question in the plan.
 
+## Contrast audit
+
+A WCAG relative-luminance function was written for slice 2's build assertion and
+first run against **App Kit's existing claims**, which are hand-written usage
+strings nothing verifies. All 14 checkable pairs pass, several comfortably
+(`ink on ground` claims 13:1 and measures 15.08 light / 19.29 dark). The honour
+system held.
+
+The function is proved rather than assumed, because one that passes everything on
+its first run is indistinguishable from one that cannot fail:
+
+| case | computed | expected |
+|---|---|---|
+| white on black | 21.00 | 21.00, the maximum |
+| a colour on itself | 1.00 | 1.00, the minimum |
+| white on the HeroCard yellow `#F4B63F` | 1.81 | 1.81, matching the plan's independent figure |
+| `#777777` on white | 4.48 | fails the 4.5 gate |
+| `#767676` on white | 4.54 | passes the 4.5 gate |
+
+### It immediately found a real conflict
+
+**The measured Music accent fails WCAG AA on its own ground.**
+`#FA2E48` on `#1F1F20` is **4.35:1**, short of 4.5 for normal text.
+
+So fidelity and accessibility genuinely disagree here, and the variant cannot
+have both from one token. The resolution is the split App Kit already uses for
+`accent` / `accent-ink`:
+
+| Token | Dark | Light | Use |
+|---|---|---|---|
+| `music-accent` | `#FA2E48` | `#FA233B` | icons, symbols, CTA fills. Matches Music exactly |
+| `music-accent-ink` | **`#FA3851`** (4.51:1) | **`#EA0623`** (4.62:1) | accent **text**, where 4.5 must hold |
+
+Both ink values keep the measured hue (H=352) and saturation and move lightness
+only as far as the gate requires: `L 0.58 -> 0.60` on dark, `0.58 -> 0.47` on
+light. The difference is small enough not to read as a different red, which is
+the point.
+
+Music itself does not do this, so this is the one place the variant deliberately
+departs from the reference. Worth stating in the README or someone will
+"restore" the measured value and reintroduce the failure.
+
 ## Geometry
 
 **Use `ax-dump.swift`. It reads exact frames in points straight from the app.**
