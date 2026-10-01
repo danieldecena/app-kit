@@ -203,8 +203,8 @@ Music's own AppleScript dictionary also answers (`bounds of front window` gives
 |---|---|
 | window | 1588 x 1007pt |
 | toolbar | y=0, h=**52pt**, full width |
-| sidebar scroll area | x=0, y=52, **w=270**, h=898 |
-| content scroll area | x=270, y=52, **w=1318**, h=873 |
+| sidebar scroll area | x=0, y=52, w=269.5 **(user-resizable, not a spec)** |
+| content scroll area | x=270, y=52, w=1318 **(follows the sidebar)** |
 | MiniPlayer group | x=579, y=934, **w=700, h=54** |
 | profile button | x=18, y=961, 123 x 28 |
 | Go Back / Share / More / Sort | 40x52, 36x52, 36x52, 42x52 |
@@ -218,10 +218,22 @@ Music's own AppleScript dictionary also answers (`bounds of front window` gives
 | section header row | **19.0pt** |
 | row width | 270.0pt |
 
-Cross-check: pixel measurement gave 32.2pt for the row, so that method was
-sound. It gave **200pt** for the sidebar width, which is **wrong** — that is
-where the background colour changes, not where the control ends. A colour
-boundary is not a control boundary.
+Cross-check: pixel measurement gave 32.2pt for the row, so that method was sound.
+
+**The sidebar width is user-resizable and is not a design value at all.** Pixels
+gave 200pt and AX gives 269.5pt; I first wrote that down as the pixel method
+being wrong about a colour boundary. That conclusion was overconfident. The two
+readings come from different moments of a draggable control, so they need not
+agree and neither is "the" width. `AXSplitter` confirms it: `AXOrientation =
+AXVerticalOrientation`, `AXValue = 269.5`.
+
+AX does **not** expose the real limits. `AXMinValue 0 / AXMaxValue 1586.5` is
+just the window range, not AppKit's enforced minimum, which lives in a delegate
+and would need dragging to find. Dragging is control, which is blocked for Music.
+
+A second splitter (`AXValue = 1317.5`) sits between the content area and the
+queue panel, so **the queue panel is resizable too**. Neither width belongs in
+`tokens.json`; both belong in the component as a default plus a min.
 
 The MiniPlayer is the reverse check: AX says 700 x 54pt, pixel measurement said
 700 x ~52pt. Agreement there is what validates the pixel numbers below.
