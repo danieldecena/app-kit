@@ -1,5 +1,8 @@
 ## Tasks
 
+- [x] Confirm the app_build.py invocation reproduces the tree byte-for-byte
+- [x] Write a CLAUDE.md for app-kit (build, publish, component pattern, design skills)
+
 - [x] Write READMEs for SegmentedControl, Panel, Highlight -- 0357bf2
 - [x] Tokenize tint palette and gray hover -- b567bc5
 - [x] Emit type styles and motion tokens -- cf065a5
