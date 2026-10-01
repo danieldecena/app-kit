@@ -1,6 +1,6 @@
 ## Tasks
 
-- [ ] Shelf arrow keys take their pitch from the first card only
+- [ ] Shelf arrow keys: pitch from first card; mind snap vs scrollTo
 - [ ] [you] Capture a Music row mid-press: is there a pressed state?
 - [ ] [you] Capture the dark transport button, window inactive
 - [ ] [you] Contextual toolbar: needs its own capture pass
