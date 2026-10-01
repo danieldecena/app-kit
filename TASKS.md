@@ -1,5 +1,6 @@
 ## Tasks
 
+- [x] Slice 6: MiniPlayer -- 700x54 stadium capsule, progress line scoped to the now-playing group
 - [x] Slice 5: HeroCard -- 3:4 ratio, caption over the art, scrim checked against white artwork
 - [x] Slice 4: Shelf + ArtworkCard -- 20/16pt gap breakpoint, square art, 37pt caption
 - [x] Slice 3: SidebarList -- 32pt rows, active/inactive selection, thumbnails, SwiftUI recipe in the README

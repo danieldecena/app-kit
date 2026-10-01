@@ -863,6 +863,35 @@ css = css.replace(
 .dc-herocard-badge { position: absolute; top: 14px; right: 14px; color: #FFFFFF; display: flex; align-items: center; gap: 4px; }
 .dc-herocard:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
+/* MiniPlayer: the floating glass capsule over Music's scrolled content. Not a
+   bar in the window chrome -- it floats, 19pt up from the window bottom, and is
+   centred on the CONTENT area rather than the window (AX x=579 w=700 against a
+   270pt sidebar and a 1588pt window puts its centre on the content centre, 929).
+
+   700 x 54pt from AX, confirmed by four pixel scans at 698-701.5pt. The radius
+   is height/2, a full stadium: the left-edge inset falls 17.5 to 0pt over 24pt.
+
+   Geometry below is measured from a Reduce Transparency capture, which is the
+   only way to get a clean edge on a glass element -- over artwork it has no
+   stable edge, and over white ground it has almost no contrast. */
+.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--ink); }
+.dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
+.dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
+.dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
+.dc-miniplayer-btn[aria-pressed="true"] { color: var(--music-accent); }
+/* The now-playing group owns the progress line, which is why the line stops at
+   the group's edges instead of running the capsule's full width. */
+.dc-miniplayer-now { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; align-self: stretch; }
+.dc-miniplayer-art { width: 34px; height: 34px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); flex: none; }
+.dc-miniplayer-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.dc-miniplayer-title { font: var(--type-glance); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-miniplayer-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A 1pt hairline 2pt up from the capsule's inner bottom edge. */
+.dc-miniplayer-track { position: absolute; left: 0; right: 0; bottom: 2px; height: 1px; background: var(--music-select-inactive); border-radius: 1px; }
+.dc-miniplayer-fill { display: block; height: 100%; background: var(--ink-soft); border-radius: 1px; }
+.dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--ink); }
+.dc-miniplayer-btn:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 3px; border-radius: 4px; }
+
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --
    32pt rows, 19pt section headers, a rounded inset selection fill. The real
    article is a vibrant material that samples the desktop; `glass` is the web
@@ -1101,6 +1130,33 @@ js = js.replace(
         h("span", { className: "dc-herocard-title" }, p.title)));
   }
 
+  // The floating transport capsule. `progress` is 0..1 and is presentation
+  // only -- the capsule does not own playback, it reports it.
+  function MiniPlayer(p) {
+    function btn(key, label, glyph, on, extra) {
+      return h("button", Object.assign({ key: key, type: "button", className: "dc-miniplayer-btn",
+                                         "aria-label": label, onClick: on, disabled: !on }, extra || {}), glyph);
+    }
+    var pct = Math.max(0, Math.min(1, p.progress || 0)) * 100;
+    return h("div", { className: cx("dc-miniplayer", p.className), role: "group", "aria-label": "Now playing",
+                      style: p.width ? { "--miniplayer-w": p.width + "px" } : undefined },
+      h("div", { className: "dc-miniplayer-transport" },
+        btn("sh", "Shuffle", p.shuffleGlyph || "⇄", p.onShuffle, { "aria-pressed": p.shuffle ? "true" : "false" }),
+        btn("pv", "Previous", p.prevGlyph || "⏮", p.onPrev),
+        btn("pp", p.playing ? "Pause" : "Play", p.playing ? (p.pauseGlyph || "⏸") : (p.playGlyph || "▶"), p.onPlayPause),
+        btn("nx", "Next", p.nextGlyph || "⏭", p.onNext),
+        btn("rp", "Repeat", p.repeatGlyph || "↻", p.onRepeat, { "aria-pressed": p.repeat ? "true" : "false" })),
+      h("div", { className: "dc-miniplayer-now" },
+        h("img", { className: "dc-miniplayer-art", src: p.art, alt: "" }),
+        h("span", { className: "dc-miniplayer-text" },
+          h("span", { className: "dc-miniplayer-title" }, p.title, p.favorite ? p.favoriteGlyph || " ★" : null),
+          p.subtitle ? h("span", { className: "dc-miniplayer-sub" }, p.subtitle) : null),
+        h("span", { className: "dc-miniplayer-track", role: "progressbar", "aria-label": "Playback position",
+                    "aria-valuemin": 0, "aria-valuemax": 100, "aria-valuenow": Math.round(pct) },
+          h("span", { className: "dc-miniplayer-fill", style: { width: pct + "%" } }))),
+      p.actions ? h("div", { className: "dc-miniplayer-actions" }, p.actions) : null);
+  }
+
   function Shelf(p) {
     // Arrow keys scroll by one card pitch, so the shelf snaps the way Music's
     // does (measured: an ease-out settling on a card boundary).
@@ -1199,11 +1255,11 @@ js = js.replace(
 )
 js = js.replace(
     '{"name":"Panel"},',
-    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},',
+    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"MiniPlayer"},',
 )
 js = js.replace(
     "Panel: Panel, ListRow: ListRow,",
-    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, ListRow: ListRow,",
+    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, MiniPlayer: MiniPlayer, ListRow: ListRow,",
 )
 assert (
     "dc-tint-" in js
@@ -1217,6 +1273,8 @@ assert (
     and "ArtworkCard: ArtworkCard" in js
     and "HeroCard: HeroCard" in js
     and '{"name":"HeroCard"}' in js
+    and "MiniPlayer: MiniPlayer" in js
+    and '{"name":"MiniPlayer"}' in js
 )
 w("components/bundle.js", js)
 
@@ -1308,6 +1366,36 @@ export function HeroCard(props: {
   /** Card width in px; height derives as width / 0.75. */
   width?: number;
   onClick?: () => void;
+  className?: string;
+}): JSX.Element;
+/** The floating glass transport capsule, 700x54 with a stadium radius. It floats over content, 19px up, centred on the CONTENT area and not the window. Presentation only: it reports playback, it does not own it. */
+export function MiniPlayer(props: {
+  art: string;
+  title: string;
+  subtitle?: string;
+  favorite?: boolean;
+  /** 0..1. Drives the hairline under the now-playing group. */
+  progress?: number;
+  playing?: boolean;
+  shuffle?: boolean;
+  repeat?: boolean;
+  onPlayPause?: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  onShuffle?: () => void;
+  onRepeat?: () => void;
+  /** Trailing icon cluster: lyrics, queue, volume. */
+  actions?: ReactNode;
+  /** Replace the text-glyph fallbacks with real SF Symbols. */
+  playGlyph?: ReactNode;
+  pauseGlyph?: ReactNode;
+  prevGlyph?: ReactNode;
+  nextGlyph?: ReactNode;
+  shuffleGlyph?: ReactNode;
+  repeatGlyph?: ReactNode;
+  favoriteGlyph?: ReactNode;
+  /** Capsule width in px; 700 by default, the measured value. */
+  width?: number;
   className?: string;
 }): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
@@ -1664,6 +1752,84 @@ docs[
         return h(D.HeroCard, { key: i, art: art(c[0], c[1]), eyebrow: c[2], title: c[3],
                                tone: c[0], width: 258 });
       })));
+</script>
+</body>
+</html>
+"""
+
+docs["MiniPlayer/README.md"] = r"""# MiniPlayer
+
+The transport capsule that floats over Music's scrolled content. It is **not** a
+bar in the window chrome, which was the open question this slice closed.
+
+## Measured
+
+| | |
+|---|---|
+| size | **700 x 54pt** (AX; four pixel scans gave 698-701.5) |
+| radius | **height / 2**, a full stadium -- the left-edge inset falls 17.5 to 0pt over 24pt |
+| floats | **19pt** up from the window bottom |
+| centred on | the **content area**, not the window |
+| artwork | 34pt square |
+| progress line | 1pt, 2pt up from the inner bottom edge |
+
+The centring is the detail worth keeping. AX puts it at `x=579 w=700` in a 1588pt
+window with a 270pt sidebar: its centre lands on 929, which is the content
+centre, not the window's 794. Widen the sidebar and the capsule moves.
+
+## The progress line spans the now-playing group, not the capsule
+
+An earlier reading from a pasted screenshot described "a hairline progress bar
+along its own lower edge", implying the full 700pt. Measured, the line runs
+x 165-555pt: it starts at the artwork's left edge and ends with the text group.
+So the line belongs to the now-playing group, which is why it is positioned
+inside `.dc-miniplayer-now` here rather than on the capsule.
+
+## Reduce Transparency is how any of this got measured
+
+Three approaches failed before it. Over artwork the capsule is translucent and
+has no stable edge; over flat white ground it is nearly white and has almost no
+contrast; and a translucency-lift comparison fails because the lift changes with
+whatever is behind. With Reduce Transparency on, the capsule is opaque
+(`#3B3B3D` dark) and its edge is a clean step.
+
+One trap inside that: the capsule floats over the Concerts card, so a naive
+non-ground scan returns the card's 1231pt width instead. The two had to be
+separated by fill colour.
+
+## Glyphs
+
+The defaults are text characters so the component renders with no asset
+dependency. Pass real SF Symbols (`playGlyph`, `nextGlyph`, and the rest) in an
+app that has them.
+"""
+
+docs[
+    "MiniPlayer/preview.html"
+] = r"""<!-- @dsCard group="Navigation" height=200 subtitle="Floating 700x54 transport capsule with a stadium radius" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>MiniPlayer</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  var art = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34">' +
+    '<rect width="34" height="34" fill="#C9472F"/></svg>');
+  function Demo() {
+    var s = React.useState(true), playing = s[0], setPlaying = s[1];
+    return h('div', { style: { display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' } },
+      h(D.MiniPlayer, { art: art, title: 'Nights', subtitle: 'Frank Ocean — Blonde',
+                        favorite: true, progress: 0.54, playing: playing, shuffle: true,
+                        onPlayPause: function () { setPlaying(!playing); },
+                        onPrev: function () {}, onNext: function () {},
+                        onShuffle: function () {}, onRepeat: function () {},
+                        actions: [h('span', { key: 'l' }, '“”'), h('span', { key: 'q' }, '☰'), h('span', { key: 'v' }, '\u{1F50A}')] }),
+      h(D.MiniPlayer, { art: art, title: 'A title long enough that it has to be truncated somewhere',
+                        subtitle: 'Nothing playing', progress: 0, width: 520 }));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
 </script>
 </body>
 </html>

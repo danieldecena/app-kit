@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
+/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"MiniPlayer"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -122,6 +122,33 @@
       h("span", { className: "dc-herocard-cap" },
         p.eyebrow ? h("span", { className: "dc-herocard-eyebrow" }, p.eyebrow) : null,
         h("span", { className: "dc-herocard-title" }, p.title)));
+  }
+
+  // The floating transport capsule. `progress` is 0..1 and is presentation
+  // only -- the capsule does not own playback, it reports it.
+  function MiniPlayer(p) {
+    function btn(key, label, glyph, on, extra) {
+      return h("button", Object.assign({ key: key, type: "button", className: "dc-miniplayer-btn",
+                                         "aria-label": label, onClick: on, disabled: !on }, extra || {}), glyph);
+    }
+    var pct = Math.max(0, Math.min(1, p.progress || 0)) * 100;
+    return h("div", { className: cx("dc-miniplayer", p.className), role: "group", "aria-label": "Now playing",
+                      style: p.width ? { "--miniplayer-w": p.width + "px" } : undefined },
+      h("div", { className: "dc-miniplayer-transport" },
+        btn("sh", "Shuffle", p.shuffleGlyph || "⇄", p.onShuffle, { "aria-pressed": p.shuffle ? "true" : "false" }),
+        btn("pv", "Previous", p.prevGlyph || "⏮", p.onPrev),
+        btn("pp", p.playing ? "Pause" : "Play", p.playing ? (p.pauseGlyph || "⏸") : (p.playGlyph || "▶"), p.onPlayPause),
+        btn("nx", "Next", p.nextGlyph || "⏭", p.onNext),
+        btn("rp", "Repeat", p.repeatGlyph || "↻", p.onRepeat, { "aria-pressed": p.repeat ? "true" : "false" })),
+      h("div", { className: "dc-miniplayer-now" },
+        h("img", { className: "dc-miniplayer-art", src: p.art, alt: "" }),
+        h("span", { className: "dc-miniplayer-text" },
+          h("span", { className: "dc-miniplayer-title" }, p.title, p.favorite ? p.favoriteGlyph || " ★" : null),
+          p.subtitle ? h("span", { className: "dc-miniplayer-sub" }, p.subtitle) : null),
+        h("span", { className: "dc-miniplayer-track", role: "progressbar", "aria-label": "Playback position",
+                    "aria-valuemin": 0, "aria-valuemax": 100, "aria-valuenow": Math.round(pct) },
+          h("span", { className: "dc-miniplayer-fill", style: { width: pct + "%" } }))),
+      p.actions ? h("div", { className: "dc-miniplayer-actions" }, p.actions) : null);
   }
 
   function Shelf(p) {
@@ -299,6 +326,6 @@
 
   window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {
     Button: Button, FilterPill: FilterPill, SegmentedControl: SegmentedControl, Badge: Badge,
-    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
+    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, MiniPlayer: MiniPlayer, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
   });
 })();

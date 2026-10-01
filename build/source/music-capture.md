@@ -806,6 +806,35 @@ is the original failure this was guarding against.
 | **corner radius** | **height / 2, a full stadium** | left-edge inset falls 17.5 -> 0pt over 24pt against a 51pt height |
 | fill, Reduce Transparency **on**, dark | `#3B3B3D` | 701pt run, cleanly separated from the `#1C1C1E` Concerts card beneath it |
 
+### Correction: the progress line spans the now-playing group, not the capsule
+
+Recorded earlier from a pasted screenshot as "a hairline progress bar along its
+own lower edge", which implies the full 700pt. Measured from
+`home-reduced-transparency-dark.png`, the line runs **x 165-555pt** inside the
+capsule: it begins at the artwork's left edge and ends with the text group, and
+sits 1pt tall, 2pt above the inner bottom edge.
+
+So it belongs to the now-playing group, not to the capsule. A pasted screenshot
+is good for layout and role and this is exactly where it was not good enough.
+
+### MiniPlayer contents (pixel, Reduce Transparency dark)
+
+Column-occupancy scan of the capsule interior, offsets from the capsule's own
+left edge:
+
+| Element | x |
+|---|---|
+| shuffle | 15.5-28.5 |
+| previous | 39.5-60.0 |
+| play / pause | 74.5-89.5 |
+| next | 104.0-124.5 |
+| repeat | 136.0-148.0 |
+| artwork | **165.0-199.0, 34pt square** |
+| title / subtitle | from 207.5 |
+| trailing icon cluster | 506-680 |
+
+Left inset 15.5pt, right inset 20pt.
+
 **Reduce Transparency is the tool that made this measurable**, and it beats every
 other approach tried. Three failed first:
 

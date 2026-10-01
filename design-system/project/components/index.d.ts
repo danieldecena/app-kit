@@ -119,6 +119,36 @@ export function HeroCard(props: {
   onClick?: () => void;
   className?: string;
 }): JSX.Element;
+/** The floating glass transport capsule, 700x54 with a stadium radius. It floats over content, 19px up, centred on the CONTENT area and not the window. Presentation only: it reports playback, it does not own it. */
+export function MiniPlayer(props: {
+  art: string;
+  title: string;
+  subtitle?: string;
+  favorite?: boolean;
+  /** 0..1. Drives the hairline under the now-playing group. */
+  progress?: number;
+  playing?: boolean;
+  shuffle?: boolean;
+  repeat?: boolean;
+  onPlayPause?: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  onShuffle?: () => void;
+  onRepeat?: () => void;
+  /** Trailing icon cluster: lyrics, queue, volume. */
+  actions?: ReactNode;
+  /** Replace the text-glyph fallbacks with real SF Symbols. */
+  playGlyph?: ReactNode;
+  pauseGlyph?: ReactNode;
+  prevGlyph?: ReactNode;
+  nextGlyph?: ReactNode;
+  shuffleGlyph?: ReactNode;
+  repeatGlyph?: ReactNode;
+  favoriteGlyph?: ReactNode;
+  /** Capsule width in px; 700 by default, the measured value. */
+  width?: number;
+  className?: string;
+}): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
 export function SidebarList(props: {
   sections: SidebarSection[];
