@@ -432,9 +432,37 @@ only as far as the gate requires: `L 0.58 -> 0.60` on dark, `0.58 -> 0.47` on
 light. The difference is small enough not to read as a different red, which is
 the point.
 
-Music itself does not do this, so this is the one place the variant deliberately
-departs from the reference. Worth stating in the README or someone will
-"restore" the measured value and reintroduce the failure.
+### A second failure: secondary text in light mode
+
+`music-ink-soft` measured `#808080`, which on the light ground `#FFFFFF` is
+**3.95:1**. Secondary text is exactly where small type lives, so this matters
+more than the accent case.
+
+| | measured | compliant | ratio |
+|---|---|---|---|
+| `music-ink-soft` dark | `#9A9A9A` | unchanged | 5.85 |
+| `music-ink-soft` light | `#808080` (3.95) | **`#767676`** | 4.54 |
+
+`#767676` is the first grey that clears 4.5 on white, and is the same boundary
+value used as a test case for the contrast function itself.
+
+### The two deliberate departures, together
+
+Music's own palette fails WCAG AA in two places. The variant keeps the measured
+value wherever it is not text, and ships a corrected value where it is:
+
+| Role | Measured (Music) | Shipped | Why |
+|---|---|---|---|
+| accent on icons, symbols, CTA fills | `#FA2E48` / `#FA233B` | same | not text, fidelity wins |
+| accent as **text** | 4.35 dark, 3.91 light | `#FA3851` / `#EA0623` | 4.51 / 4.62 |
+| secondary **text** | `#808080` light, 3.95 | `#767676` light | 4.54 |
+
+Both corrections move lightness only as far as the gate requires and keep hue
+and saturation, so neither reads as a different colour.
+
+Music itself does neither, so these are the only two places the variant
+deliberately departs from the reference. Both must be stated in the README or
+someone will "restore" the measured values and reintroduce the failures.
 
 ## Geometry
 
