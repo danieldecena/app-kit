@@ -394,6 +394,45 @@ neither, so do not substitute a system colour for it.
 The content ground is **flat**, not graded and not tinted by the top artwork.
 That closes the open question in the plan.
 
+## Slice 2 spike: the tokens against a real SwiftUI window
+
+`build/source/music-spike.swift`, compiled with `swiftc` and run as a plain
+binary (not `swift file.swift`, which JITs and cannot resolve SwiftUI symbols).
+Standalone on purpose: Spinner carries no App Kit Swift tokens, and coupling two
+repos for a throwaway is worse than hardcoding eleven measured values.
+
+**The tokens render correctly.** Sampled from a capture of the spike window,
+sRGB, against the Music measurements:
+
+| | spike | Music | |
+|---|---|---|---|
+| `ground-window` | `#1F1F20` | `#1F1F20` | exact |
+| `music-select` | `#CC132D` | `#CC132D` | exact |
+| `music-hover` | `#2C2C2D` | `#2C2C2D` | exact |
+| sidebar | `#262627` | `#262629` | within 2 units |
+
+### The sidebar needs no token
+
+Stock `List { }.listStyle(.sidebar)` in a `NavigationSplitView`, with **no
+background set**, lands within 2 units of Music's measured sidebar. So Music's
+sidebar is the standard SwiftUI material and nothing else. The variant should
+set no background there; doing so would defeat the vibrancy that makes it match.
+
+This is the thing a CSS preview could not have told us, and it is why this slice
+exists.
+
+### Two SwiftUI behaviours the preview would have hidden
+
+1. **Sidebar selection uses the system accent, not your colour.** The spike's
+   selected row renders system blue despite every label being tinted
+   `music-accent`. `List(selection:)` with `.listStyle(.sidebar)` draws its own
+   selection. Matching Music's red needs an explicit override, which slice 3
+   must budget for.
+2. **`.foregroundStyle` on a `Label` tints the symbol AND the text.** Music
+   tints only the symbol and leaves the label in normal ink. The spike gets this
+   wrong on purpose-adjacent accident, and the screenshot shows the difference
+   clearly: all-red rows read as decorative rather than as Music's quieter list.
+
 ## Contrast audit
 
 A WCAG relative-luminance function was written for slice 2's build assertion and
