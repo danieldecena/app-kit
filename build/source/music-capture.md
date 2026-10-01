@@ -251,8 +251,44 @@ holds, before the main movement. That looks like a drag that was released below
 the snap threshold, which would be worth confirming as the rubber-band
 behaviour.
 
-Not yet identified: the 9.942-10.575s event in `motion-04` (0.633s, 22 frames,
-peak delta 63), which is genuinely animated, unlike the page navigation.
+Identified: the 9.942-10.575s event in `motion-04` is a **fast vertical scroll**,
+not a UI animation. Frames across it are identical until the last, then far down
+the page.
+
+### Measured motion: the appearance switch IS animated
+
+From `motion-03-dark.mov`, tracking sidebar luminance (chrome, so it flips hard;
+an earlier attempt sampled card artwork, which stays colourful in both
+appearances and barely moved).
+
+```
+ 8.528s   flat, light      233
+ 8.545s     5.3% complete
+ 8.645s    45.1%
+ 8.720s    72.2%
+ 8.853s    93.5%
+ 8.995s   100%, dark        37
+```
+
+**0.47s, ease-out**: half the distance in the first 0.14s, the remaining half
+over 0.33s.
+
+A first pass reported 3.92s. That was the start detector firing on a 3-unit
+luminance drift at 5.0s caused by artwork loading, not by the switch. The
+transition only begins once the value leaves its flat 228.8 plateau.
+
+### Motion summary across all four recordings
+
+| Event | Animated? | Duration | Curve |
+|---|---|---|---|
+| page navigation | **no** | single frame, then a blank content area for ~0.15-0.4s | n/a |
+| shelf horizontal scroll | yes | ~0.73s | ease-out, snaps to a card boundary |
+| appearance switch | yes | **~0.47s** | ease-out |
+| vertical page scroll | yes | varies with the flick | inertial |
+
+So Music animates **state** changes (appearance, scroll position) and does not
+animate **navigation**. That is the opposite of the usual instinct, which is to
+animate the page transition and let everything else snap.
 
 ## Measured
 
