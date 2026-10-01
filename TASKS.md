@@ -5,7 +5,7 @@
 - [ ] [you] Capture the dark transport button with the window inactive, for music-primary-inactive
 - [x] Verify the Home AX dump was complete -- depth 9 reports no truncation; card size turned out to track the resizable sidebar width
 - [ ] Slice 2: add the music-* tokens from the measured table in app-kit-music.md
-- [ ] Slice 2: write the WCAG contrast assertion, proving it with a failing and a passing pair
+- [x] Slice 2: WCAG contrast assertion in app_build.py -- 24 pairs, proved by mutation, survives python -O
 - [ ] Slice 2: SwiftUI spike in claude-spinner for ground-window and sidebar vibrancy
 
 - [x] Confirm the app_build.py invocation reproduces the tree byte-for-byte
