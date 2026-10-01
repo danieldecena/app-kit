@@ -863,6 +863,38 @@ css = css.replace(
 .dc-herocard-badge { position: absolute; top: 14px; right: 14px; color: #FFFFFF; display: flex; align-items: center; gap: 4px; }
 .dc-herocard:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
+/* TrackList: Music's song table. 56pt rows, and the highlight is a ROUNDED
+   INSET PILL rather than a full-bleed row fill -- 1238 x 45pt inset 40pt each
+   side of the 1318pt content width, 5.5pt above and below inside the 56pt row,
+   ~6pt radius. Built full-bleed it reads wrong immediately.
+
+   Hover and selection are the same pill with different fills, which is one
+   component with a state and not two layouts. The selected fill is music-select,
+   its own measured value and NOT the accent stepped toward black: App Kit's
+   convention would give #C8253A from the dark accent, and Music uses #CC132D.
+
+   Columns are configuration. The playlist measured has seven and no Album; an
+   earlier capture had one. */
+.dc-tracklist { display: flex; flex-direction: column; }
+.dc-tracklist-head { display: grid; align-items: center; gap: 0; padding: 0 40px 6px; font: var(--type-caption-2); color: var(--music-ink-soft); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); box-shadow: inset 0 -1px 0 var(--hair); }
+.dc-tracklist-row { display: grid; align-items: center; height: 56px; padding: 0 40px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: default; position: relative; }
+/* The pill is a pseudo-element so it can be inset inside the 56pt row without
+   moving the cells. 45pt tall centred leaves 5.5pt each side, as measured. */
+.dc-tracklist-row::before { content: ""; position: absolute; left: 40px; right: 40px; top: 5.5px; bottom: 5.5px; border-radius: 6px; background: transparent; }
+.dc-tracklist-row:hover::before { background: var(--music-hover); }
+.dc-tracklist-row[aria-selected="true"]::before { background: var(--music-select); }
+.dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"]::before { background: var(--music-select-inactive); }
+.dc-tracklist-row > * { position: relative; }
+.dc-tracklist-cell { font: var(--type-subhead); color: var(--music-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: var(--space-4); }
+.dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft); }
+.dc-tracklist-cell[data-align="end"] { text-align: right; padding-right: 0; }
+.dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell,
+.dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell[data-soft="true"] { color: var(--on-music-select); }
+.dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell { color: var(--music-ink); }
+.dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft); }
+.dc-tracklist-art { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); display: block; }
+.dc-tracklist-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -4px; border-radius: 6px; }
+
 /* MiniPlayer: the floating glass capsule over Music's scrolled content. Not a
    bar in the window chrome -- it floats, 19pt up from the window bottom, and is
    centred on the CONTENT area rather than the window (AX x=579 w=700 against a
@@ -1130,6 +1162,36 @@ js = js.replace(
         h("span", { className: "dc-herocard-title" }, p.title)));
   }
 
+  // Music's song table. `columns` is configuration, not a fixed set: the
+  // playlist measured has seven and no Album, an earlier capture had one.
+  function TrackList(p) {
+    var cols = p.columns || [];
+    var grid = cols.map(function (c) { return c.width || "1fr"; }).join(" ");
+    function cells(row, head) {
+      return cols.map(function (c, i) {
+        var v = head ? c.label : (c.render ? c.render(row) : row[c.key]);
+        return h("span", { key: c.key || i, className: head ? undefined : "dc-tracklist-cell",
+                           "data-soft": !head && c.soft ? "true" : undefined,
+                           "data-align": c.align === "end" ? "end" : undefined }, v);
+      });
+    }
+    return h("div", { className: cx("dc-tracklist", p.className), role: "grid",
+                      "aria-label": p.label || "Tracks",
+                      "data-window-inactive": p.windowInactive ? "true" : undefined },
+      cols.some(function (c) { return c.label; })
+        ? h("div", { className: "dc-tracklist-head", role: "row", style: { gridTemplateColumns: grid } }, cells(null, true))
+        : null,
+      p.rows.map(function (row, i) {
+        var id = row.id != null ? row.id : i;
+        return h("div", { key: id, className: "dc-tracklist-row", role: "row", tabIndex: 0,
+                          "aria-selected": p.selection === id ? "true" : "false",
+                          style: { gridTemplateColumns: grid },
+                          onClick: p.onSelect ? function () { p.onSelect(id); } : undefined,
+                          onDoubleClick: p.onPlay ? function () { p.onPlay(id); } : undefined },
+          cells(row, false));
+      }));
+  }
+
   // The floating transport capsule. `progress` is 0..1 and is presentation
   // only -- the capsule does not own playback, it reports it.
   function MiniPlayer(p) {
@@ -1255,11 +1317,11 @@ js = js.replace(
 )
 js = js.replace(
     '{"name":"Panel"},',
-    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"MiniPlayer"},',
+    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"MiniPlayer"},{"name":"TrackList"},',
 )
 js = js.replace(
     "Panel: Panel, ListRow: ListRow,",
-    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, MiniPlayer: MiniPlayer, ListRow: ListRow,",
+    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, MiniPlayer: MiniPlayer, TrackList: TrackList, ListRow: ListRow,",
 )
 assert (
     "dc-tint-" in js
@@ -1275,6 +1337,8 @@ assert (
     and '{"name":"HeroCard"}' in js
     and "MiniPlayer: MiniPlayer" in js
     and '{"name":"MiniPlayer"}' in js
+    and "TrackList: TrackList" in js
+    and '{"name":"TrackList"}' in js
 )
 w("components/bundle.js", js)
 
@@ -1366,6 +1430,29 @@ export function HeroCard(props: {
   /** Card width in px; height derives as width / 0.75. */
   width?: number;
   onClick?: () => void;
+  className?: string;
+}): JSX.Element;
+export interface TrackColumn {
+  key: string;
+  /** Header text. Omit on every column to drop the header row. */
+  label?: string;
+  /** A grid track size: "40px", "1fr", "2fr". */
+  width?: string;
+  /** Render in ink-soft -- artist, time, and other secondary columns. */
+  soft?: boolean;
+  align?: "start" | "end";
+  render?: (row: any) => ReactNode;
+}
+/** Music's song table: 56px rows whose highlight is a rounded pill inset 40px each side, NOT a full-bleed row fill. Columns are configuration; the measured playlist had seven and no Album. */
+export function TrackList(props: {
+  rows: Array<Record<string, any> & { id?: string | number }>;
+  columns: TrackColumn[];
+  selection?: string | number;
+  onSelect?: (id: string | number) => void;
+  onPlay?: (id: string | number) => void;
+  /** Renders the grey inactive selection fill, as macOS does when the window is not key. */
+  windowInactive?: boolean;
+  label?: string;
   className?: string;
 }): JSX.Element;
 /** The floating glass transport capsule, 700x54 with a stadium radius. It floats over content, 19px up, centred on the CONTENT area and not the window. Presentation only: it reports playback, it does not own it. */
@@ -1752,6 +1839,104 @@ docs[
         return h(D.HeroCard, { key: i, art: art(c[0], c[1]), eyebrow: c[2], title: c[3],
                                tone: c[0], width: 258 });
       })));
+</script>
+</body>
+</html>
+"""
+
+docs["TrackList/README.md"] = r"""# TrackList
+
+Music's song table: the playlist and album view.
+
+## The highlight is a pill, not a row fill
+
+This is the whole component, and getting it wrong reads as not-Music instantly.
+
+| | |
+|---|---|
+| row height | **56pt** (AX and pixels agree) |
+| pill | **1238 x 45pt**, x 310.0-1547.5 |
+| inset | **40pt** each side of the 1318pt content width |
+| vertical | **5.5pt** above and below, inside the 56pt row |
+| radius | **~6pt** |
+
+Hover and selection are the *same* pill with different fills, which is one
+component with a state rather than two layouts. The pill is a pseudo-element here
+so the inset does not move the cells.
+
+## Three reds, none derived from another
+
+| | light | dark |
+|---|---|---|
+| accent | `#FA233B` | `#FA2E48` |
+| selection | `#DC1229` | `#CC132D` |
+
+App Kit's convention is the accent stepped 20% toward black, which from `#FA2E48`
+would give `#C8253A`. Music uses `#CC132D`. So `music-select` is a measured value
+and not a derivation, and the same goes the other way.
+
+## Inactive selection is the normal state for a monitor app
+
+macOS greys the selection when the window is not key, and this caught the capture
+out: the first "selected" shot read red because Music was still key, and a later
+shot of the same state read grey because it was not. Pass `windowInactive` and
+the fill becomes `music-select-inactive` with the labels back to normal ink.
+
+## Columns are configuration
+
+The measured playlist has seven columns and no Album; an earlier capture had one.
+So the column set is passed in, and pixel-derived column positions recorded for
+one capture describe *that* column set rather than contradicting another.
+
+Measured column frames for the seven-column playlist, window-relative:
+
+| Column | x | width |
+|---|---|---|
+| favorited star | 270.0 | 40.0 |
+| artwork | 310.0 | 57.0 |
+| Song | 367.0 | 593.5 |
+| Artist | 960.5 | 468.5 |
+| cloud / download | 1429.0 | 16.0 |
+| Time | 1445.0 | 58.0 |
+| "..." menu | 1503.0 | 85.0 |
+"""
+
+docs[
+    "TrackList/preview.html"
+] = r"""<!-- @dsCard group="Navigation" height=360 subtitle="Song table whose highlight is a rounded inset pill" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>TrackList</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  function art(c) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">' +
+      '<rect width="40" height="40" fill="' + c + '"/></svg>');
+  }
+  var rows = [
+    { id: 1, star: '★', art: '#C9472F', song: 'Nights', artist: 'Frank Ocean', time: '5:07' },
+    { id: 2, star: '', art: '#2F6DC9', song: 'Solo', artist: 'Frank Ocean', time: '4:17' },
+    { id: 3, star: '', art: '#2F9A6D', song: 'Pink + White', artist: 'Frank Ocean', time: '3:04' },
+    { id: 4, star: '★', art: '#8A4FC9', song: 'Self Control', artist: 'Frank Ocean', time: '4:09' }
+  ];
+  var columns = [
+    { key: 'star', width: '40px', render: function (r) { return r.star; } },
+    { key: 'art', width: '57px', render: function (r) { return h('img', { className: 'dc-tracklist-art', src: art(r.art), alt: '' }); } },
+    { key: 'song', label: 'Song', width: '2fr' },
+    { key: 'artist', label: 'Artist', width: '1.5fr', soft: true },
+    { key: 'time', label: 'Time', width: '58px', soft: true, align: 'end' }
+  ];
+  function Demo() {
+    var s = React.useState(2), sel = s[0], setSel = s[1];
+    return h('div', { style: { display: 'flex', flexDirection: 'column', gap: 28 } },
+      h(D.TrackList, { rows: rows, columns: columns, selection: sel, onSelect: setSel }),
+      h(D.TrackList, { rows: rows, columns: columns, selection: sel, windowInactive: true,
+                       label: 'Tracks, window not key' }));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"MiniPlayer"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
+/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"MiniPlayer"},{"name":"TrackList"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -122,6 +122,36 @@
       h("span", { className: "dc-herocard-cap" },
         p.eyebrow ? h("span", { className: "dc-herocard-eyebrow" }, p.eyebrow) : null,
         h("span", { className: "dc-herocard-title" }, p.title)));
+  }
+
+  // Music's song table. `columns` is configuration, not a fixed set: the
+  // playlist measured has seven and no Album, an earlier capture had one.
+  function TrackList(p) {
+    var cols = p.columns || [];
+    var grid = cols.map(function (c) { return c.width || "1fr"; }).join(" ");
+    function cells(row, head) {
+      return cols.map(function (c, i) {
+        var v = head ? c.label : (c.render ? c.render(row) : row[c.key]);
+        return h("span", { key: c.key || i, className: head ? undefined : "dc-tracklist-cell",
+                           "data-soft": !head && c.soft ? "true" : undefined,
+                           "data-align": c.align === "end" ? "end" : undefined }, v);
+      });
+    }
+    return h("div", { className: cx("dc-tracklist", p.className), role: "grid",
+                      "aria-label": p.label || "Tracks",
+                      "data-window-inactive": p.windowInactive ? "true" : undefined },
+      cols.some(function (c) { return c.label; })
+        ? h("div", { className: "dc-tracklist-head", role: "row", style: { gridTemplateColumns: grid } }, cells(null, true))
+        : null,
+      p.rows.map(function (row, i) {
+        var id = row.id != null ? row.id : i;
+        return h("div", { key: id, className: "dc-tracklist-row", role: "row", tabIndex: 0,
+                          "aria-selected": p.selection === id ? "true" : "false",
+                          style: { gridTemplateColumns: grid },
+                          onClick: p.onSelect ? function () { p.onSelect(id); } : undefined,
+                          onDoubleClick: p.onPlay ? function () { p.onPlay(id); } : undefined },
+          cells(row, false));
+      }));
   }
 
   // The floating transport capsule. `progress` is 0..1 and is presentation
@@ -326,6 +356,6 @@
 
   window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {
     Button: Button, FilterPill: FilterPill, SegmentedControl: SegmentedControl, Badge: Badge,
-    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, MiniPlayer: MiniPlayer, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
+    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, MiniPlayer: MiniPlayer, TrackList: TrackList, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
   });
 })();

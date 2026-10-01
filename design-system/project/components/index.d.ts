@@ -119,6 +119,29 @@ export function HeroCard(props: {
   onClick?: () => void;
   className?: string;
 }): JSX.Element;
+export interface TrackColumn {
+  key: string;
+  /** Header text. Omit on every column to drop the header row. */
+  label?: string;
+  /** A grid track size: "40px", "1fr", "2fr". */
+  width?: string;
+  /** Render in ink-soft -- artist, time, and other secondary columns. */
+  soft?: boolean;
+  align?: "start" | "end";
+  render?: (row: any) => ReactNode;
+}
+/** Music's song table: 56px rows whose highlight is a rounded pill inset 40px each side, NOT a full-bleed row fill. Columns are configuration; the measured playlist had seven and no Album. */
+export function TrackList(props: {
+  rows: Array<Record<string, any> & { id?: string | number }>;
+  columns: TrackColumn[];
+  selection?: string | number;
+  onSelect?: (id: string | number) => void;
+  onPlay?: (id: string | number) => void;
+  /** Renders the grey inactive selection fill, as macOS does when the window is not key. */
+  windowInactive?: boolean;
+  label?: string;
+  className?: string;
+}): JSX.Element;
 /** The floating glass transport capsule, 700x54 with a stadium radius. It floats over content, 19px up, centred on the CONTENT area and not the window. Presentation only: it reports playback, it does not own it. */
 export function MiniPlayer(props: {
   art: string;
