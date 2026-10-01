@@ -641,10 +641,34 @@ and the card width absorbs the difference.
 HeroCard behaves identically: 257.5 x 343pt at the wide sidebar, 271.0 x 362.5pt
 at the narrow one, pitch 277.5 then 291.0, gap 20pt throughout.
 
-So **no card dimension in this file is a constant**. The only transferable
-numbers are the 20pt gap and the aspect ratios (ArtworkCard about 1:1.19,
-HeroCard about 1:1.34). A component that hard-codes 188x225 will be wrong for
-every user whose sidebar is not where mine was.
+**Correction: the gap is not constant either.** A third run, with Music on a
+virtual display at a 980pt window, gives a **16pt** gap in both shelves. So
+"the 20pt gap holds across every measurement" was true only of the two wide
+runs, and is wrong.
+
+| Run | content width | hero gap | artwork gap | hero w/h | artwork caption |
+|---|---|---|---|---|---|
+| 1588pt window, sidebar 270 | 1318 | 20.0 | 20.0 | 0.751 | 37.0 |
+| 1588pt window, sidebar 242 | 1346 | 20.0 | 19.8 | 0.748 | 36.8 |
+| **980pt window, sidebar 208** | **772** | **16.0** | **16.0** | 0.748 | 37.0 |
+
+The gap looks like a breakpoint rather than a scale: 20pt at ~1300pt of content,
+16pt at 772. Where it switches is unknown, and three points cannot locate it.
+
+### What IS invariant, which is the useful part
+
+Three widths spanning 772 to 1346pt agree on two things, and they are a better
+component spec than any pixel size:
+
+- **HeroCard is 3:4.** Width over height is 0.751, 0.748, 0.748.
+- **ArtworkCard is a square artwork plus a caption block of constant height.**
+  Card height minus card width is 37.0, 36.8, 37.0pt at every width. The
+  artwork is square and the caption does not scale.
+
+So `ArtworkCard` takes a width and derives `width + 37pt`; `HeroCard` takes a
+width and derives `width / 0.75`. Neither needs a hard-coded size, and that is
+what makes the component correct at any sidebar position rather than only at
+mine.
 
 Consequence for the component: **do not ship a fixed card size.** Ship the 20pt
 gap and let the card size derive, which is also what the earlier finding implied
