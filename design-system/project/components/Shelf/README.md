@@ -23,6 +23,17 @@ The 20/16 split is a breakpoint, not a scale: 20px was measured at ~1300px of
 content and 16px at 772px. Where it switches is not known, so `compact` is a
 caller decision.
 
+## The caption has to fit 37px, not be clipped to it
+
+37 is a measured total, so the type inside it is constrained by it. Two
+`footnote` lines are 18 + 18 = 36 and leave 1px for the gap under the artwork,
+so the subtitle takes `caption-2`: 6 + 18 + 13 is exactly 37.
+
+The first attempt used `footnote` for both and let flex compress each line from
+18 to 14, cutting the descenders off the subtitle. It looked right only because
+the preview's subtitle was all-caps. Music's own caption type was never
+measured, so this split is ours.
+
 ## Scrolling
 
 Music's shelf snaps to a card boundary: a measured scroll landed 878.9px against

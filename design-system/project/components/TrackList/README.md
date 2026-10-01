@@ -45,6 +45,21 @@ Music's inactive label colour was not measured; normal ink is the macOS default
 and clears 4.5:1 on that fill, which `music-ink-soft` does not (3.31:1), so
 secondary cells step to `music-ink-soft-on-fill` under any fill.
 
+## Keyboard
+
+A `grid` takes **one** tab stop, not one per row -- a 200-track playlist would
+otherwise be 200 of them. The selected row holds it, falling back to the first.
+
+| key | |
+|---|---|
+| Up / Down | move focus **and** the selection together |
+| Home / End | first and last row |
+| Enter, Space | play, which is what Music does |
+
+Focus moves with the selection rather than trailing it, or the ring stays on the
+row you left and a screen reader never hears the change. Double-click also plays,
+for the pointer.
+
 ## Columns are configuration
 
 The measured playlist has seven columns and no Album; an earlier capture had one.

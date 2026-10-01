@@ -144,9 +144,16 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
    measurements agreed on. The caption pads itself instead. */
 .dc-artcard { display: flex; flex-direction: column; gap: 0; border: 0; padding: 0; background: none; text-align: left; cursor: pointer; width: var(--artcard-w, 188px); }
 .dc-artcard-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); object-fit: cover; background: var(--surface-sunk); display: block; }
-.dc-artcard-cap { box-sizing: border-box; height: 37px; padding-top: 8px; display: flex; flex-direction: column; justify-content: flex-start; gap: 1px; overflow: hidden; }
+/* The 37px is a measured TOTAL and the type has to fit inside it, not be
+   clipped to it. Two footnote lines are 18 + 18 = 36 and leave 1px for the
+   gap under the artwork, so the subtitle drops to caption-2: 6 + 18 + 13 is
+   exactly 37. The first attempt kept footnote for both and let flex compress
+   each line from 18 to 14, which cut the descenders off the subtitle --
+   invisible in a preview whose subtitle was all-caps. Music's own caption
+   type was never measured, so this split is ours. */
+.dc-artcard-cap { box-sizing: border-box; height: 37px; padding-top: 6px; display: flex; flex-direction: column; justify-content: flex-start; gap: 0; overflow: hidden; }
 .dc-artcard-title { font: var(--type-footnote); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dc-artcard-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard-sub { font: var(--type-caption-2); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
 /* HeroCard: full-bleed artwork at 3:4 with the caption INSIDE the card, over
@@ -200,7 +207,10 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-tracklist-row > * { position: relative; }
 .dc-tracklist-cell { font: var(--type-subhead); color: var(--music-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: var(--space-4); }
 .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft); }
-.dc-tracklist-cell[data-align="end"] { text-align: right; padding-right: 0; }
+/* Keyed off the attribute, not .dc-tracklist-cell, so the HEADER aligns with
+   its column too. The header carries no cell class, because that would give it
+   the row cell's subhead ink instead of its own. */
+.dc-tracklist [data-align="end"] { text-align: right; padding-right: 0; }
 .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell,
 .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell[data-soft="true"] { color: var(--on-music-select); }
 .dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell { color: var(--music-ink); }
@@ -269,7 +279,7 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
    is not key; macOS does this itself and a monitor app is in this state most of
    the time, so it is not an edge case. */
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--music-ink); }
-.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--ink-soft); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--music-ink-soft-on-fill); }
 .dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
 .dc-sidebar-thumb { flex: none; width: 16px; height: 16px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); }
 .dc-sidebar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

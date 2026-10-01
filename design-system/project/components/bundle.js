@@ -128,26 +128,65 @@
   // playlist measured has seven and no Album, an earlier capture had one.
   function TrackList(p) {
     var cols = p.columns || [];
+    var rows = p.rows || [];
     var grid = cols.map(function (c) { return c.width || "1fr"; }).join(" ");
+    var ids = rows.map(function (row, i) { return row.id != null ? row.id : i; });
+    var selectable = !!p.onSelect;
+    // A role=grid wants ONE tab stop with the arrows moving inside it, not one
+    // per row: a 200-track playlist is otherwise 200 tab stops. The row that
+    // takes it is the selected one, falling back to the first.
+    var activeIndex = Math.max(0, ids.indexOf(p.selection));
+    function onKeyDown(e, i) {
+      var next = null;
+      if (e.key === "ArrowDown") next = Math.min(ids.length - 1, i + 1);
+      else if (e.key === "ArrowUp") next = Math.max(0, i - 1);
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = ids.length - 1;
+      else if (e.key === "Enter" || e.key === " ") {
+        // Enter plays, which is what Music does. Space too, since a focused row
+        // has to answer the key that activates everything else.
+        e.preventDefault();
+        if (p.onPlay) p.onPlay(ids[i]);
+        return;
+      } else return;
+      e.preventDefault();
+      if (next === i) return;
+      // Move focus WITH the selection. Moving only the selection leaves the
+      // focus ring behind and a screen reader never hears the change.
+      var el = e.currentTarget.parentNode.querySelectorAll(".dc-tracklist-row")[next];
+      if (el) el.focus();
+      if (p.onSelect) p.onSelect(ids[next]);
+    }
     function cells(row, head) {
       return cols.map(function (c, i) {
         var v = head ? c.label : (c.render ? c.render(row) : row[c.key]);
-        return h("span", { key: c.key || i, className: head ? undefined : "dc-tracklist-cell",
+        return h("span", { key: c.key || i,
+                           className: head ? undefined : "dc-tracklist-cell",
+                           role: head ? "columnheader" : "gridcell",
                            "data-soft": !head && c.soft ? "true" : undefined,
+                           // Alignment is a column property, so the header has to
+                           // take it too or a right-aligned Time column sits over
+                           // left-aligned times.
                            "data-align": c.align === "end" ? "end" : undefined }, v);
       });
     }
     return h("div", { className: cx("dc-tracklist", p.className), role: "grid",
                       "aria-label": p.label || "Tracks",
+                      "aria-rowcount": rows.length,
                       "data-window-inactive": p.windowInactive ? "true" : undefined },
       cols.some(function (c) { return c.label; })
         ? h("div", { className: "dc-tracklist-head", role: "row", style: { gridTemplateColumns: grid } }, cells(null, true))
         : null,
-      p.rows.map(function (row, i) {
-        var id = row.id != null ? row.id : i;
-        return h("div", { key: id, className: "dc-tracklist-row", role: "row", tabIndex: 0,
-                          "aria-selected": p.selection === id ? "true" : "false",
+      rows.map(function (row, i) {
+        var id = ids[i];
+        return h("div", { key: id, className: "dc-tracklist-row", role: "row",
+                          tabIndex: i === activeIndex ? 0 : -1,
+                          // Only claim a selection state when selection is a
+                          // thing here; otherwise every row announces itself as
+                          // "not selected" in a purely presentational list.
+                          "aria-selected": selectable ? (p.selection === id ? "true" : "false") : undefined,
                           style: { gridTemplateColumns: grid },
+                          onKeyDown: function (e) { onKeyDown(e, i); },
                           onClick: p.onSelect ? function () { p.onSelect(id); } : undefined,
                           onDoubleClick: p.onPlay ? function () { p.onPlay(id); } : undefined },
           cells(row, false));
@@ -158,8 +197,15 @@
   // only -- the capsule does not own playback, it reports it.
   function MiniPlayer(p) {
     function btn(key, label, glyph, on, extra) {
+      // A control with no handler is genuinely unavailable, so it is disabled.
+      // But a toggle must not claim BOTH pressed and unavailable, which is what
+      // `shuffle` without `onShuffle` produced: accent-red, dimmed, and out of
+      // the tab order. Drop the pressed state when there is nothing to press.
+      var pressable = !!on;
+      var e2 = Object.assign({}, extra || {});
+      if (!pressable) delete e2["aria-pressed"];
       return h("button", Object.assign({ key: key, type: "button", className: "dc-miniplayer-btn",
-                                         "aria-label": label, onClick: on, disabled: !on }, extra || {}), glyph);
+                                         "aria-label": label, onClick: on, disabled: !on }, e2), glyph);
     }
     var pct = Math.max(0, Math.min(1, p.progress || 0)) * 100;
     return h("div", { className: cx("dc-miniplayer", p.className), role: "group", "aria-label": "Now playing",
@@ -199,7 +245,10 @@
         p.onMore ? h("button", { type: "button", className: "dc-shelf-more", "aria-label": "See all " + p.title, onClick: p.onMore },
           h("svg", { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", "aria-hidden": "true" },
             h("path", { d: "M6 3l5 5-5 5" }))) : null),
-      h("div", { className: "dc-shelf-track", ref: track, tabIndex: 0, role: "list",
+      // No role=list here: the children are the caller's cards, not listitems,
+      // and a list owning no listitem is announced as empty. The section's
+      // aria-label already names the group.
+      h("div", { className: "dc-shelf-track", ref: track, tabIndex: 0,
                  onKeyDown: function (e) {
                    if (e.key === "ArrowRight") { e.preventDefault(); nudge(1); }
                    if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-1); }
@@ -212,10 +261,18 @@
     // Selection is controlled. Arrow keys move it, matching SegmentedControl.
     var flat = [];
     (p.sections || []).forEach(function (sec) { (sec.items || []).forEach(function (it) { flat.push(it.id); }); });
-    function move(d) {
+    function move(e, d) {
       var i = flat.indexOf(p.selection);
-      var n = flat[Math.min(flat.length - 1, Math.max(0, (i < 0 ? 0 : i) + d))];
-      if (n && p.onSelect) p.onSelect(n);
+      // With nothing selected, step to an END rather than to index 0 + d: the
+      // old form made ArrowDown land on item 1 and skip item 0 entirely.
+      var n = i < 0 ? (d > 0 ? 0 : flat.length - 1)
+                    : Math.min(flat.length - 1, Math.max(0, i + d));
+      if (n === i) return;
+      // Focus follows the selection. Moving only the selection leaves the ring
+      // on the row you started from and a screen reader never hears the change.
+      var rows = e.currentTarget.closest(".dc-sidebar").querySelectorAll(".dc-sidebar-row");
+      if (rows[n]) rows[n].focus();
+      if (p.onSelect) p.onSelect(flat[n]);
     }
     return h("nav", {
       className: cx("dc-sidebar", p.className),
@@ -235,8 +292,8 @@
                 "aria-current": on ? "true" : undefined,
                 onClick: function () { if (p.onSelect) p.onSelect(it.id); },
                 onKeyDown: function (e) {
-                  if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
-                  if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
+                  if (e.key === "ArrowDown") { e.preventDefault(); move(e, 1); }
+                  if (e.key === "ArrowUp") { e.preventDefault(); move(e, -1); }
                 }
               },
                 it.thumb

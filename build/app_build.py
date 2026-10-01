@@ -665,24 +665,41 @@ def _check_contrast(tokens):
             raise ValueError(
                 f"contrast() is wrong at its {label}: {got:.2f}, expected {want}"
             )
-    if not (contrast("#777777", "#FFFFFF") < 4.5 <= contrast("#767676", "#FFFFFF")):
-        raise ValueError(
-            "contrast() does not separate 4.48 from 4.54 across the 4.5 gate"
-        )
-
     if not CONTRAST_PAIRS:
         raise ValueError("contrast gate has no pairs; it would pass vacuously")
 
-    failures = []
-    for fg, bg, floor in CONTRAST_PAIRS:
-        for theme in ("light", "dark"):
-            r = contrast(
-                val(fg, theme), val(bg, theme), f"{fg} ({theme})", f"{bg} ({theme})"
-            )
-            if r < floor:
-                failures.append(
-                    f"  {fg} on {bg} ({theme}) is {r:.2f}:1, below the claimed {floor}:1"
+    def failures_for(lookup, pairs):
+        out = []
+        for fg, bg, floor in pairs:
+            for theme in ("light", "dark"):
+                r = contrast(
+                    lookup(fg, theme),
+                    lookup(bg, theme),
+                    f"{fg} ({theme})",
+                    f"{bg} ({theme})",
                 )
+                if r < floor:
+                    out.append(
+                        f"  {fg} on {bg} ({theme}) is {r:.2f}:1, below the claimed {floor}:1"
+                    )
+        return out
+
+    # Prove the gate REJECTS, through the same code path that does the real
+    # work, not through a restatement of the two values above -- the tolerance
+    # loop has already pinned those inside the gate's two sides, so asserting
+    # they straddle 4.5 is a condition that cannot fail, dressed as a proof.
+    # Both halves, so this separates "fires correctly" from "always fires":
+    probe = {"bad": "#777777", "good": "#767676", "bg": "#FFFFFF"}
+
+    def probe_val(name, _theme):
+        return probe[name]
+
+    if not failures_for(probe_val, [("bad", "bg", 4.5)]):
+        raise ValueError("the contrast gate accepted 4.48:1 against a 4.5 floor")
+    if failures_for(probe_val, [("good", "bg", 4.5)]):
+        raise ValueError("the contrast gate rejected 4.54:1 against a 4.5 floor")
+
+    failures = failures_for(val, CONTRAST_PAIRS)
     # Contrast is blind to a light/dark swap: invert a whole theme pair and the
     # ratios are unchanged. T() takes (name, light, dark), and the Music tokens
     # were first written dark-first from a notes table, which the gate passed.
@@ -766,12 +783,32 @@ for a in (
 ):
     assert a in css, a
     css = css.replace(a, a.replace("--signal", "--warn"))
-css = css.replace(
+def css_sub(css, old, new, count=1):
+    """A replace that fails loudly when its anchor stops matching.
+
+    The source tree these anchors point into is not versioned here, so one
+    upstream reformat turns a replace into a no-op that still exits 0. The
+    `.dc-tile-value` one is the dangerous shape: on a miss the mono font
+    survives into type_var, finds an exact `--type-value` match, and passes
+    both the `assert hits` and the raw-px gate. The tile ships in the wrong
+    family with nothing raised.
+    """
+    got = css.count(old)
+    # count="+" is a rename sweep whose number of hits is not meaningful; what
+    # matters is that it still hits something. An exact number everywhere else.
+    ok = got >= 1 if count == "+" else got == count
+    if not ok:
+        raise SystemExit(f"css anchor matched {got} times, expected {count}: {old[:70]!r}")
+    return css.replace(old, new)
+
+
+css = css_sub(
+    css,
     ".dc-tile-attn .dc-tile-meter > span",
     ".dc-tile-attn .dc-tile-meter { background: var(--warn-wash); }\n.dc-tile-attn .dc-tile-meter > span",
 )
 for a, b in R:
-    css = css.replace(a, b)
+    css = css_sub(css, a, b, count="+")
 BTN_OLD = css[css.index("/* Button */") : css.index("/* FilterPill */")]
 BTN = """/* Button: iOS 26 capsules in the Notes highlight colours, translucent */
 .dc-btn { --tint: var(--accent); --tint-ink: var(--accent-ink); --tint-wash: var(--accent-wash); --tint-fill: var(--accent-fill); --tint-on: var(--on-accent);
@@ -794,9 +831,10 @@ BTN = """/* Button: iOS 26 capsules in the Notes highlight colours, translucent 
 .dc-btn:disabled { opacity: .4; cursor: default; filter: none; }
 
 """
-css = css.replace(BTN_OLD, BTN)
+css = css_sub(css, BTN_OLD, BTN)
 PANEL_OLD = css[css.index("/* Panel */") : css.index("/* ListRow */")]
-css = css.replace(
+css = css_sub(
+    css,
     PANEL_OLD,
     """/* Panel: Footage Library's detail card, and its Charts plate states */
 .dc-panel { position: relative; background: var(--surface); border-radius: var(--radius-lg); padding: var(--space-6); display: flex; flex-direction: column; gap: 10px; }
@@ -850,9 +888,16 @@ css = css.replace(
    measurements agreed on. The caption pads itself instead. */
 .dc-artcard { display: flex; flex-direction: column; gap: 0; border: 0; padding: 0; background: none; text-align: left; cursor: pointer; width: var(--artcard-w, 188px); }
 .dc-artcard-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); object-fit: cover; background: var(--surface-sunk); display: block; }
-.dc-artcard-cap { box-sizing: border-box; height: 37px; padding-top: 8px; display: flex; flex-direction: column; justify-content: flex-start; gap: 1px; overflow: hidden; }
+/* The 37px is a measured TOTAL and the type has to fit inside it, not be
+   clipped to it. Two footnote lines are 18 + 18 = 36 and leave 1px for the
+   gap under the artwork, so the subtitle drops to caption-2: 6 + 18 + 13 is
+   exactly 37. The first attempt kept footnote for both and let flex compress
+   each line from 18 to 14, which cut the descenders off the subtitle --
+   invisible in a preview whose subtitle was all-caps. Music's own caption
+   type was never measured, so this split is ours. */
+.dc-artcard-cap { box-sizing: border-box; height: 37px; padding-top: 6px; display: flex; flex-direction: column; justify-content: flex-start; gap: 0; overflow: hidden; }
 .dc-artcard-title { font: var(--type-footnote); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dc-artcard-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard-sub { font: var(--type-caption-2); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
 /* HeroCard: full-bleed artwork at 3:4 with the caption INSIDE the card, over
@@ -906,7 +951,10 @@ css = css.replace(
 .dc-tracklist-row > * { position: relative; }
 .dc-tracklist-cell { font: var(--type-subhead); color: var(--music-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: var(--space-4); }
 .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft); }
-.dc-tracklist-cell[data-align="end"] { text-align: right; padding-right: 0; }
+/* Keyed off the attribute, not .dc-tracklist-cell, so the HEADER aligns with
+   its column too. The header carries no cell class, because that would give it
+   the row cell's subhead ink instead of its own. */
+.dc-tracklist [data-align="end"] { text-align: right; padding-right: 0; }
 .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell,
 .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell[data-soft="true"] { color: var(--on-music-select); }
 .dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell { color: var(--music-ink); }
@@ -975,7 +1023,7 @@ css = css.replace(
    is not key; macOS does this itself and a monitor app is in this state most of
    the time, so it is not an edge case. */
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--music-ink); }
-.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--ink-soft); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--music-ink-soft-on-fill); }
 .dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
 .dc-sidebar-thumb { flex: none; width: 16px; height: 16px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); }
 .dc-sidebar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -999,36 +1047,43 @@ css = css.replace(
 
 """,
 )
-css = css.replace(
+css = css_sub(
+    css,
     ".dc-pill { min-height: 40px; padding: 0 var(--space-5); border-radius: var(--radius-pill); font: 600 13px/18px var(--font-sans); border: 1px solid var(--edge); background: var(--surface); color: var(--ink);",
     ".dc-pill { min-height: 40px; padding: 0 var(--space-5); border-radius: var(--radius-pill); font: 600 13px/18px var(--font-sans); border: 0; background: var(--fill); color: var(--ink);",
 )
-css = css.replace(
+css = css_sub(
+    css,
     '.dc-pill[aria-pressed="true"] { background: var(--clay); border-color: var(--clay); color: var(--on-accent); }',
     '.dc-pill[aria-pressed="true"] { background: var(--accent-wash); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }',
 )
-css = css.replace(
+css = css_sub(
+    css,
     ".dc-badge-clay { background: var(--accent-wash); color: var(--accent-ink); }\n.dc-badge-signal { background: var(--accent-wash); color: var(--accent); }",
     ".dc-badge-accent, .dc-badge-clay, .dc-badge-signal { background: var(--accent-wash); color: var(--accent-ink); }",
 )
-css = css.replace(
+css = css_sub(
+    css,
     ".dc-flag-signal { background: var(--accent-wash); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }",
     ".dc-flag-accent, .dc-flag-signal { background: var(--accent-wash); color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent); }",
 )
-css = css.replace(
+css = css_sub(
+    css,
     ".dc-tile-value { font: 600 28px/32px var(--font-mono);",
     ".dc-tile-value { font: 700 28px/32px var(--font-round);",
 )
-css = css.replace(
+css = css_sub(
+    css,
     ".dc-tile-meter > span { display: block; height: 100%; border-radius: 3px; background: var(--ink); }",
     ".dc-tile-meter > span { display: block; height: 100%; border-radius: 3px; background: var(--accent); }",
 )
-css = css.replace(
+css = css_sub(
+    css,
     ".dc-tile-meter { height: 6px; border-radius: 3px; background: var(--surface-sunk);",
     ".dc-tile-meter { height: 6px; border-radius: 3px; background: var(--accent-wash);",
 )
 assert css.count("inset 0 0 0 1.5px") == 2
-css = css.replace("inset 0 0 0 1.5px", "inset 0 0 0 var(--stroke-outline)")
+css = css_sub(css, "inset 0 0 0 1.5px", "inset 0 0 0 var(--stroke-outline)", count=2)
 assert "clay" not in re.sub(r"dc-(badge|flag)-(clay|signal)", "", css), [
     l for l in css.split("\n") if "clay" in l
 ]
@@ -1045,12 +1100,14 @@ TYPE = {
     for g in tok["type"]["groups"]
     for s in g["styles"]
 }
-css = css.replace(
+css = css_sub(
+    css,
     "font-family: var(--font-sans); font-size: 16px; line-height: 21px;",
     "font: 400 16px/21px var(--font-sans);",
 )
 # The thumbnail placeholder was 10/12, the only size below the scale; it takes label, one step up.
-css = css.replace(
+css = css_sub(
+    css,
     "font: 600 10px/12px var(--font-mono);", "font: 600 11px/14px var(--font-mono);"
 )
 
@@ -1200,26 +1257,65 @@ js = js.replace(
   // playlist measured has seven and no Album, an earlier capture had one.
   function TrackList(p) {
     var cols = p.columns || [];
+    var rows = p.rows || [];
     var grid = cols.map(function (c) { return c.width || "1fr"; }).join(" ");
+    var ids = rows.map(function (row, i) { return row.id != null ? row.id : i; });
+    var selectable = !!p.onSelect;
+    // A role=grid wants ONE tab stop with the arrows moving inside it, not one
+    // per row: a 200-track playlist is otherwise 200 tab stops. The row that
+    // takes it is the selected one, falling back to the first.
+    var activeIndex = Math.max(0, ids.indexOf(p.selection));
+    function onKeyDown(e, i) {
+      var next = null;
+      if (e.key === "ArrowDown") next = Math.min(ids.length - 1, i + 1);
+      else if (e.key === "ArrowUp") next = Math.max(0, i - 1);
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = ids.length - 1;
+      else if (e.key === "Enter" || e.key === " ") {
+        // Enter plays, which is what Music does. Space too, since a focused row
+        // has to answer the key that activates everything else.
+        e.preventDefault();
+        if (p.onPlay) p.onPlay(ids[i]);
+        return;
+      } else return;
+      e.preventDefault();
+      if (next === i) return;
+      // Move focus WITH the selection. Moving only the selection leaves the
+      // focus ring behind and a screen reader never hears the change.
+      var el = e.currentTarget.parentNode.querySelectorAll(".dc-tracklist-row")[next];
+      if (el) el.focus();
+      if (p.onSelect) p.onSelect(ids[next]);
+    }
     function cells(row, head) {
       return cols.map(function (c, i) {
         var v = head ? c.label : (c.render ? c.render(row) : row[c.key]);
-        return h("span", { key: c.key || i, className: head ? undefined : "dc-tracklist-cell",
+        return h("span", { key: c.key || i,
+                           className: head ? undefined : "dc-tracklist-cell",
+                           role: head ? "columnheader" : "gridcell",
                            "data-soft": !head && c.soft ? "true" : undefined,
+                           // Alignment is a column property, so the header has to
+                           // take it too or a right-aligned Time column sits over
+                           // left-aligned times.
                            "data-align": c.align === "end" ? "end" : undefined }, v);
       });
     }
     return h("div", { className: cx("dc-tracklist", p.className), role: "grid",
                       "aria-label": p.label || "Tracks",
+                      "aria-rowcount": rows.length,
                       "data-window-inactive": p.windowInactive ? "true" : undefined },
       cols.some(function (c) { return c.label; })
         ? h("div", { className: "dc-tracklist-head", role: "row", style: { gridTemplateColumns: grid } }, cells(null, true))
         : null,
-      p.rows.map(function (row, i) {
-        var id = row.id != null ? row.id : i;
-        return h("div", { key: id, className: "dc-tracklist-row", role: "row", tabIndex: 0,
-                          "aria-selected": p.selection === id ? "true" : "false",
+      rows.map(function (row, i) {
+        var id = ids[i];
+        return h("div", { key: id, className: "dc-tracklist-row", role: "row",
+                          tabIndex: i === activeIndex ? 0 : -1,
+                          // Only claim a selection state when selection is a
+                          // thing here; otherwise every row announces itself as
+                          // "not selected" in a purely presentational list.
+                          "aria-selected": selectable ? (p.selection === id ? "true" : "false") : undefined,
                           style: { gridTemplateColumns: grid },
+                          onKeyDown: function (e) { onKeyDown(e, i); },
                           onClick: p.onSelect ? function () { p.onSelect(id); } : undefined,
                           onDoubleClick: p.onPlay ? function () { p.onPlay(id); } : undefined },
           cells(row, false));
@@ -1230,8 +1326,15 @@ js = js.replace(
   // only -- the capsule does not own playback, it reports it.
   function MiniPlayer(p) {
     function btn(key, label, glyph, on, extra) {
+      // A control with no handler is genuinely unavailable, so it is disabled.
+      // But a toggle must not claim BOTH pressed and unavailable, which is what
+      // `shuffle` without `onShuffle` produced: accent-red, dimmed, and out of
+      // the tab order. Drop the pressed state when there is nothing to press.
+      var pressable = !!on;
+      var e2 = Object.assign({}, extra || {});
+      if (!pressable) delete e2["aria-pressed"];
       return h("button", Object.assign({ key: key, type: "button", className: "dc-miniplayer-btn",
-                                         "aria-label": label, onClick: on, disabled: !on }, extra || {}), glyph);
+                                         "aria-label": label, onClick: on, disabled: !on }, e2), glyph);
     }
     var pct = Math.max(0, Math.min(1, p.progress || 0)) * 100;
     return h("div", { className: cx("dc-miniplayer", p.className), role: "group", "aria-label": "Now playing",
@@ -1271,7 +1374,10 @@ js = js.replace(
         p.onMore ? h("button", { type: "button", className: "dc-shelf-more", "aria-label": "See all " + p.title, onClick: p.onMore },
           h("svg", { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", "aria-hidden": "true" },
             h("path", { d: "M6 3l5 5-5 5" }))) : null),
-      h("div", { className: "dc-shelf-track", ref: track, tabIndex: 0, role: "list",
+      // No role=list here: the children are the caller's cards, not listitems,
+      // and a list owning no listitem is announced as empty. The section's
+      // aria-label already names the group.
+      h("div", { className: "dc-shelf-track", ref: track, tabIndex: 0,
                  onKeyDown: function (e) {
                    if (e.key === "ArrowRight") { e.preventDefault(); nudge(1); }
                    if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-1); }
@@ -1284,10 +1390,18 @@ js = js.replace(
     // Selection is controlled. Arrow keys move it, matching SegmentedControl.
     var flat = [];
     (p.sections || []).forEach(function (sec) { (sec.items || []).forEach(function (it) { flat.push(it.id); }); });
-    function move(d) {
+    function move(e, d) {
       var i = flat.indexOf(p.selection);
-      var n = flat[Math.min(flat.length - 1, Math.max(0, (i < 0 ? 0 : i) + d))];
-      if (n && p.onSelect) p.onSelect(n);
+      // With nothing selected, step to an END rather than to index 0 + d: the
+      // old form made ArrowDown land on item 1 and skip item 0 entirely.
+      var n = i < 0 ? (d > 0 ? 0 : flat.length - 1)
+                    : Math.min(flat.length - 1, Math.max(0, i + d));
+      if (n === i) return;
+      // Focus follows the selection. Moving only the selection leaves the ring
+      // on the row you started from and a screen reader never hears the change.
+      var rows = e.currentTarget.closest(".dc-sidebar").querySelectorAll(".dc-sidebar-row");
+      if (rows[n]) rows[n].focus();
+      if (p.onSelect) p.onSelect(flat[n]);
     }
     return h("nav", {
       className: cx("dc-sidebar", p.className),
@@ -1307,8 +1421,8 @@ js = js.replace(
                 "aria-current": on ? "true" : undefined,
                 onClick: function () { if (p.onSelect) p.onSelect(it.id); },
                 onKeyDown: function (e) {
-                  if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
-                  if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
+                  if (e.key === "ArrowDown") { e.preventDefault(); move(e, 1); }
+                  if (e.key === "ArrowUp") { e.preventDefault(); move(e, -1); }
                 }
               },
                 it.thumb
@@ -1791,6 +1905,17 @@ The 20/16 split is a breakpoint, not a scale: 20px was measured at ~1300px of
 content and 16px at 772px. Where it switches is not known, so `compact` is a
 caller decision.
 
+## The caption has to fit 37px, not be clipped to it
+
+37 is a measured total, so the type inside it is constrained by it. Two
+`footnote` lines are 18 + 18 = 36 and leave 1px for the gap under the artwork,
+so the subtitle takes `caption-2`: 6 + 18 + 13 is exactly 37.
+
+The first attempt used `footnote` for both and let flex compress each line from
+18 to 14, cutting the descenders off the subtitle. It looked right only because
+the preview's subtitle was all-caps. Music's own caption type was never
+measured, so this split is ours.
+
 ## Scrolling
 
 Music's shelf snaps to a card boundary: a measured scroll landed 878.9px against
@@ -1930,6 +2055,21 @@ the fill becomes `music-select-inactive` with the labels back to normal ink.
 Music's inactive label colour was not measured; normal ink is the macOS default
 and clears 4.5:1 on that fill, which `music-ink-soft` does not (3.31:1), so
 secondary cells step to `music-ink-soft-on-fill` under any fill.
+
+## Keyboard
+
+A `grid` takes **one** tab stop, not one per row -- a 200-track playlist would
+otherwise be 200 of them. The selected row holds it, falling back to the first.
+
+| key | |
+|---|---|
+| Up / Down | move focus **and** the selection together |
+| Home / End | first and last row |
+| Enter, Space | play, which is what Music does |
+
+Focus moves with the selection rather than trailing it, or the ring stays on the
+row you left and a screen reader never hears the change. Double-click also plays,
+for the pointer.
 
 ## Columns are configuration
 
