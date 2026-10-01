@@ -334,7 +334,7 @@ All sRGB unless marked. Values taken before the P3 discovery have been redone.
 | **accent, content** | **`#FA2E48`** | **`#FA233B`** | stroke interiors of the "Tame Impala" title, found by scanning the whole image for strongly-red pixels rather than guessing coordinates. 707 px dark, ~445 px light |
 | **accent, sidebar icon** | **`#FF275C`** | **`#FF0029`** | same scan, 626 px in both. Differs from the content accent because the sidebar is a vibrancy material; treat as one token through material, not two tokens, until proven otherwise |
 | **transport button fill** (Play) | **`#F3F3F3`** | **`#0E0E0E`** | widest dark/light run in the header band. Light: 124pt wide at y=294pt, 2484 px of `#0E0E0E`. **It inverts with appearance**: maximum contrast against the ground |
-| **CTA button fill** (Set Location) | not yet | **`#FA233B`** | 1238 x 32pt filled bar, 805 sampled px. Exactly the content accent value |
+| **CTA button fill** (Set Location) | **`#FA2E48`** | **`#FA233B`** | filled bar, 32pt tall in both themes, white label. **Exactly the content accent in each theme**, so the CTA fill is not a separate token: it IS `music-accent` |
 | surface (detail panel) | not yet | `#FFFFFF` | vertical sweep, y=60-540pt on the album page |
 | ground | `#1F1F20` | `#FFFFFF` | row-wise sweep where every sample agrees. Light confirmed on Home; `#F8F8F8` is a section background on album pages, not the ground |
 | sidebar ground | `#262629` | `#EDEDEE` | same sweep. **Wallpaper-dependent in dark**, see below |
