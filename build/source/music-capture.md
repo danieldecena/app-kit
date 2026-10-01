@@ -178,9 +178,58 @@ That closes the open question in the plan.
 
 ## Geometry
 
-Measured off captures by edge detection, not Accessibility Inspector. Edges in
-this UI are hard, so a scanline resolves them to the half-point. Source:
-`playlist-tracklist-unfocused-light.png`.
+**Use `ax-dump.swift`. It reads exact frames in points straight from the app.**
+
+```
+swift build/source/ax-dump.swift Music [maxDepth]
+```
+
+This supersedes pixel measurement for geometry, and it means Accessibility
+Inspector is not needed either. Getting there took three wrong turns worth
+recording, because the obvious routes all fail on Music specifically:
+
+- `System Events` reports Music as having **0 windows**. Finder and Safari
+  report 1, so the permission is fine and the failure is Music-specific.
+- The raw AX API agrees: `AXWindows` returns success with an **empty** array for
+  Music and one window for Safari.
+- But `AXMainWindow` works. **Enter through `AXMainWindow`, not `AXWindows`.**
+
+Music's own AppleScript dictionary also answers (`bounds of front window` gives
+`106, 59, 1694, 1066`), but only for the window, not its contents.
+
+### Window chrome and containers (AX, exact)
+
+| Element | Frame, window-relative |
+|---|---|
+| window | 1588 x 1007pt |
+| toolbar | y=0, h=**52pt**, full width |
+| sidebar scroll area | x=0, y=52, **w=270**, h=898 |
+| content scroll area | x=270, y=52, **w=1318**, h=873 |
+| MiniPlayer group | x=579, y=934, **w=700, h=54** |
+| profile button | x=18, y=961, 123 x 28 |
+| Go Back / Share / More / Sort | 40x52, 36x52, 36x52, 42x52 |
+| search field | x=1359, y=7, 221.5 x 38 |
+
+### SidebarList (AX, exact)
+
+| | |
+|---|---|
+| row height | **32.0pt** (rows at y=52, 84, 116, 148 …) |
+| section header row | **19.0pt** |
+| row width | 270.0pt |
+
+Cross-check: pixel measurement gave 32.2pt for the row, so that method was
+sound. It gave **200pt** for the sidebar width, which is **wrong** — that is
+where the background colour changes, not where the control ends. A colour
+boundary is not a control boundary.
+
+The MiniPlayer is the reverse check: AX says 700 x 54pt, pixel measurement said
+700 x ~52pt. Agreement there is what validates the pixel numbers below.
+
+### Measured off captures by edge detection
+
+Still the right tool for anything AX does not expose as its own element, such as
+the gap *between* cards. Source: `playlist-tracklist-unfocused-light.png`.
 
 ### TrackList
 
