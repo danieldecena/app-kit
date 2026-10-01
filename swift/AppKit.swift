@@ -23,7 +23,7 @@ public extension Color {
         public static let surface = dyn((1.000, 1.000, 1.000, 1.00), (0.110, 0.110, 0.118, 1.00))
         /// Segmented tracks, neutral badges, thumbnail placeholders: systemGray5 / tertiary grouped.
         public static let surfaceSunk = dyn((0.898, 0.898, 0.918, 1.00), (0.173, 0.173, 0.180, 1.00))
-        /// Primary text and icons (label). 13:1 or better on ground and surface, 12.8:1 on surface-sunk in dark.
+        /// Primary text and icons (label). 13:1 or better on ground and surface, just under 12.8:1 on surface-sunk in dar
         public static let ink = dyn((0.114, 0.114, 0.122, 1.00), (0.961, 0.961, 0.969, 1.00))
         /// Secondary text (secondaryLabel, opaque). 4.7:1 or better on ground, surface and surface-sunk.
         public static let inkSoft = dyn((0.388, 0.388, 0.400, 1.00), (0.596, 0.596, 0.616, 1.00))
