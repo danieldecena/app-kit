@@ -2,12 +2,12 @@
 
 - [x] Dark CTA button fill: #FA2E48, which is exactly the dark accent, so no separate token is needed
 - [ ] [you] Capture a row with the mouse held down, to settle whether a pressed state exists
-- [ ] [you] Click the spike window so it is key, to settle whether .tint reaches the ACTIVE sidebar selection fill (run build/source/music-spike.swift; three capture attempts all caught it unfocused)
+- [ ] [you] Click the spike window, then it self-captures: .tint vs the ACTIVE selection. Four attempts incl. in-process NSApp.activate all report isKeyWindow=false -- macOS denies focus to a shell-launched binary, so this needs a human click
 - [ ] [you] Capture the dark transport button with the window inactive, for music-primary-inactive
 - [x] Verify the Home AX dump was complete -- depth 9 reports no truncation; card size turned out to track the resizable sidebar width
 - [x] Slice 2: 11 music-* tokens added, gate extended to 29 pairs plus an orientation check
 - [x] Slice 2: WCAG contrast assertion in app_build.py -- 24 pairs, proved by mutation, survives python -O
-- [ ] Slice 2: SwiftUI spike in claude-spinner for ground-window and sidebar vibrancy
+- [x] Slice 2: SwiftUI spike -- ground-window, select and hover render exactly; sidebar is the stock material within 2 units
 
 - [x] Confirm the app_build.py invocation reproduces the tree byte-for-byte
 - [x] Write a CLAUDE.md for app-kit (build, publish, component pattern, design skills)

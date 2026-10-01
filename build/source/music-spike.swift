@@ -121,4 +121,29 @@ win.titlebarAppearsTransparent = true
 win.contentView = NSHostingView(rootView: SpikeView())
 win.makeKeyAndOrderFront(nil)
 app.activate(ignoringOtherApps: true)
+
+// Self-capture. A shell-launched binary loses focus to the terminal within a
+// second or two, so three external capture attempts all caught this window
+// unfocused and only ever showed the inactive selection. Capturing from inside
+// the process, after re-asserting focus, is the only way to observe the ACTIVE
+// state without a human clicking the window.
+if CommandLine.arguments.contains("--selfshot") {
+    let out = CommandLine.arguments.last ?? "/tmp/spike-self.png"
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+        NSApp.activate(ignoringOtherApps: true)
+        win.makeKeyAndOrderFront(nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            let key = win.isKeyWindow, active = NSApp.isActive
+            let p = Process()
+            p.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
+            p.arguments = ["-o", "-x", "-l", String(win.windowNumber), out]
+            try? p.run(); p.waitUntilExit()
+            // Report the focus state WITH the shot: a capture of an unfocused
+            // window is not evidence about the active selection.
+            FileHandle.standardError.write(
+                "isKeyWindow=\(key) isActive=\(active) wrote=\(out)\n".data(using: .utf8)!)
+            NSApp.terminate(nil)
+        }
+    }
+}
 app.run()
