@@ -915,7 +915,12 @@ css = css.replace(
    measured music-ink-soft reaches only 3.31:1 on the inactive fill and 3.99:1
    on hover in light. So soft cells step to music-ink-soft-on-fill whenever a
    fill is under them. That is a decision, not a measurement. */
-.dc-tracklist-row:hover .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft-on-fill); }
+/* :not(selected) is load-bearing, not tidiness. Without it this rule ties the
+   selected-row rule on specificity, wins by coming later, and paints the
+   stepped grey onto the red fill: #5F5F5F on #DC1229 is 1.27:1. The gate
+   cannot catch that, because it is a cascade accident between two pairs that
+   each pass on their own. */
+.dc-tracklist-row:not([aria-selected="true"]):hover .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft-on-fill); }
 .dc-tracklist-art { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); display: block; }
 .dc-tracklist-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -4px; border-radius: 6px; }
 
