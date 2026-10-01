@@ -87,7 +87,8 @@ All sRGB unless marked. Values taken before the P3 discovery have been redone.
 |---|---|---|---|
 | **accent, content** | **`#FA2E48`** | **`#FA233B`** | stroke interiors of the "Tame Impala" title, found by scanning the whole image for strongly-red pixels rather than guessing coordinates. 707 px dark, ~445 px light |
 | **accent, sidebar icon** | **`#FF275C`** | **`#FF0029`** | same scan, 626 px in both. Differs from the content accent because the sidebar is a vibrancy material; treat as one token through material, not two tokens, until proven otherwise |
-| **primary button fill** | **`#F3F3F3`** | **`#0E0E0E`** | widest dark/light run in the header band. Light: 124pt wide at y=294pt, 2484 px of `#0E0E0E`. **It inverts with appearance**: maximum contrast against the ground, never the accent |
+| **transport button fill** (Play) | **`#F3F3F3`** | **`#0E0E0E`** | widest dark/light run in the header band. Light: 124pt wide at y=294pt, 2484 px of `#0E0E0E`. **It inverts with appearance**: maximum contrast against the ground |
+| **CTA button fill** (Set Location) | not yet | **`#FA233B`** | 1238 x 32pt filled bar, 805 sampled px. Exactly the content accent value |
 | surface (detail panel) | not yet | `#FFFFFF` | vertical sweep, y=60-540pt on the album page |
 | ground | `#1F1F20` | `#FFFFFF` | row-wise sweep where every sample agrees. Light confirmed on Home; `#F8F8F8` is a section background on album pages, not the ground |
 | sidebar ground | `#262629` | `#EDEDEE` | same sweep. **Wallpaper-dependent in dark**, see below |
@@ -192,7 +193,39 @@ so a Shelf component should take the card as a slot rather than owning its size.
 So a section header occupies roughly one extra row slot rather than a bespoke
 margin, which is worth copying.
 
-### MiniPlayer — not measurable from these captures
+### Buttons: the accent IS a fill, for one kind of button
+
+An earlier note here claimed Music never fills a button with its accent. **That
+was wrong**, generalised from the Play button alone. Both kinds exist:
+
+| Kind | Example | Fill | Label |
+|---|---|---|---|
+| transport / primary | Play on an album or playlist | neutral, inverts with appearance (`#0E0E0E` light, `#F3F3F3` dark) | opposite neutral |
+| CTA / promotional | "Set Location" in the Concerts card | **the accent, `#FA233B` light** | white |
+
+So the variant needs `music-accent-fill` after all, and the real rule is about
+*which* button: the thing you press to play is neutral, the thing that sells you
+something is accent. Getting that backwards gives you a red Play button, which
+is the original failure this was guarding against.
+
+### MiniPlayer
+
+| Dimension | Measured | How |
+|---|---|---|
+| **width** | **701.0pt** | three independent scans agreeing: 698, 701.0, 701.5pt |
+| height | not measured | see below |
+
+Measuring it is harder than it looks and the obvious fix made it worse. The
+capsule is a light translucent pill; over **white** ground it is nearly white, so
+its edge has almost no contrast and both thresholding and translucency-lift
+comparison fail. Scrolling it onto flat ground, which I asked for, produced the
+worst case rather than the best.
+
+**What would work: a dark-mode capture with the capsule over flat dark ground.**
+A light pill on a dark ground has high edge contrast, and height and corner
+radius fall straight out.
+
+### Superseded, kept so it is not re-derived
 
 The capsule is translucent and floats over album artwork, so it has no stable
 edge: a threshold finds nothing (it is not pale, it is mid-grey over dark art)
