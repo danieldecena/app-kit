@@ -97,11 +97,21 @@ separator or the playing row.
 
 **Selection has two appearances, and which one you see depends on window focus.**
 
-| state | fill | when |
-|---|---|---|
-| hover | **`#2C2C2D`** | pointer over the row. Measured twice independently, same value |
-| selected, window **active** | **`#CC132D`** | Music is the key window |
-| selected, window **inactive** | **`#464646`** | any other app is frontmost |
+| state | dark | light | when |
+|---|---|---|---|
+| hover | **`#2C2C2D`** | **`#F0F0F0`** | pointer over the row. Dark value measured twice independently |
+| selected, window **active** | **`#CC132D`** | **`#DC1229`** | Music is the key window |
+| selected, window **inactive** | **`#464646`** | not yet | any other app is frontmost |
+
+Geometry is identical across both appearances and both states: **1238pt wide,
+45pt tall, x 310.0-1547.5pt**. The selected pill is the reliable one to measure
+because red matches nothing else on the page; a light-mode hover scan for
+`#F0F0F0` runs into the sidebar ground `#EDEDEE` and over-reports the width as
+1348pt.
+
+Note the selection fill is **not** the accent in either theme. Accent is
+`#FA2E48` dark / `#FA233B` light; selection is `#CC132D` / `#DC1229`, darker and
+more saturated in both. Three separate red tokens, none derivable from another.
 
 This is standard macOS active/inactive selection, and it caught me out: the
 first "selected" capture read red because Music was still key at that moment,
