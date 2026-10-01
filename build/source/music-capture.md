@@ -226,6 +226,36 @@ boundary is not a control boundary.
 The MiniPlayer is the reverse check: AX says 700 x 54pt, pixel measurement said
 700 x ~52pt. Agreement there is what validates the pixel numbers below.
 
+### TrackList (AX, exact)
+
+Row height **56.0pt**, width 1318pt, confirming the 56.0pt measured from pixels.
+
+Columns, window-relative x (the content area begins at x=270):
+
+| Column | x | width |
+|---|---|---|
+| favorited star | 270.0 | 40.0 |
+| artwork | 310.0 | 57.0 |
+| Song | 367.0 | 593.5 |
+| Artist | 960.5 | 468.5 |
+| cloud / download | 1429.0 | 16.0 |
+| Time | 1445.0 | 58.0 |
+| "…" menu | 1503.0 | 85.0 |
+
+**The column set is not fixed.** This playlist has seven columns and no Album;
+an earlier capture had one. So TrackList takes its columns as configuration, and
+the pixel-derived column positions recorded earlier describe a *different*
+column set, not a contradiction.
+
+### Detail page header (AX, exact)
+
+| Element | Frame |
+|---|---|
+| title | x=611, y=87, 502 x 33 |
+| "Updated N days ago" | x=611, y=155, 119.5 x 17 |
+| description | x=611, y=206, 502 x 54 |
+| header group | x=310, y=52, 1238 x 270 |
+
 ### Measured off captures by edge detection
 
 Still the right tool for anything AX does not expose as its own element, such as
