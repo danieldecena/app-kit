@@ -301,7 +301,7 @@ colors += [
         "music-accent",
         "#FA233B",
         "#FA2E48",
-        "Music's fixed red. Icons, text actions, the favorited star, the active queue icon, and CTA button fills. NOT the transport button, which is neutral. Only 4.35:1 on ground-window, so use music-accent-ink for text.",
+        "Music's fixed red. Sidebar glyphs, text actions, the active queue icon, and CTA button fills. NOT the transport button, which is neutral, and NOT the favorited star, which measures gold. Only 4.35:1 on ground-window, so use music-accent-ink for text.",
     ),
     T(
         "music-accent-ink",
@@ -362,6 +362,12 @@ colors += [
         "#767676",
         "#9A9A9A",
         "Secondary text. Music measures #808080 in light, which is only 3.95:1 on white; #767676 is the first grey that clears 4.5. The second deliberate departure.",
+    ),
+    T(
+        "music-ink-soft-on-fill",
+        "#5F5F5F",
+        "#B4B4B4",
+        "Secondary text on music-hover or music-select-inactive. music-ink-soft reaches only 3.31:1 on the inactive selection fill and 3.99:1 on hover in light, so it is stepped here, the same split App Kit already makes between accent and accent-ink.",
     ),
 ]
 
@@ -603,6 +609,13 @@ CONTRAST_PAIRS = (
         ("on-music-select", "music-select", 4.5),
         ("music-ink", "ground-window", 4.5),
         ("music-ink-soft", "ground-window", 4.5),
+        ("music-ink-soft-on-fill", "ground-window", 4.5),
+        # The states a row can be in. music-ink-soft fails both in light, which
+        # is what music-ink-soft-on-fill exists for.
+        ("music-ink-soft-on-fill", "music-hover", 4.5),
+        ("music-ink-soft-on-fill", "music-select-inactive", 4.5),
+        ("music-ink", "music-hover", 4.5),
+        ("music-ink", "music-select-inactive", 4.5),
     ]
     + [
         (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
@@ -689,6 +702,7 @@ def _check_contrast(tokens):
         "ink-soft",
         "music-ink",
         "music-ink-soft",
+        "music-ink-soft-on-fill",
         "music-primary",
     )
     # The reds do not follow the ground: they are deliberately near-equal in both
@@ -825,13 +839,18 @@ css = css.replace(
 .dc-shelf-track { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: var(--space-2); }
 .dc-shelf-track::-webkit-scrollbar { display: none; }
 .dc-shelf[data-compact="true"] .dc-shelf-track { gap: 16px; }
-.dc-shelf-track > * { scroll-snap-align: start; flex: none; }
+/* align-self stops a card being stretched to the tallest sibling, which would
+   break "card height minus card width is 37" the moment a shelf mixed widths. */
+.dc-shelf-track > * { scroll-snap-align: start; flex: none; align-self: flex-start; }
 /* ArtworkCard: a SQUARE artwork plus a caption block of constant height. Card
    height minus card width measured 37.0, 36.8 and 37.0pt across three widths,
    so the caption does not scale with the card. */
-.dc-artcard { display: flex; flex-direction: column; gap: var(--space-4); border: 0; padding: 0; background: none; text-align: left; cursor: pointer; width: var(--artcard-w, 188px); }
+/* No gap: the measured invariant is card height MINUS card width = 37, so a gap
+   on top of a 37px caption would make it 45 and break the one thing three
+   measurements agreed on. The caption pads itself instead. */
+.dc-artcard { display: flex; flex-direction: column; gap: 0; border: 0; padding: 0; background: none; text-align: left; cursor: pointer; width: var(--artcard-w, 188px); }
 .dc-artcard-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); object-fit: cover; background: var(--surface-sunk); display: block; }
-.dc-artcard-cap { height: 37px; display: flex; flex-direction: column; justify-content: flex-start; gap: 1px; overflow: hidden; }
+.dc-artcard-cap { box-sizing: border-box; height: 37px; padding-top: 8px; display: flex; flex-direction: column; justify-content: flex-start; gap: 1px; overflow: hidden; }
 .dc-artcard-title { font: var(--type-footnote); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
@@ -891,7 +910,12 @@ css = css.replace(
 .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell,
 .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell[data-soft="true"] { color: var(--on-music-select); }
 .dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell { color: var(--music-ink); }
-.dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft); }
+.dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"] .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft-on-fill); }
+/* Music's own secondary ink on these two fills was never measured, and the
+   measured music-ink-soft reaches only 3.31:1 on the inactive fill and 3.99:1
+   on hover in light. So soft cells step to music-ink-soft-on-fill whenever a
+   fill is under them. That is a decision, not a measurement. */
+.dc-tracklist-row:hover .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft-on-fill); }
 .dc-tracklist-art { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); display: block; }
 .dc-tracklist-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -4px; border-radius: 6px; }
 
@@ -906,6 +930,11 @@ css = css.replace(
    Geometry below is measured from a Reduce Transparency capture, which is the
    only way to get a clean edge on a glass element -- over artwork it has no
    stable edge, and over white ground it has almost no contrast. */
+/* `floating` is what actually positions it, and it is opt-in because the
+   capsule has to be inside the CONTENT column for the centring to be Music's.
+   Dropped into a window-width wrapper it would centre on the window, which is
+   the thing the measurement says it does not do. */
+.dc-miniplayer[data-floating="true"] { position: absolute; left: 50%; transform: translateX(-50%); bottom: 19px; z-index: 2; }
 .dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--ink); }
 .dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
 .dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
@@ -940,7 +969,7 @@ css = css.replace(
 /* Inactive selection. Set data-window="inactive" on the sidebar when the window
    is not key; macOS does this itself and a monitor app is in this state most of
    the time, so it is not an edge case. */
-.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--ink); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--music-ink); }
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--ink-soft); }
 .dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
 .dc-sidebar-thumb { flex: none; width: 16px; height: 16px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); }
@@ -1201,6 +1230,7 @@ js = js.replace(
     }
     var pct = Math.max(0, Math.min(1, p.progress || 0)) * 100;
     return h("div", { className: cx("dc-miniplayer", p.className), role: "group", "aria-label": "Now playing",
+                      "data-floating": p.floating ? "true" : undefined,
                       style: p.width ? { "--miniplayer-w": p.width + "px" } : undefined },
       h("div", { className: "dc-miniplayer-transport" },
         btn("sh", "Shuffle", p.shuffleGlyph || "⇄", p.onShuffle, { "aria-pressed": p.shuffle ? "true" : "false" }),
@@ -1483,6 +1513,8 @@ export function MiniPlayer(props: {
   favoriteGlyph?: ReactNode;
   /** Capsule width in px; 700 by default, the measured value. */
   width?: number;
+  /** Position it 19px up from the bottom, centred. Put it inside the CONTENT column, not a window-width wrapper: Music centres it on the content, not the window. */
+  floating?: boolean;
   className?: string;
 }): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
@@ -1776,7 +1808,10 @@ moved. So `HeroCard` takes a `width` and derives the height; see
 [Shelf](../Shelf/README.md) for the same decision on the row around it.
 
 Caption geometry, measured from the same capture: 18.5pt in from the left edge,
-title sitting 22.5pt up from the bottom, eyebrow 7.5pt above the title.
+title sitting 22.5pt up from the bottom, eyebrow 7.5pt above the title. The CSS
+rounds to 18px and lets the line boxes set the rest, so the title sits a little
+lower than Music's; the badge inset (14px) and the eyebrow's 82% alpha are the
+component's own and were not measured.
 
 ## The scrim is ours, not Music's
 
@@ -1875,18 +1910,36 @@ App Kit's convention is the accent stepped 20% toward black, which from `#FA2E48
 would give `#C8253A`. Music uses `#CC132D`. So `music-select` is a measured value
 and not a derivation, and the same goes the other way.
 
+## Header
+
+`caption-2` uppercase. Music's own headers read "Song / Artist / Album" in
+sentence case and the capture records a 32pt header row that this component does
+not set. Both are departures, not readings.
+
 ## Inactive selection is the normal state for a monitor app
 
 macOS greys the selection when the window is not key, and this caught the capture
 out: the first "selected" shot read red because Music was still key, and a later
 shot of the same state read grey because it was not. Pass `windowInactive` and
 the fill becomes `music-select-inactive` with the labels back to normal ink.
+Music's inactive label colour was not measured; normal ink is the macOS default
+and clears 4.5:1 on that fill, which `music-ink-soft` does not (3.31:1), so
+secondary cells step to `music-ink-soft-on-fill` under any fill.
 
 ## Columns are configuration
 
 The measured playlist has seven columns and no Album; an earlier capture had one.
 So the column set is passed in, and pixel-derived column positions recorded for
 one capture describe *that* column set rather than contradicting another.
+
+### Two measured columns this component cannot place
+
+The star sits at x=270 and the "..." menu runs to 1588, while the pill spans
+310.0-1547.5. So in Music both live **outside** the pill, in the 40pt gutters.
+The grid here starts after that 40px padding, so a star or menu column passed in
+`columns` renders inside the pill instead. Shipped that way deliberately rather
+than silently dropping them: the frames below are the record of what Music does,
+and matching it needs a gutter slot this component does not have yet.
 
 Measured column frames for the seven-column playlist, window-relative:
 
@@ -2028,13 +2081,20 @@ thumbnail, and a rounded selection fill.
 
 ## Geometry
 
-Measured from the Music app, not designed.
+| | | |
+|---|---|---|
+| row height | **32pt** | measured, AX and pixels agree |
+| section header | **19pt** | measured, AX |
+| selection | a rounded fill inset within the row | **shape measured, size not** |
 
-| | |
-|---|---|
-| row height | 32pt |
-| section header | 19pt |
-| selection | rounded fill inset within the row |
+Only the first two numbers are measured. The sidebar's selection fill, its
+radius, its hover, the 16px glyph and thumbnail, the 600 weight on the selected
+row, the 50px footer and the 24px avatar are all the component's own: the
+capture records the sidebar's row rhythm and its inactive behaviour, not a
+selection frame. The fills reuse `music-select` and `music-hover`, which were
+measured on **track rows**, on the reasoning that macOS draws one selection
+colour per window rather than one per list. That is a reasonable inference and
+it is not an observation.
 
 The sidebar's **width is not a token**. It is a user-resizable split, so ship a
 default and a minimum and let the person drag it. Card and shelf sizes elsewhere
@@ -2387,7 +2447,7 @@ scrape of music.apple.com gave `#D60017` for the accent; the Mac app measures
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `music-accent` | `#FA233B` | `#FA2E48` | sidebar glyphs, text actions, the favorited star, promotional CTA fills |
+| `music-accent` | `#FA233B` | `#FA2E48` | sidebar glyphs, text actions, the active queue icon, promotional CTA fills |
 | `music-accent-ink` | `#EA0623` | `#FA3851` | the same red as *text*, stepped to pass 4.5:1 |
 | `music-select` | `#DC1229` | `#CC132D` | the selected row pill |
 
@@ -2415,6 +2475,12 @@ macOS greys a selection when the window is not key, and a monitor app spends
 most of its life there. `SidebarList` and `TrackList` both take
 `windowInactive`, which swaps `music-select` for `music-select-inactive` and
 returns labels to normal ink. Sidebar glyphs lose their red entirely.
+
+Music's own secondary ink on a filled row was never measured, and the measured
+`music-ink-soft` reaches only 3.31:1 on the inactive fill and 3.99:1 on hover in
+light. So secondary cells step to `music-ink-soft-on-fill` whenever a fill is
+under them. That is a decision rather than a measurement, and it is the same
+split App Kit already makes between `accent` and `accent-ink`.
 
 ### Sizes are not the spec; ratios and gaps are
 

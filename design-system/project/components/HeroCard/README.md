@@ -12,7 +12,10 @@ moved. So `HeroCard` takes a `width` and derives the height; see
 [Shelf](../Shelf/README.md) for the same decision on the row around it.
 
 Caption geometry, measured from the same capture: 18.5pt in from the left edge,
-title sitting 22.5pt up from the bottom, eyebrow 7.5pt above the title.
+title sitting 22.5pt up from the bottom, eyebrow 7.5pt above the title. The CSS
+rounds to 18px and lets the line boxes set the rest, so the title sits a little
+lower than Music's; the badge inset (14px) and the eyebrow's 82% alpha are the
+component's own and were not measured.
 
 ## The scrim is ours, not Music's
 

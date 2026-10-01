@@ -1,5 +1,8 @@
 ## Tasks
 
+- [ ] MiniPlayer has no SwiftUI spike check. The plan makes the spike the fidelity gate for slice 6 and only the CSS preview exists, so the glass capsule has never been judged against a real material
+- [ ] [you] Contextual toolbar: deferred, not dropped. Music's is per-page (Home has none, a playlist has a back chevron, an action capsule and a search field), so it needs its own capture pass before it is a component
+- [ ] [you] Window chrome (unified titlebar, traffic-light inset, back/forward): deferred to the adopting app. It is contextual per page, so App Kit would be guessing; revisit if Spinner needs it
 - [x] TrackList -- taken into this plan rather than deferred; pill highlight, configurable columns
 - [x] Slice 6: MiniPlayer -- 700x54 stadium capsule, progress line scoped to the now-playing group
 - [x] Slice 5: HeroCard -- 3:4 ratio, caption over the art, scrim checked against white artwork

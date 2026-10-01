@@ -88,7 +88,7 @@ scrape of music.apple.com gave `#D60017` for the accent; the Mac app measures
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `music-accent` | `#FA233B` | `#FA2E48` | sidebar glyphs, text actions, the favorited star, promotional CTA fills |
+| `music-accent` | `#FA233B` | `#FA2E48` | sidebar glyphs, text actions, the active queue icon, promotional CTA fills |
 | `music-accent-ink` | `#EA0623` | `#FA3851` | the same red as *text*, stepped to pass 4.5:1 |
 | `music-select` | `#DC1229` | `#CC132D` | the selected row pill |
 
@@ -116,6 +116,12 @@ macOS greys a selection when the window is not key, and a monitor app spends
 most of its life there. `SidebarList` and `TrackList` both take
 `windowInactive`, which swaps `music-select` for `music-select-inactive` and
 returns labels to normal ink. Sidebar glyphs lose their red entirely.
+
+Music's own secondary ink on a filled row was never measured, and the measured
+`music-ink-soft` reaches only 3.31:1 on the inactive fill and 3.99:1 on hover in
+light. So secondary cells step to `music-ink-soft-on-fill` whenever a fill is
+under them. That is a decision rather than a measurement, and it is the same
+split App Kit already makes between `accent` and `accent-ink`.
 
 ### Sizes are not the spec; ratios and gaps are
 

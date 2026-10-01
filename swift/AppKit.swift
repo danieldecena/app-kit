@@ -131,7 +131,7 @@ public extension Color {
         public static let glassEdge = dyn((1.000, 1.000, 1.000, 0.70), (1.000, 1.000, 1.000, 0.14))
         /// Toasts and hints over content, white text.
         public static let scrim = dyn((0.000, 0.000, 0.000, 0.80), (0.000, 0.000, 0.000, 0.78))
-        /// Music's fixed red. Icons, text actions, the favorited star, the active queue icon, and CTA button fills. NOT t
+        /// Music's fixed red. Sidebar glyphs, text actions, the active queue icon, and CTA button fills. NOT the transpor
         public static let musicAccent = dyn((0.980, 0.137, 0.231, 1.00), (0.980, 0.180, 0.282, 1.00))
         /// Accent TEXT, where 4.5:1 must hold. Music itself uses the raw accent here and fails AA; this is the one delibe
         public static let musicAccentInk = dyn((0.918, 0.024, 0.137, 1.00), (0.980, 0.220, 0.318, 1.00))
@@ -153,6 +153,8 @@ public extension Color {
         public static let musicInk = dyn((0.153, 0.153, 0.153, 1.00), (0.867, 0.867, 0.867, 1.00))
         /// Secondary text. Music measures #808080 in light, which is only 3.95:1 on white; #767676 is the first grey that
         public static let musicInkSoft = dyn((0.463, 0.463, 0.463, 1.00), (0.604, 0.604, 0.604, 1.00))
+        /// Secondary text on music-hover or music-select-inactive. music-ink-soft reaches only 3.31:1 on the inactive sel
+        public static let musicInkSoftOnFill = dyn((0.373, 0.373, 0.373, 1.00), (0.706, 0.706, 0.706, 1.00))
     }
 }
 

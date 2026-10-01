@@ -29,18 +29,36 @@ App Kit's convention is the accent stepped 20% toward black, which from `#FA2E48
 would give `#C8253A`. Music uses `#CC132D`. So `music-select` is a measured value
 and not a derivation, and the same goes the other way.
 
+## Header
+
+`caption-2` uppercase. Music's own headers read "Song / Artist / Album" in
+sentence case and the capture records a 32pt header row that this component does
+not set. Both are departures, not readings.
+
 ## Inactive selection is the normal state for a monitor app
 
 macOS greys the selection when the window is not key, and this caught the capture
 out: the first "selected" shot read red because Music was still key, and a later
 shot of the same state read grey because it was not. Pass `windowInactive` and
 the fill becomes `music-select-inactive` with the labels back to normal ink.
+Music's inactive label colour was not measured; normal ink is the macOS default
+and clears 4.5:1 on that fill, which `music-ink-soft` does not (3.31:1), so
+secondary cells step to `music-ink-soft-on-fill` under any fill.
 
 ## Columns are configuration
 
 The measured playlist has seven columns and no Album; an earlier capture had one.
 So the column set is passed in, and pixel-derived column positions recorded for
 one capture describe *that* column set rather than contradicting another.
+
+### Two measured columns this component cannot place
+
+The star sits at x=270 and the "..." menu runs to 1588, while the pill spans
+310.0-1547.5. So in Music both live **outside** the pill, in the 40pt gutters.
+The grid here starts after that 40px padding, so a star or menu column passed in
+`columns` renders inside the pill instead. Shipped that way deliberately rather
+than silently dropping them: the frames below are the record of what Music does,
+and matching it needs a gutter slot this component does not have yet.
 
 Measured column frames for the seven-column playlist, window-relative:
 

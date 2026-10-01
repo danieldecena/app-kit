@@ -170,6 +170,8 @@ export function MiniPlayer(props: {
   favoriteGlyph?: ReactNode;
   /** Capsule width in px; 700 by default, the measured value. */
   width?: number;
+  /** Position it 19px up from the bottom, centred. Put it inside the CONTENT column, not a window-width wrapper: Music centres it on the content, not the window. */
+  floating?: boolean;
   className?: string;
 }): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */

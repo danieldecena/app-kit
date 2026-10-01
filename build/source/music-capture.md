@@ -733,6 +733,30 @@ runs, and is wrong.
 The gap looks like a breakpoint rather than a scale: 20pt at ~1300pt of content,
 16pt at 772. Where it switches is unknown, and three points cannot locate it.
 
+### HeroCard caption geometry (pixel, light)
+
+Source `window-home-unfocused-light.png`, converted to sRGB, card 1 isolated by
+scanning for the near-white gutters at a mid-card row: gutters at x 1015-1052,
+1602-1639 and 2188-2223 @2x give a 587px pitch and a 550px card, so 275.5 x
+367.0pt and a ratio of 0.751, agreeing with the AX figure.
+
+Text bands inside that card, offsets from the card's own edges:
+
+| | |
+|---|---|
+| left inset, both lines | **18.5pt** |
+| title band | y 335.0-344.5pt, so **22.5pt** up from the card bottom, cap height ~10pt |
+| eyebrow band | y 320.0-327.5pt, **7.5pt** above the title, cap height ~8pt |
+| badge | top-right, Apple Music wordmark |
+
+The title was found at a >240 white threshold; the eyebrow needed a lower one,
+which is itself the observation that **the eyebrow is translucent white and the
+title is not**. Both sample over orange artwork, so neither is a colour source:
+the alpha is inferred from the threshold that finds them, not measured.
+
+**The scrim is not Music's.** Music has none here; the artwork is commissioned
+to carry the text. White on the measured `#F4B63F` is 1.81:1.
+
 ### What IS invariant, which is the useful part
 
 Three widths spanning 772 to 1346pt agree on two things, and they are a better

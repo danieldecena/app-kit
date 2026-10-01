@@ -6,13 +6,20 @@ thumbnail, and a rounded selection fill.
 
 ## Geometry
 
-Measured from the Music app, not designed.
+| | | |
+|---|---|---|
+| row height | **32pt** | measured, AX and pixels agree |
+| section header | **19pt** | measured, AX |
+| selection | a rounded fill inset within the row | **shape measured, size not** |
 
-| | |
-|---|---|
-| row height | 32pt |
-| section header | 19pt |
-| selection | rounded fill inset within the row |
+Only the first two numbers are measured. The sidebar's selection fill, its
+radius, its hover, the 16px glyph and thumbnail, the 600 weight on the selected
+row, the 50px footer and the 24px avatar are all the component's own: the
+capture records the sidebar's row rhythm and its inactive behaviour, not a
+selection frame. The fills reuse `music-select` and `music-hover`, which were
+measured on **track rows**, on the reasoning that macOS draws one selection
+colour per window rather than one per list. That is a reasonable inference and
+it is not an observation.
 
 The sidebar's **width is not a token**. It is a user-resizable split, so ship a
 default and a minimum and let the person drag it. Card and shelf sizes elsewhere

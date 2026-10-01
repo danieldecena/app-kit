@@ -163,6 +163,7 @@
     }
     var pct = Math.max(0, Math.min(1, p.progress || 0)) * 100;
     return h("div", { className: cx("dc-miniplayer", p.className), role: "group", "aria-label": "Now playing",
+                      "data-floating": p.floating ? "true" : undefined,
                       style: p.width ? { "--miniplayer-w": p.width + "px" } : undefined },
       h("div", { className: "dc-miniplayer-transport" },
         btn("sh", "Shuffle", p.shuffleGlyph || "⇄", p.onShuffle, { "aria-pressed": p.shuffle ? "true" : "false" }),
