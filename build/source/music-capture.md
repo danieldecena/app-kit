@@ -212,18 +212,28 @@ is the original failure this was guarding against.
 
 | Dimension | Measured | How |
 |---|---|---|
-| **width** | **701.0pt** | three independent scans agreeing: 698, 701.0, 701.5pt |
-| height | not measured | see below |
+| **width** | **700pt** | four scans across two appearances: 698, 700.0, 701.0, 701.5pt |
+| **height** | **~52pt** | 51.0pt by fill-colour match (excludes the antialiased edge), 54.0pt by band edge (includes it) |
+| **corner radius** | **height / 2, a full stadium** | left-edge inset falls 17.5 -> 0pt over 24pt against a 51pt height |
+| fill, Reduce Transparency **on**, dark | `#3B3B3D` | 701pt run, cleanly separated from the `#1C1C1E` Concerts card beneath it |
 
-Measuring it is harder than it looks and the obvious fix made it worse. The
-capsule is a light translucent pill; over **white** ground it is nearly white, so
-its edge has almost no contrast and both thresholding and translucency-lift
-comparison fail. Scrolling it onto flat ground, which I asked for, produced the
-worst case rather than the best.
+**Reduce Transparency is the tool that made this measurable**, and it beats every
+other approach tried. Three failed first:
 
-**What would work: a dark-mode capture with the capsule over flat dark ground.**
-A light pill on a dark ground has high edge contrast, and height and corner
-radius fall straight out.
+1. Over album artwork the capsule is translucent, so it has no stable edge.
+2. Over flat **white** ground it is nearly white, so there is almost no contrast.
+   Scrolling it onto flat ground made it *harder*, not easier.
+3. A translucency-lift comparison fails too, because the lift changes with
+   whatever is behind it.
+
+With Reduce Transparency on, the capsule is opaque and its edge is a clean step.
+Turning it on is also what the plan's capture rules already ask for, to record
+each glass surface twice; it turns out to be the only practical way to measure
+any glass element's geometry at all.
+
+One trap inside that: the capsule floats over the Concerts card, so a naive
+non-ground scan returns the **card's** 1231pt width. The two had to be separated
+by fill colour, `#3B3B3D` capsule against `#1C1C1E` card.
 
 ### Superseded, kept so it is not re-derived
 
