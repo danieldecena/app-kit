@@ -59,7 +59,7 @@ colors = [
         "ink",
         "#1D1D1F",
         "#F5F5F7",
-        "Primary text and icons (label). 13:1 or better on ground, surface and surface-sunk.",
+        "Primary text and icons (label). 13:1 or better on ground and surface, 12.8:1 on surface-sunk in dark.",
     ),
     T(
         "ink-soft",
@@ -467,58 +467,126 @@ for t in tok["radius"]["tokens"]:
 # #777777 (4.48, fails) from #767676 (4.54, passes) on white.
 def _lin(c):
     c /= 255
+    # 0.03928 is the legacy WCAG 2.0 constant; 2.1 errata use 0.04045. For 8-bit
+    # input the two are identical, since the first value above either cutoff is
+    # 11/255 = 0.0431.
     return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
 
 
-def _lum(hexstr):
-    v = hexstr.strip().lstrip("#")
-    r, g, b = (int(v[i : i + 2], 16) for i in (0, 2, 4))
+_HEX6 = re.compile(r"#[0-9A-Fa-f]{6}\Z")
+
+
+def _lum(hexstr, what=""):
+    # Strict: only solid 6-digit hex. An 8-digit #RRGGBBAA would otherwise parse
+    # with its alpha silently dropped, scoring a translucent colour as opaque --
+    # exactly the compositing mistake this gate is supposed to avoid.
+    s = hexstr.strip()
+    if not _HEX6.match(s):
+        raise ValueError(
+            f"contrast gate: {what or 'value'} is not solid 6-digit hex: {hexstr!r}"
+        )
+    r, g, b = (int(s[i : i + 2], 16) for i in (1, 3, 5))
     return 0.2126 * _lin(r) + 0.7152 * _lin(g) + 0.0722 * _lin(b)
 
 
-def contrast(a, b):
-    la, lb = _lum(a), _lum(b)
+def contrast(a, b, what_a="", what_b=""):
+    la, lb = _lum(a, what_a), _lum(b, what_b)
     hi, lo = max(la, lb), min(la, lb)
     return (hi + 0.05) / (lo + 0.05)
 
 
-_by = {t["name"]: t for t in tok["color"]["tokens"]}
-
-
-def _val(name, theme):
-    v = _by[name]["value"]
-    return v[theme] if isinstance(v, dict) else v
-
-
-# Only solid pairs: a token whose value is rgba() would need compositing over a
-# ground first, and compositing the wrong ground is worse than not checking.
-CONTRAST_PAIRS = [
-    ("ink", "ground", 13.0),
-    ("ink", "surface", 13.0),
-    ("ink-soft", "ground", 4.7),
-    ("ink-soft", "surface", 4.7),
-    ("on-accent", "accent-fill", 4.5),
-    ("accent-ink", "ground", 4.5),
-    ("accent-ink", "surface", 4.5),
-    ("edge", "ground", 3.0),
-    ("edge", "surface", 3.0),
-] + [
-    (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
-    for c in ("purple", "pink", "orange", "mint", "blue")
-]
-
-assert abs(contrast("#FFFFFF", "#000000") - 21.0) < 0.01, (
-    "contrast() is broken at its maximum"
+# Pairs are (foreground, background, claimed minimum). Only solid pairs: a token
+# whose value is rgba() needs compositing over a ground first, and compositing
+# the wrong ground is worse than not checking. Every claim left unasserted is
+# listed in CONTRAST_UNCHECKED below, so "not in this table" never means
+# "nobody noticed".
+CONTRAST_PAIRS = (
+    [
+        ("ink", "ground", 13.0),
+        ("ink", "surface", 13.0),
+        ("ink", "surface-sunk", 12.5),
+        ("ink-soft", "ground", 4.7),
+        ("ink-soft", "surface", 4.7),
+        ("ink-soft", "surface-sunk", 4.7),
+        ("on-accent", "accent-fill", 4.5),
+        ("accent-ink", "ground", 4.5),
+        ("accent-ink", "surface", 4.5),
+        ("edge", "ground", 3.0),
+        ("edge", "surface", 3.0),
+        ("warn-ink", "warn-wash", 4.6),
+        ("heat-1", "surface", 3.0),
+    ]
+    + [
+        (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
+        for c in ("purple", "pink", "orange", "mint", "blue")
+    ]
+    + [(f"series-{i}", "surface", 4.4) for i in range(1, 6)]
 )
-assert abs(contrast("#000000", "#000000") - 1.0) < 0.01, (
-    "contrast() is broken at its minimum"
-)
-for _fg, _bg, _min in CONTRAST_PAIRS:
-    for _th in ("light", "dark"):
-        _r = contrast(_val(_fg, _th), _val(_bg, _th))
-        assert _r >= _min - 0.005, (
-            f"{_fg} on {_bg} ({_th}) is {_r:.2f}:1, below the claimed {_min}:1"
+
+# Claims in usage strings that this gate does NOT assert, and why. Keep in sync.
+CONTRAST_UNCHECKED = {
+    "accent-ink on accent-wash": "accent-wash is rgba; needs compositing",
+    "hl-* on hl-*-wash": "the washes are rgba; needs compositing",
+    "ink-faint under 3:1": "rgba, and an upper bound rather than a floor",
+    "chart-base under 3:1": "an upper bound rather than a floor",
+    "series-* 3:1 as marks": "a second, weaker claim on the same tokens",
+}
+
+
+def _check_contrast(tokens):
+    """Fail the build if any claimed contrast ratio is not met.
+
+    Raises rather than asserting, so the gate survives python -O. A bare assert
+    would vanish under optimisation and the build would still write tokens.json,
+    which is the exact failure this gate exists to prevent.
+    """
+    by = {t["name"]: t for t in tokens}
+
+    def val(name, theme):
+        if name not in by:
+            raise KeyError(f"contrast gate names unknown token {name!r}")
+        v = by[name]["value"]
+        if isinstance(v, dict):
+            if theme not in v:
+                raise KeyError(f"contrast gate: {name} has no {theme!r} value")
+            return v[theme]
+        return v
+
+    # Self-checks on the maths, including the boundary the gate actually turns
+    # on. Without these a broken contrast() could pass every pair silently.
+    for got, want, label in (
+        (contrast("#FFFFFF", "#000000"), 21.0, "maximum"),
+        (contrast("#000000", "#000000"), 1.0, "minimum"),
+        (contrast("#777777", "#FFFFFF"), 4.48, "just below the 4.5 gate"),
+        (contrast("#767676", "#FFFFFF"), 4.54, "just above the 4.5 gate"),
+    ):
+        if abs(got - want) > 0.01:
+            raise ValueError(
+                f"contrast() is wrong at its {label}: {got:.2f}, expected {want}"
+            )
+    if not (contrast("#777777", "#FFFFFF") < 4.5 <= contrast("#767676", "#FFFFFF")):
+        raise ValueError(
+            "contrast() does not separate 4.48 from 4.54 across the 4.5 gate"
         )
+
+    if not CONTRAST_PAIRS:
+        raise ValueError("contrast gate has no pairs; it would pass vacuously")
+
+    failures = []
+    for fg, bg, floor in CONTRAST_PAIRS:
+        for theme in ("light", "dark"):
+            r = contrast(
+                val(fg, theme), val(bg, theme), f"{fg} ({theme})", f"{bg} ({theme})"
+            )
+            if r < floor:
+                failures.append(
+                    f"  {fg} on {bg} ({theme}) is {r:.2f}:1, below the claimed {floor}:1"
+                )
+    if failures:
+        raise SystemExit("contrast gate failed:\n" + "\n".join(failures))
+
+
+_check_contrast(tok["color"]["tokens"])
 
 w("tokens.json", json.dumps(tok, indent=2, ensure_ascii=False))
 
