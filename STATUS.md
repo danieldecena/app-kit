@@ -5,6 +5,9 @@
 - `build/app_build.py` regenerates `design-system/project/` and `swift/AppKit.swift` from the source snapshot; the build asserts no raw `px` font sizes survive outside the `--type-*` vars.
 - The App Kit design system artifact (URL in `artifacts.json`) serves the tint tokens, `--type-*` style vars and the `motion` group; observed resolving in a live preview frame on 2026-09-29 (`--motion-fast` 150ms, button transition 0.15s ease-out, stat tile 700 28px/32px Rounded).
 - SegmentedControl keyboard: one tab stop on the chosen segment, arrows move and choose with wrap, Home/End jump (headless Chrome, 2026-09-29).
+- The Music variant: eleven `music-*` tokens plus SidebarList, Shelf, ArtworkCard, HeroCard, TrackList and MiniPlayer. Published as artifact version 24 (2026-10-01). Every geometry claim verified from the live DOM in the preview harness in both appearances, and the MiniPlayer additionally against a real `.regularMaterial` in the SwiftUI spike.
+- The build's contrast gate computes WCAG 2.x ratios over 33 token pairs and fails the build below the claimed figure. Proved to fire by mutation, with the mutation asserted applied each time.
+- An orientation check catches a `T(name, light, dark)` triple written dark-first, which a contrast gate cannot: ratios survive a consistent swap. It caught a real inversion of all eleven Music tokens.
 
 ## Known broken
 
@@ -12,9 +15,20 @@
 
 ## Next Up
 
-- Nothing queued: every App Kit task is done.
+- Two capture tasks need Daniel's hands, because driving Music is policy-blocked for the agent: a row with the mouse held down (does a pressed state exist?), and the dark transport button with the window inactive (for `music-primary-inactive`).
+- Contextual toolbar and window chrome are deliberately deferred, not dropped. Music's are per-page, so both need their own capture pass before either is a component.
 
 ## Decision log
+
+### 2026-10-01
+- Decided: the native Mac app is the only value source for the Music variant. An early Firecrawl scrape of music.apple.com gave `#D60017` for the accent against a measured `#FA233B`, so the web player is superseded by measurement rather than by argument.
+- Decided: ship ratios and gaps, never card sizes. Three readings of the same window disagreed on card size and agreed on the gap and the ratios, because cards track the width left by a user-resizable sidebar. `ArtworkCard` is width + 37, `HeroCard` is 3:4, `Shelf` owns the 20/16 gap breakpoint.
+- Decided: `music-ink-soft-on-fill` (`#5F5F5F` / `#B4B4B4`) rather than moving the measured `music-ink-soft`. The measured value is 3.31:1 on `music-select-inactive` and 3.99:1 on `music-hover` in light, and fidelity is the point of the measured token, so the variant takes the same split App Kit already makes between `accent` and `accent-ink`.
+- Decided: `HeroCard` carries a bottom scrim that Music does not have. Music's heroes are commissioned to carry white text; the one measured is white on `#F4B63F`, 1.81:1. An adopting app has whatever artwork it has. Stops computed against a pure white image: 10.0:1 at the title, 6.5:1 at the eyebrow.
+- Decided: TrackList joins this plan rather than going to `music-discovery-web` or being deferred. The measurements already existed and it carries more Music character than anything else outstanding.
+- Answered: `.tint` does not reach a SwiftUI sidebar selection. On a key, active window with `.tint(Color.musicSelect)` the selected row fills `#434346`, a neutral grey. A SwiftUI `SidebarList` needs a custom row background.
+- Retracted: "macOS denies focus to a shell-launched binary", written after four consecutive `isKeyWindow=false` self-captures. Five later attempts returned true four times. Focus there is unreliable, not denied, and the question had been parked on Daniel for nothing. A count of a flaky operation is not a mechanism (`cerebrum.md`).
+- Retracted: "the progress bar runs along the MiniPlayer's lower edge", which came from a pasted screenshot. Measured, the line runs x 165-555 inside the 700pt capsule: it belongs to the now-playing group, not the capsule.
 
 ### 2026-09-29
 - Decided: StatTile `attention` moves from an `accent` ring to `warn`, ring and meter (track `warn-wash`), so "needs the person" reads as one colour with the Panel `act` tone. Computed ring `#C73300` in a headless Chrome render; published as artifact version 20, the three files read back byte-identical.
