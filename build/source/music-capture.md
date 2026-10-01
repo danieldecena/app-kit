@@ -76,6 +76,20 @@ On `motion-04` it found 19 localised changes, including full-width
 **1210 x 74pt** and **1210 x 50pt** boxes (track-row hovers) and **40pt-wide**
 columns (the favorited-star column).
 
+**Track-row hover anatomy** (structure only, corroborated by two sources):
+
+- the track number is replaced by a play triangle
+- a star appears in the leading 40pt column
+- a "+" appears toward the trailing edge
+- the whole row takes a fill
+
+The two sources are `state-diff.py`'s boxes on the Mac app, which found exactly
+a full-width row change plus a 40pt leading-column change, and a screenshot of
+the **web player**, which shows the same four changes legibly. The web player is
+barred as a value source and that screenshot is a good illustration of why: its
+ground is blue-tinted, nowhere near the Mac app's neutral `#1F1F20`. It is being
+used here for structure only, and no number from it may be recorded.
+
 **But do not take colour from a recording.** Recording frames are
 **Rec. ITU-R BT.709**, a third colour space after the P3 of stills and the sRGB
 of tokens, and video encoding shifts values far beyond rounding:
