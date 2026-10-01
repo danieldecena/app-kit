@@ -1,10 +1,22 @@
 #!/bin/zsh
-# Shoot a named window of an app at @2x, verified by size, not by exit code.
-# Usage: music-shot.sh <app-name> <output-name>   e.g. music-shot.sh Music window-home-default-dark
+# Shoot a named window of an app at @2x, verified by size AND content, not by
+# exit code. Usage: music-shot.sh <app-name> <output-name>
+#   e.g. music-shot.sh Music window-home-default-dark
 set -u
+
+if [[ $# -ne 2 ]]; then
+  print -u2 "usage: ${0:t} <app-name> <output-name>"
+  exit 64
+fi
 APP="$1"; NAME="$2"
+if [[ "$NAME" != ${~NAME//[^A-Za-z0-9._-]/} ]]; then
+  # The name is interpolated into a Python literal below; keep it boring.
+  print -u2 "output name must be [A-Za-z0-9._-] only: $NAME"
+  exit 64
+fi
 DIR="${0:A:h}/music-reference"
 HELPER="${0:A:h}/.winid.swift"
+mkdir -p "$DIR"
 
 cat > "$HELPER" <<'EOF'
 import CoreGraphics
@@ -25,32 +37,63 @@ for w in list {
 if let b = best { print("\(b.0) \(b.1) \(b.2)") } else { exit(2) }
 EOF
 
-read -r ID W H < <(swift "$HELPER" "$APP") || { print -u2 "no layer-0 window for $APP"; exit 2 }
+# Capture swift's own exit status. Piping into `read` would report the status of
+# `read`, so a compile error would be announced as "no window for <app>".
+WINLINE=$(swift "$HELPER" "$APP")
+SWIFT_RC=$?
+if (( SWIFT_RC == 2 )); then
+  print -u2 "no layer-0 window for $APP (is it running?)"
+  exit 2
+elif (( SWIFT_RC != 0 )); then
+  print -u2 "window-id helper failed with status $SWIFT_RC -- this is a tooling fault, not a missing window"
+  exit 70
+fi
+read -r ID W H <<< "$WINLINE"
+
 OUT="$DIR/$NAME.png"
 rm -f "$OUT"
 screencapture -o -x -l "$ID" "$OUT" || { print -u2 "screencapture failed"; exit 3 }
+[[ -s "$OUT" ]] || { print -u2 "screencapture wrote nothing"; exit 3 }
 
-# Verify the EFFECT: the file must be exactly 2x the window's point size.
-# A wrong-window grab exits 0 just like a right one.
+# Verify the EFFECT, not the exit code: the file must be exactly 2x the window's
+# point size. A wrong-window grab exits 0 just like a right one.
 PW=$(sips -g pixelWidth  "$OUT" | awk '/pixelWidth/{print $2}')
 PH=$(sips -g pixelHeight "$OUT" | awk '/pixelHeight/{print $2}')
-if [[ "$PW" -ne $((W*2)) || "$PH" -ne $((H*2)) ]]; then
+if [[ -z "$PW" || -z "$PH" ]]; then
+  print -u2 "could not read the PNG's dimensions; the capture is kept at $OUT"
+  exit 70
+fi
+if (( PW != W*2 || PH != H*2 )); then
   print -u2 "MISMATCH $NAME: got ${PW}x${PH}, window is ${W}x${H} points (expected $((W*2))x$((H*2)))"
   exit 4
 fi
 
-# Verify the CONTENT, not just the geometry. A fullscreen window sits on its own
-# Space and screencapture returns a uniform rectangle of the right size at exit 0.
-DISTINCT=$(uv run --quiet --with pillow python -c "
-from PIL import Image
+# Verify the CONTENT. A fullscreen window sits on its own Space and
+# screencapture returns a uniform rectangle of the right size at exit 0.
+DISTINCT=$(uv run --quiet --with pillow python - "$OUT" <<'PY'
+import sys
 from collections import Counter
-im=Image.open('$OUT').convert('RGB'); W,H=im.size
-print(len(Counter(im.getpixel((x,y)) for x in range(0,W,37) for y in range(0,H,37))))
-")
-if [[ "$DISTINCT" -lt 50 ]]; then
+from PIL import Image
+im = Image.open(sys.argv[1]).convert("RGB")
+W, H = im.size
+print(len(Counter(im.getpixel((x, y)) for x in range(0, W, 37) for y in range(0, H, 37))))
+PY
+)
+CHECK_RC=$?
+# An empty or non-numeric result means the CHECKER broke, which is a different
+# thing from a blank window. Never delete the capture on a tooling fault: the
+# whole point of this script is that the capture is the evidence.
+if (( CHECK_RC != 0 )) || [[ ! "$DISTINCT" == <-> ]]; then
+  print -u2 "colour check did not run (status $CHECK_RC, output: ${DISTINCT:-empty})."
+  print -u2 "  This is a tooling fault, NOT a verdict on the image."
+  print -u2 "  The capture is kept at $OUT -- inspect it before re-shooting."
+  exit 70
+fi
+if (( DISTINCT < 50 )); then
   print -u2 "BLANK $NAME: only $DISTINCT distinct colours. The window is probably"
   print -u2 "  fullscreen (own Space) or never rendered. Take it out of fullscreen."
-  rm -f "$OUT"
+  mv "$OUT" "$OUT.blank"
+  print -u2 "  Kept as $OUT.blank rather than deleted."
   exit 5
 fi
 
