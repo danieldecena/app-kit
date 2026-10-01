@@ -46,6 +46,32 @@ should: a build that produced it would overwrite publish state.
 
 Use `/opt/homebrew/bin/python3`. Never bare `python3`.
 
+**`build/` is ignored globally** (`~/.gitignore_global:52`), yet `build/app_build.py`
+and the whole snapshot are tracked because they were force-added. A new file
+under `build/` needs `git add -f` or it stages nothing and reports no error.
+
+## Previewing locally
+
+The previews are not standalone pages: each is a bare `<script>` expecting
+`React`, `ReactDOM` and `window.AppKit` as globals, and `bundle.css` defines only
+`--type-*`, `--stroke-*` and `--tracking-*`, so colour, spacing, radius, shadow
+and motion vars are missing too. Opened directly in a browser a preview renders
+blank and unstyled. The artifact host supplies all of it.
+
+`build/preview/index.html` is a local stand-in for that host. Serve the repo root
+and open it:
+
+```
+/opt/homebrew/bin/python3 -m http.server 8111 --directory /Users/home/developer/app-kit
+open http://localhost:8111/build/preview/index.html?c=Toolbar
+```
+
+`.claude/launch.json` defines the same server for `preview_start`. The component
+list comes from the bundle's own `@ds-bundle` manifest, so it cannot drift. Type
+is approximate there: `tokens.json` names font families but carries no stacks,
+so the harness guesses them. Judge type on the published artifact; judge colour,
+spacing, radius, state and layout in the harness.
+
 ## Publish
 
 `README.md` holds the rule and `artifacts.json` holds the URL. Publish with the

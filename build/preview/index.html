@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Kit previews</title>
+
+<!-- React must exist before bundle.js, which reads window.React at load. -->
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+
+<link rel="stylesheet" href="/design-system/project/components/bundle.css">
+<script src="/design-system/project/components/bundle.js"></script>
+
+<style>
+  /* Harness chrome only. Everything .dc-* belongs to the bundle. */
+  html { color-scheme: light; }
+  html[data-theme="dark"] { color-scheme: dark; }
+  body { margin: 0; font: 400 13px/18px -apple-system, system-ui, sans-serif;
+         background: var(--ground); color: var(--ink); }
+  #bar { position: sticky; top: 0; z-index: 10; display: flex; gap: 12px; align-items: center;
+         padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--hair); }
+  #bar select, #bar button { font: inherit; padding: 4px 8px; }
+  #bar .grow { flex: 1; }
+  #note { padding: 8px 16px; background: var(--warn-wash); color: var(--warn-ink);
+          font-size: 12px; border-bottom: 1px solid var(--hair); }
+  #sub { color: var(--ink-soft); }
+  #stage { padding: 24px; }
+  #err { white-space: pre-wrap; font-family: ui-monospace, Menlo, monospace;
+         color: var(--bad); padding: 16px; }
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <label>Component <select id="pick"></select></label>
+  <span id="sub"></span>
+  <span class="grow"></span>
+  <button id="theme" type="button">Dark</button>
+  <button id="reload" type="button">Re-run</button>
+</div>
+
+<div id="note">
+  Harness only. Type is approximate: tokens.json names font families but carries no
+  stacks, so these are the harness's guess, not the artifact host's. Judge type on
+  the published artifact. Colour, spacing, radius, state and layout are read from
+  tokens.json and are faithful.
+</div>
+
+<div id="stage"><div id="root"></div></div>
+<div id="err"></div>
+
+<script>
+(function () {
+  var BASE = '/design-system/project';
+  var FAMILIES = {
+    // Not from tokens.json; see the note above.
+    'display': '-apple-system, "SF Pro Display", system-ui, sans-serif',
+    'sans':    '-apple-system, "SF Pro Text", system-ui, sans-serif',
+    'mono':    'ui-monospace, "SF Mono", Menlo, monospace',
+    'round':   '"SF Pro Rounded", -apple-system, system-ui, sans-serif',
+    'compact': '"SF Compact", -apple-system, system-ui, sans-serif'
+  };
+  var pick = document.getElementById('pick');
+  var stage = document.getElementById('stage');
+  var sub = document.getElementById('sub');
+  var err = document.getElementById('err');
+
+  function fail(e) { err.textContent = String(e && e.stack || e); }
+
+  // bundle.css defines only --type-*, --stroke-* and --tracking-*. Colour, spacing,
+  // radius, shadow and motion vars come from tokens.json, which the artifact host
+  // normally injects. Synthesise them here so the previews are not unstyled.
+  function themeCss(tok) {
+    var light = [], dark = [];
+    Object.keys(tok).forEach(function (group) {
+      var g = tok[group];
+      if (!g || !g.tokens) return;
+      g.tokens.forEach(function (t) {
+        var v = t.value;
+        if (v && typeof v === 'object') {
+          light.push('--' + t.name + ':' + v.light);
+          dark.push('--' + t.name + ':' + v.dark);
+        } else {
+          light.push('--' + t.name + ':' + v);
+        }
+      });
+    });
+    Object.keys(FAMILIES).forEach(function (k) { light.push('--font-' + k + ':' + FAMILIES[k]); });
+    return ':root{' + light.join(';') + '}\n' +
+           ':root[data-theme="dark"]{' + dark.join(';') + '}';
+  }
+
+  function run(name) {
+    err.textContent = '';
+    fetch(BASE + '/components/' + name + '/preview.html')
+      .then(function (r) { if (!r.ok) throw new Error(r.status + ' ' + r.url); return r.text(); })
+      .then(function (html) {
+        var card = html.match(/@dsCard([^>]*)-->/);
+        sub.textContent = card ? card[1].trim() : '';
+
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var scripts = [].slice.call(doc.body.querySelectorAll('script'));
+        scripts.forEach(function (s) { s.remove(); });
+
+        // Previews all render into #root, so give them a fresh one each time.
+        stage.innerHTML = doc.body.innerHTML;
+        if (!stage.querySelector('#root')) {
+          var d = document.createElement('div'); d.id = 'root'; stage.appendChild(d);
+        }
+        scripts.forEach(function (s) { new Function(s.textContent)(); });
+      })
+      .catch(fail);
+  }
+
+  Promise.all([
+    fetch(BASE + '/tokens.json').then(function (r) { return r.json(); }),
+    fetch(BASE + '/components/bundle.js').then(function (r) { return r.text(); })
+  ]).then(function (res) {
+    var style = document.createElement('style');
+    style.textContent = themeCss(res[0]);
+    document.head.appendChild(style);
+
+    var m = res[1].match(/@ds-bundle:\s*(\{[\s\S]*?\})\s*\*\//);
+    var names = m ? JSON.parse(m[1]).components.map(function (c) { return c.name; })
+                  : Object.keys(window.AppKit || {});
+    names.sort().forEach(function (n) {
+      var o = document.createElement('option'); o.value = o.textContent = n; pick.appendChild(o);
+    });
+
+    var start = new URLSearchParams(location.search).get('c');
+    if (start && names.indexOf(start) !== -1) pick.value = start;
+    run(pick.value);
+  }).catch(fail);
+
+  pick.addEventListener('change', function () {
+    history.replaceState(null, '', '?c=' + pick.value);
+    run(pick.value);
+  });
+  document.getElementById('reload').addEventListener('click', function () { run(pick.value); });
+  document.getElementById('theme').addEventListener('click', function () {
+    var dark = document.documentElement.dataset.theme === 'dark';
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    this.textContent = dark ? 'Dark' : 'Light';
+  });
+})();
+</script>
+</body>
+</html>

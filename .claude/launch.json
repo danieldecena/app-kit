@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "app-kit-previews",
+      "runtimeExecutable": "/opt/homebrew/bin/python3",
+      "runtimeArgs": ["-m", "http.server", "8111", "--directory", "/Users/home/developer/app-kit"],
+      "port": 8111,
+      "url": "http://localhost:8111"
+    }
+  ]
+}
