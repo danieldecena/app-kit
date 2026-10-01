@@ -15,8 +15,11 @@
 
 ## Next Up
 
+- `Shelf`'s arrow-key `nudge` takes its pitch from `firstElementChild` alone, so a shelf mixing card widths scrolls by the wrong amount for every later card and `scroll-snap` then re-settles on a neighbour. The CSS explicitly anticipates mixed widths, so this is reachable. Actionable without Daniel.
 - Two capture tasks need Daniel's hands, because driving Music is policy-blocked for the agent: a row with the mouse held down (does a pressed state exist?), and the dark transport button with the window inactive (for `music-primary-inactive`).
 - Contextual toolbar and window chrome are deliberately deferred, not dropped. Music's are per-page, so both need their own capture pass before either is a component.
+
+Full list: `TASKS.md`.
 
 ## Decision log
 
@@ -28,6 +31,7 @@
 - Decided: TrackList joins this plan rather than going to `music-discovery-web` or being deferred. The measurements already existed and it carries more Music character than anything else outstanding.
 - Answered: `.tint` does not reach a SwiftUI sidebar selection. On a key, active window with `.tint(Color.musicSelect)` the selected row fills `#434346`, a neutral grey. A SwiftUI `SidebarList` needs a custom row background.
 - Retracted: "macOS denies focus to a shell-launched binary", written after four consecutive `isKeyWindow=false` self-captures. Five later attempts returned true four times. Focus there is unreliable, not denied, and the question had been parked on Daniel for nothing. A count of a flaky operation is not a mechanism (`cerebrum.md`).
+- Left open deliberately: `Shelf`'s arrow-key pitch is read from the first card only. Found in the same bug-hunt pass and not fixed, because the run had reached its stop condition and starting a fix would have been new work rather than landing.
 - Caught by a bug-hunt pass, eight findings, all fixed: ArtworkCard clipped its subtitle's descenders because the measured 37px caption is a TOTAL and two footnote lines do not fit inside it; TrackList had no keyboard at all, every row a dead tab stop; its header ignored a column's alignment; `role=grid` had no gridcells; SidebarList moved the selection without the focus; a MiniPlayer toggle could read as pressed and unavailable at once; Shelf claimed a list role owning no listitems; and in the generator, every `css.replace` ran unasserted while the gate's boundary check could not fail.
 - Caught late: the TrackList hover rule tied the selected-row rule on specificity and won by order, so a hovered selected row painted the stepped grey onto the red fill at 1.27:1. The gate is not at fault; both pairs pass on their own and the failure lives only in the cascade between them. Fixed and verified by driving a real hover rather than re-reading the cascade.
 - Retracted: "the progress bar runs along the MiniPlayer's lower edge", which came from a pasted screenshot. Measured, the line runs x 165-555 inside the 700pt capsule: it belongs to the now-playing group, not the capsule.
