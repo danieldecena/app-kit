@@ -442,12 +442,47 @@ the gap *between* cards. Source: `playlist-tracklist-unfocused-light.png`.
 The header area above the rows is not on the 56pt grid: the gaps there measure
 68.5, 16.2, 15.5 and 67.8pt, so the description block has its own spacing.
 
-### Shelf
+### Shelf and cards (AX, exact)
 
-Source: `window-home-unfocused-light.png`. Content bands were located by a
-vertical non-white fraction sweep first, then measured horizontally. Card runs
-fragment on artwork detail, so **widths are derived from gap positions**, which
-are exact.
+Home, window 1588x1007pt, content area 1318pt wide.
+
+Shelves tile with **no vertical gap** between them, each group's height
+including its header:
+
+| Shelf | y | height |
+|---|---|---|
+| Top Picks for You (hero) | 98 | **400pt** |
+| Recently Played / Pop / Stations (artwork) | 498 / 780 / 1760 | **282pt** |
+| The Sampled Series (carries a subtitle) | 1062 | 298pt |
+| Playlists Made for You (hero) | 1360 | **400pt** |
+
+The scrollable row inside each: hero `x=304 y=145 w=2476 h=343`, artwork
+`x=304 y=545 w=2476 h=225`. The 2476pt width is the horizontal scroll extent
+against a 1318pt viewport.
+
+| Card | Size | Pitch | Gap |
+|---|---|---|---|
+| **HeroCard** | **257.5 x 343pt** | 277.5pt | **20pt** |
+| **ArtworkCard** | **188 x 225pt** | 208pt | **20pt** |
+
+**The gap is constant; the card size is not.** An earlier pixel measurement of
+the same 1588pt window gave a 219.5pt artwork pitch against AX's 208pt, and
+200x200pt against 188x225pt. Two readings of the same window cannot both
+describe a fixed size, so card dimensions are computed from available width (or
+vary by shelf content) while the 20pt gap holds across every measurement in both
+methods.
+
+Consequence for the component: **do not ship a fixed card size.** Ship the 20pt
+gap and let the card size derive, which is also what the earlier finding implied
+when the two shelves shared a gap and a left edge but not a card shape.
+
+### Earlier pixel measurements of the same thing
+
+Superseded by the AX figures above, kept because the method is still right for
+anything AX does not expose as an element. Source:
+`window-home-unfocused-light.png`. Content bands were located by a vertical
+non-white fraction sweep first, then measured horizontally. Card runs fragment on
+artwork detail, so **widths were derived from gap positions**, which are exact.
 
 | Dimension | Measured | How |
 |---|---|---|
