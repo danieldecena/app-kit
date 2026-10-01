@@ -359,36 +359,33 @@ measured on the album page is a *section* background under "More By" and
 frame is superseded. So the album page has three bands: `#FFFFFF` detail panel,
 `#F8F8F8` related-content section, `#FFFFFF` elsewhere.
 
-### The hero gutter does not invert
+### The hero gutter: RETRACTED, there was never a mystery
 
-The gap between Top Picks hero cards measures `#EEEEEE` in dark and
-`#EDEDED`-`#F1F1F1` in light. A background would invert between appearances;
-this does not move. So it is **not** ground showing through, and modelling it as
-`ground` would be wrong in dark mode by a very visible margin.
+An earlier version of this section claimed the gutter between hero cards
+measures `#EEEEEE` in **dark** as well as light, concluded it therefore does not
+invert, and reasoned from that it could not be the ground showing through.
 
-A 1px-step line profile across the gap settles what it is *not*. Dark capture,
-y=490pt, sRGB:
+**All of it was wrong, from one mislabelled file.** The capture used as the
+"dark" source, then named `window-home-wide-unfocused-dark.png`, is a **light
+mode** capture. It was renamed from `probe-minimized.png` and labelled by
+assumption rather than by looking. Sampling its sidebar gives `#F2F2F2` and the
+area above the shelf `#FFFFFF`.
 
-```
- x=557.0pt  #DC9A2B   <- orange card, solid
- x=558.0pt  #EDEDED   <- hard edge, no ramp
- ...        #EEEEEE     flat for 20pt
- x=577.0pt  #ECECEC
- x=578.0pt  #4C1CAE   <- hard edge into the purple card
-```
+So both gutter measurements were light-mode measurements, and `#EEEEEE` against
+a near-white ground is entirely ordinary. **The gutter has never been measured
+in dark mode at all.** The simple reading, that the gap is the ground showing
+between cards, is unrefuted and is what AX supports: cards are 257.5pt wide at
+277.5pt pitch with no element between them.
 
-**Exactly 20pt wide, flat, with hard edges on both sides.** That rules out a
-drop shadow (a gradient, and it would darken rather than lighten), a border
-stroke (1-2pt, not 20), and antialiasing (a single-pixel ramp). It also runs the
-full height of the hero row.
+The one thing that survives is the width. **20pt**, from the line profile and
+independently from AX (277.5 - 257.5). That was never in doubt.
 
-So the practical rule, whatever the cause: **a Shelf built with a 20pt gap
-showing `ground` will be wrong in dark mode by the full distance between
-`#1F1F20` and `#EEEEEE`.** The gap is its own fixed value, not the ground.
+Every other capture's name was audited against its actual mean luminance after
+this was found; only this one was wrong.
 
-Still unexplained, and it needs a human looking at a hero card edge at high zoom
-with Music in front. Until then, model the gap as a literal `#EEEEEE` in both
-themes rather than as any existing token.
+Lesson worth keeping: a filename is not an observation. This one asserted an
+appearance that was never checked, and then a finding was built on top of it and
+committed.
 
 For reference, Apple's dark system colours in sRGB are `systemRed #FF453A` and
 `systemPink #FF375F`. The measured content accent sits between them and matches
