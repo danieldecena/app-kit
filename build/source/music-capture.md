@@ -101,7 +101,31 @@ separator or the playing row.
 |---|---|---|---|
 | hover | **`#2C2C2D`** | **`#F0F0F0`** | pointer over the row. Dark value measured twice independently |
 | selected, window **active** | **`#CC132D`** | **`#DC1229`** | Music is the key window |
-| selected, window **inactive** | **`#464646`** | not yet | any other app is frontmost |
+| selected, window **inactive** | **`#464646`** | **`#DCDCDD`** | any other app is frontmost |
+
+#### Losing focus changes more than the selection
+
+The **Play button inverts completely** when the window is not key. Light mode,
+measured at the AX-reported frame (x=655 y=285 132x38pt) rather than by scanning:
+
+| | fill | label |
+|---|---|---|
+| active | `#0E0E0E` | `#FFFFFF` |
+| **inactive** | **`#ECECEC`** | **`#242424`** |
+
+Black-on-white becomes light-grey-with-dark-text. It does not dim, it swaps.
+
+**This is the single most important state for the first adopter.** Claude
+Spinner is a monitor app, so an unfocused window is its normal condition, and
+every value in the inactive column is what its users will actually see. A build
+tested only with the window in front would render none of them.
+
+Not supported by measurement: the window *appears* to desaturate overall when
+inactive, and the sidebar icons look like they lose their red. An active/inactive
+comparison of sidebar saturation did **not** show that (max saturation 15 vs 3,
+with no strongly-coloured pixels in either), so either the sidebar icons are not
+red in light mode at all, or the effect is elsewhere. Recorded as unverified
+rather than asserted from one reading.
 
 Geometry is identical across both appearances and both states: **1238pt wide,
 45pt tall, x 310.0-1547.5pt**. The selected pill is the reliable one to measure
