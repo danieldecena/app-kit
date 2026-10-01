@@ -85,6 +85,25 @@ export interface SidebarSection {
   onAction?: () => void;
   items: SidebarItem[];
 }
+/** A square artwork over a caption block of constant height. The caption does NOT scale with the card: measured 37pt at every width. Pass width; do not assume a fixed size, it tracks the available space in the real app. */
+export function ArtworkCard(props: {
+  art: string;
+  title: string;
+  subtitle?: string;
+  /** Card width in px. The artwork is square and the caption adds 37px. */
+  width?: number;
+  onClick?: () => void;
+  className?: string;
+}): JSX.Element;
+/** A horizontally scrolling row of cards with a title and an optional "see all". Owns the GAP (20px, 16px when compact) and lets the card own its size. Arrow keys scroll by one card pitch. */
+export function Shelf(props: {
+  title: string;
+  onMore?: () => void;
+  /** 16px gap instead of 20px. Music switches at a narrow window; where exactly is unmeasured. */
+  compact?: boolean;
+  children?: ReactNode;
+  className?: string;
+}): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
 export function SidebarList(props: {
   sections: SidebarSection[];

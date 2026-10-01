@@ -1,0 +1,25 @@
+<!-- @dsCard group="Navigation" height=320 subtitle="Scrolling row of artwork cards; square art over a 37px caption" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Shelf</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  function art(c, t) { return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="' + c +
+    '"/><text x="100" y="110" font-family="-apple-system" font-size="22" fill="#fff" text-anchor="middle">' + t + '</text></svg>'); }
+  var cards = [['#CC132D','740'],['#8944AB','741'],['#0B7771','743'],['#C73300','745'],['#0040DD','747'],['#8C42B2','749']];
+  function Row(props) {
+    return h(D.Shelf, { title: props.title, compact: props.compact, onMore: function () {} },
+      cards.map(function (c, i) {
+        return h(D.ArtworkCard, { key: i, art: art(c[0], c[1]), title: 'Episode ' + c[1], subtitle: 'SOULECTION', width: props.w });
+      }));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { className: 'dc-stack', style: { gap: 24 } },
+      h(Row, { title: 'Recently Played', w: 188 }),
+      h(Row, { title: 'Narrow window (compact gap)', w: 159, compact: true })));
+</script>
+</body>
+</html>

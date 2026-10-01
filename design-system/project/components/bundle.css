@@ -117,6 +117,33 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-eyebrow { font: var(--type-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-soft); }
 .dc-eyebrow-act { color: var(--warn); }
 
+/* Shelf + ArtworkCard: a horizontally scrolling row of cards, as on Music's
+   Home. Card SIZE is deliberately not fixed here -- it tracks the available
+   width in the real app, and three measurements of the same window disagreed on
+   it while agreeing on the gap and the ratios. So the shelf owns the gap and the
+   card owns its shape; the width comes from the caller. */
+.dc-shelf { display: flex; flex-direction: column; gap: var(--space-5); }
+.dc-shelf-head { display: flex; align-items: baseline; gap: var(--space-3); }
+.dc-shelf-title { font: var(--type-title-3); color: var(--ink); }
+.dc-shelf-more { border: 0; padding: 0; background: none; color: var(--ink-soft); cursor: pointer; display: inline-flex; align-items: center; }
+.dc-shelf-head:hover .dc-shelf-more { color: var(--ink); }
+/* 20pt at wide windows, 16pt narrow -- a breakpoint, not a scale. Measured
+   both; where it switches is unknown, so the wide value is the default and
+   data-compact selects the narrow one. */
+.dc-shelf-track { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: var(--space-2); }
+.dc-shelf-track::-webkit-scrollbar { display: none; }
+.dc-shelf[data-compact="true"] .dc-shelf-track { gap: 16px; }
+.dc-shelf-track > * { scroll-snap-align: start; flex: none; }
+/* ArtworkCard: a SQUARE artwork plus a caption block of constant height. Card
+   height minus card width measured 37.0, 36.8 and 37.0pt across three widths,
+   so the caption does not scale with the card. */
+.dc-artcard { display: flex; flex-direction: column; gap: var(--space-4); border: 0; padding: 0; background: none; text-align: left; cursor: pointer; width: var(--artcard-w, 188px); }
+.dc-artcard-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); object-fit: cover; background: var(--surface-sunk); display: block; }
+.dc-artcard-cap { height: 37px; display: flex; flex-direction: column; justify-content: flex-start; gap: 1px; overflow: hidden; }
+.dc-artcard-title { font: var(--type-footnote); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
+
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --
    32pt rows, 19pt section headers, a rounded inset selection fill. The real
    article is a vibrant material that samples the desktop; `glass` is the web

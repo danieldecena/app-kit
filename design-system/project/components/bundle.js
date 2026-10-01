@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
+/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -95,6 +95,40 @@
 
   function Eyebrow(p) {
     return h("span", { className: cx("dc-eyebrow", p.act && "dc-eyebrow-act", p.className) }, p.children);
+  }
+
+  function ArtworkCard(p) {
+    return h("button", { type: "button", className: cx("dc-artcard", p.className), onClick: p.onClick,
+                         style: p.width ? { "--artcard-w": p.width + "px" } : undefined },
+      h("img", { className: "dc-artcard-art", src: p.art, alt: "" }),
+      h("span", { className: "dc-artcard-cap" },
+        h("span", { className: "dc-artcard-title" }, p.title),
+        p.subtitle ? h("span", { className: "dc-artcard-sub" }, p.subtitle) : null));
+  }
+
+  function Shelf(p) {
+    // Arrow keys scroll by one card pitch, so the shelf snaps the way Music's
+    // does (measured: an ease-out settling on a card boundary).
+    var track = React.useRef(null);
+    function nudge(dir) {
+      var el = track.current; if (!el) return;
+      var first = el.firstElementChild;
+      var pitch = first ? first.getBoundingClientRect().width + (p.compact ? 16 : 20) : 200;
+      el.scrollBy({ left: dir * pitch, behavior: "smooth" });
+    }
+    return h("section", { className: cx("dc-shelf", p.className), "data-compact": p.compact ? "true" : undefined,
+                          "aria-label": p.title },
+      h("div", { className: "dc-shelf-head" },
+        h("h2", { className: "dc-shelf-title" }, p.title),
+        p.onMore ? h("button", { type: "button", className: "dc-shelf-more", "aria-label": "See all " + p.title, onClick: p.onMore },
+          h("svg", { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", "aria-hidden": "true" },
+            h("path", { d: "M6 3l5 5-5 5" }))) : null),
+      h("div", { className: "dc-shelf-track", ref: track, tabIndex: 0, role: "list",
+                 onKeyDown: function (e) {
+                   if (e.key === "ArrowRight") { e.preventDefault(); nudge(1); }
+                   if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-1); }
+                 } },
+        p.children));
   }
 
   function SidebarList(p) {
@@ -247,6 +281,6 @@
 
   window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {
     Button: Button, FilterPill: FilterPill, SegmentedControl: SegmentedControl, Badge: Badge,
-    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
+    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
   });
 })();

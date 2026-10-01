@@ -798,6 +798,33 @@ css = css.replace(
 .dc-eyebrow { font: 600 11px/13px var(--font-mono); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-soft); }
 .dc-eyebrow-act { color: var(--warn); }
 
+/* Shelf + ArtworkCard: a horizontally scrolling row of cards, as on Music's
+   Home. Card SIZE is deliberately not fixed here -- it tracks the available
+   width in the real app, and three measurements of the same window disagreed on
+   it while agreeing on the gap and the ratios. So the shelf owns the gap and the
+   card owns its shape; the width comes from the caller. */
+.dc-shelf { display: flex; flex-direction: column; gap: var(--space-5); }
+.dc-shelf-head { display: flex; align-items: baseline; gap: var(--space-3); }
+.dc-shelf-title { font: var(--type-title-3); color: var(--ink); }
+.dc-shelf-more { border: 0; padding: 0; background: none; color: var(--ink-soft); cursor: pointer; display: inline-flex; align-items: center; }
+.dc-shelf-head:hover .dc-shelf-more { color: var(--ink); }
+/* 20pt at wide windows, 16pt narrow -- a breakpoint, not a scale. Measured
+   both; where it switches is unknown, so the wide value is the default and
+   data-compact selects the narrow one. */
+.dc-shelf-track { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: var(--space-2); }
+.dc-shelf-track::-webkit-scrollbar { display: none; }
+.dc-shelf[data-compact="true"] .dc-shelf-track { gap: 16px; }
+.dc-shelf-track > * { scroll-snap-align: start; flex: none; }
+/* ArtworkCard: a SQUARE artwork plus a caption block of constant height. Card
+   height minus card width measured 37.0, 36.8 and 37.0pt across three widths,
+   so the caption does not scale with the card. */
+.dc-artcard { display: flex; flex-direction: column; gap: var(--space-4); border: 0; padding: 0; background: none; text-align: left; cursor: pointer; width: var(--artcard-w, 188px); }
+.dc-artcard-art { width: 100%; aspect-ratio: 1; border-radius: var(--radius-md); object-fit: cover; background: var(--surface-sunk); display: block; }
+.dc-artcard-cap { height: 37px; display: flex; flex-direction: column; justify-content: flex-start; gap: 1px; overflow: hidden; }
+.dc-artcard-title { font: var(--type-footnote); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
+
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --
    32pt rows, 19pt section headers, a rounded inset selection fill. The real
    article is a vibrant material that samples the desktop; `glass` is the web
@@ -1009,6 +1036,40 @@ js = js.replace(
     return h("span", { className: cx("dc-eyebrow", p.act && "dc-eyebrow-act", p.className) }, p.children);
   }
 
+  function ArtworkCard(p) {
+    return h("button", { type: "button", className: cx("dc-artcard", p.className), onClick: p.onClick,
+                         style: p.width ? { "--artcard-w": p.width + "px" } : undefined },
+      h("img", { className: "dc-artcard-art", src: p.art, alt: "" }),
+      h("span", { className: "dc-artcard-cap" },
+        h("span", { className: "dc-artcard-title" }, p.title),
+        p.subtitle ? h("span", { className: "dc-artcard-sub" }, p.subtitle) : null));
+  }
+
+  function Shelf(p) {
+    // Arrow keys scroll by one card pitch, so the shelf snaps the way Music's
+    // does (measured: an ease-out settling on a card boundary).
+    var track = React.useRef(null);
+    function nudge(dir) {
+      var el = track.current; if (!el) return;
+      var first = el.firstElementChild;
+      var pitch = first ? first.getBoundingClientRect().width + (p.compact ? 16 : 20) : 200;
+      el.scrollBy({ left: dir * pitch, behavior: "smooth" });
+    }
+    return h("section", { className: cx("dc-shelf", p.className), "data-compact": p.compact ? "true" : undefined,
+                          "aria-label": p.title },
+      h("div", { className: "dc-shelf-head" },
+        h("h2", { className: "dc-shelf-title" }, p.title),
+        p.onMore ? h("button", { type: "button", className: "dc-shelf-more", "aria-label": "See all " + p.title, onClick: p.onMore },
+          h("svg", { width: 12, height: 12, viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", "aria-hidden": "true" },
+            h("path", { d: "M6 3l5 5-5 5" }))) : null),
+      h("div", { className: "dc-shelf-track", ref: track, tabIndex: 0, role: "list",
+                 onKeyDown: function (e) {
+                   if (e.key === "ArrowRight") { e.preventDefault(); nudge(1); }
+                   if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-1); }
+                 } },
+        p.children));
+  }
+
   function SidebarList(p) {
     // sections: [{ label, action, onAction, items: [{ id, label, icon, thumb }] }]
     // Selection is controlled. Arrow keys move it, matching SegmentedControl.
@@ -1082,11 +1143,11 @@ js = js.replace(
 )
 js = js.replace(
     '{"name":"Panel"},',
-    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},',
+    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},',
 )
 js = js.replace(
     "Panel: Panel, ListRow: ListRow,",
-    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, ListRow: ListRow,",
+    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, ListRow: ListRow,",
 )
 assert (
     "dc-tint-" in js
@@ -1096,6 +1157,8 @@ assert (
     and '{"name":"Toolbar"}' in js
     and "SidebarList: SidebarList" in js
     and '{"name":"SidebarList"}' in js
+    and "Shelf: Shelf" in js
+    and "ArtworkCard: ArtworkCard" in js
 )
 w("components/bundle.js", js)
 
@@ -1155,6 +1218,25 @@ export interface SidebarSection {
   onAction?: () => void;
   items: SidebarItem[];
 }
+/** A square artwork over a caption block of constant height. The caption does NOT scale with the card: measured 37pt at every width. Pass width; do not assume a fixed size, it tracks the available space in the real app. */
+export function ArtworkCard(props: {
+  art: string;
+  title: string;
+  subtitle?: string;
+  /** Card width in px. The artwork is square and the caption adds 37px. */
+  width?: number;
+  onClick?: () => void;
+  className?: string;
+}): JSX.Element;
+/** A horizontally scrolling row of cards with a title and an optional "see all". Owns the GAP (20px, 16px when compact) and lets the card own its size. Arrow keys scroll by one card pitch. */
+export function Shelf(props: {
+  title: string;
+  onMore?: () => void;
+  /** 16px gap instead of 20px. Music switches at a narrow window; where exactly is unmeasured. */
+  compact?: boolean;
+  children?: ReactNode;
+  className?: string;
+}): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
 export function SidebarList(props: {
   sections: SidebarSection[];
@@ -1399,6 +1481,39 @@ docs[
 </body>
 </html>
 """
+docs["Shelf/README.md"] = r"""# Shelf
+
+A horizontally scrolling row of cards with a title and an optional "see all"
+chevron, as on Music's Home.
+
+## The shelf owns the gap; the card owns its shape
+
+This is the one structural decision, and it comes from measurement rather than
+taste. Three readings of the *same* window disagreed on card size and agreed on
+the gap and the ratios, because the card tracks the width left over by a
+user-resizable sidebar.
+
+| | |
+|---|---|
+| gap | **20px**, or 16px with `compact` |
+| ArtworkCard | square artwork + a **37px** caption block |
+| HeroCard | 3:4 |
+
+So **do not hard-code a card size**. A component shipping 188x225 is correct only
+for the one sidebar position it was measured at.
+
+The 20/16 split is a breakpoint, not a scale: 20px was measured at ~1300px of
+content and 16px at 772px. Where it switches is not known, so `compact` is a
+caller decision.
+
+## Scrolling
+
+Music's shelf snaps to a card boundary: a measured scroll landed 878.9px against
+a 219.5px pitch, four cards, within 0.1%, after an ease-out of about 0.73s. The
+CSS uses `scroll-snap-type: x mandatory` and arrow keys scroll by exactly one
+card pitch.
+"""
+
 docs["SidebarList/README.md"] = r"""# SidebarList
 
 A Mac source list, as in Music for macOS: sections with small grey headers and an
@@ -1473,6 +1588,33 @@ SwiftUI, docked (Footage Library): the row is an `HStack(spacing: 10)` padded 16
 
 SwiftUI, native on macOS 26 and later (Claude Spinner's SessionToolbar): Liquid Glass instead of a bar. Wrap the row in `GlassEffectContainer(spacing: 8) { HStack(spacing: 8) { ... } }`, give the search field `.glassEffect(.regular, in: Capsule())` and the tools `.buttonStyle(.glass)` with `.help(reason ?? title)`, put the notice under it on a card (radius 6), and pin the whole stack with `.safeAreaInset(edge: .top, spacing: 0)` so content scrolls beneath.
 """
+docs["Shelf/preview.html"] = r'''<!-- @dsCard group="Navigation" height=320 subtitle="Scrolling row of artwork cards; square art over a 37px caption" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Shelf</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  function art(c, t) { return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="' + c +
+    '"/><text x="100" y="110" font-family="-apple-system" font-size="22" fill="#fff" text-anchor="middle">' + t + '</text></svg>'); }
+  var cards = [['#CC132D','740'],['#8944AB','741'],['#0B7771','743'],['#C73300','745'],['#0040DD','747'],['#8C42B2','749']];
+  function Row(props) {
+    return h(D.Shelf, { title: props.title, compact: props.compact, onMore: function () {} },
+      cards.map(function (c, i) {
+        return h(D.ArtworkCard, { key: i, art: art(c[0], c[1]), title: 'Episode ' + c[1], subtitle: 'SOULECTION', width: props.w });
+      }));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { className: 'dc-stack', style: { gap: 24 } },
+      h(Row, { title: 'Recently Played', w: 188 }),
+      h(Row, { title: 'Narrow window (compact gap)', w: 159, compact: true })));
+</script>
+</body>
+</html>
+'''
+
 docs["SidebarList/preview.html"] = r'''<!-- @dsCard group="Navigation" height=420 subtitle="Source list: sections, tinted glyphs, playlist thumbnails, active and inactive selection" -->
 <!doctype html>
 <html>

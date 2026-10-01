@@ -1,5 +1,7 @@
 ## Tasks
 
+- [x] Slice 3: SidebarList -- 32pt rows, active/inactive selection, thumbnails, SwiftUI recipe in the README
+
 - [x] Dark CTA button fill: #FA2E48, which is exactly the dark accent, so no separate token is needed
 - [ ] [you] Capture a row with the mouse held down, to settle whether a pressed state exists
 - [ ] [you] Click the spike window, then it self-captures: .tint vs the ACTIVE selection. Four attempts incl. in-process NSApp.activate all report isKeyWindow=false -- macOS denies focus to a shell-launched binary, so this needs a human click
