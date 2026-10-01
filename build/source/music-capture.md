@@ -76,7 +76,22 @@ On `motion-04` it found 19 localised changes, including full-width
 **1210 x 74pt** and **1210 x 50pt** boxes (track-row hovers) and **40pt-wide**
 columns (the favorited-star column).
 
-**Track-row hover anatomy** (structure only, corroborated by two sources):
+#### Track-row hover, measured (dark)
+
+| Property | Value |
+|---|---|
+| fill | **`#2C2C2D`** sRGB, against the `#1E1F20` ground |
+| size | **1238 x 45pt** |
+| horizontal inset | **40pt** each side, within the 1318pt content width |
+| vertical inset | **5.5pt** top and bottom, within the 56pt row |
+| corner radius | **~6pt** (left edge moves 5.5pt over the first 6pt, then flat) |
+
+So the highlight is a **rounded inset pill, not a full-bleed row fill**. Built as
+a full-width fill it would read wrong immediately. Exactly one band in the
+capture matched, which is what confirms it is the hovered row and not a
+separator or the playing row.
+
+**Anatomy** (structure only, corroborated by two sources):
 
 - the track number is replaced by a play triangle
 - a star appears in the leading 40pt column
