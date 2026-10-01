@@ -61,6 +61,33 @@ before it was wrong. Pixel counts are identical either side of the conversion
 (707 and 626), which is what confirms it is a straight remap rather than
 resampling.
 
+### Finding interaction states: `state-diff.py`
+
+```
+uv run --with pillow python build/source/state-diff.py <mov>
+```
+
+Record while hovering over things; this reports every moment a **small** region
+changed, with its bounding box in window points, ignoring large changes like
+scrolling and navigation. It is how hover, pressed and selection states get
+located without driving the app, which is blocked for Music.
+
+On `motion-04` it found 19 localised changes, including full-width
+**1210 x 74pt** and **1210 x 50pt** boxes (track-row hovers) and **40pt-wide**
+columns (the favorited-star column).
+
+**But do not take colour from a recording.** Recording frames are
+**Rec. ITU-R BT.709**, a third colour space after the P3 of stills and the sRGB
+of tokens, and video encoding shifts values far beyond rounding:
+
+| | from the recording | from a still capture |
+|---|---|---|
+| content ground, dark | `#0D0D0D` | `#1F1F20` |
+
+So the division of labour is: **recordings give geometry, timing, and the fact
+that a state exists; stills give its colour.** A hover's fill must be sampled
+from a still capture taken while the pointer rests on the element.
+
 ### Motion
 
 Screen recordings are **variable frame rate**. `ffprobe` reports
