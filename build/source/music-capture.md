@@ -81,15 +81,28 @@ default and duplicated 542 source frames into 1148 strips. Pass
 
 ## Measured
 
+All sRGB unless marked. Values taken before the P3 discovery have been redone.
+
 | Role | Dark | Light | Instrument |
 |---|---|---|---|
-| content ground | `#1F1F20` | `#FDFDFD` | scanline sweep, every sample in a row agreeing. Dark: `window-home-narrow-unfocused-dark.png`. Light: `motion-f0200-light.png` |
-| sidebar ground | `#262629` | `#E6E6E8` | same sweep. **Wallpaper-dependent in dark**, see below |
-| primary button fill | `#F3F3F3` | not yet | solid fill, maximised playlist capture |
+| **accent, content** | **`#FA2E48`** | **`#FA233B`** | stroke interiors of the "Tame Impala" title, found by scanning the whole image for strongly-red pixels rather than guessing coordinates. 707 px dark, ~445 px light |
+| **accent, sidebar icon** | **`#FF275C`** | **`#FF0029`** | same scan, 626 px in both. Differs from the content accent because the sidebar is a vibrancy material; treat as one token through material, not two tokens, until proven otherwise |
+| **primary button fill** | **`#F3F3F3`** | **`#0E0E0E`** | widest dark/light run in the header band. Light: 124pt wide at y=294pt, 2484 px of `#0E0E0E`. **It inverts with appearance**: maximum contrast against the ground, never the accent |
+| surface (detail panel) | not yet | `#FFFFFF` | vertical sweep, y=60-540pt on the album page |
+| ground (content below) | `#1F1F20` | `#F8F8F8` | vertical sweep. Dark value from a row-wise sweep where every sample agrees |
+| sidebar ground | `#262629` | `#EDEDEE` | same sweep. **Wallpaper-dependent in dark**, see below |
 | track title ink | `#DDDDDD` | not yet | solid glyph interior |
 | column header ink | `#9A9A9A` | not yet | solid glyph interior |
-| **accent, content** | **`#FA2E48`** | not yet | sRGB-converted, 707 stroke-interior pixels of the "Tame Impala" title, `album-detail-unfocused-dark.png`. Found by scanning the whole image for strongly-red pixels rather than guessing coordinates |
-| **accent, sidebar icon** | **`#FF275C`** | not yet | same scan, 626 pixels. Differs from the content accent because the sidebar is a vibrancy material; treat as one token rendered through material, not two tokens, until proven otherwise |
+
+**Light mode has two grounds**, which maps onto App Kit's existing `surface` /
+`ground` split: `#FFFFFF` for the detail panel, `#F8F8F8` for the content below
+it. App Kit light is `ground #F2F2F7` / `surface #FFFFFF`, so the surface matches
+and the ground needs lightening.
+
+Unresolved: a light-mode Home frame measured `#FDFDFD` for its ground, against
+`#F8F8F8` on the album page. That frame was sampled before the P3 fix, and Home
+has no detail panel, so this is either a page difference or a stale reading. One
+light Home capture settles it.
 
 For reference, Apple's dark system colours in sRGB are `systemRed #FF453A` and
 `systemPink #FF375F`. The measured content accent sits between them and matches
@@ -104,8 +117,6 @@ That closes the open question in the plan.
   interiors rather than a favorited star, because the favorited star turned out
   to be **gold, not accent red** (`album-detail-unfocused-dark.png`, track row 1).
   The web player's `#D60017` is superseded and must not be used.
-- **The light-mode accent.** Not yet captured; needs one light-mode shot of a
-  page with accent text, such as any album detail page.
 - **Whether the sidebar can be hidden at all.** Music appears to have no
   hide-sidebar command, unlike most Mac apps. If `View` offers none, drop that
   row from the shot list rather than chasing it; a variant does not need a state
