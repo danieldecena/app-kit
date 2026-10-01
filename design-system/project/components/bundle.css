@@ -144,6 +144,33 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-artcard-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
+/* HeroCard: full-bleed artwork at 3:4 with the caption INSIDE the card, over
+   the art. Width over height measured 0.751, 0.748 and 0.748 across three
+   window widths, so the ratio is the spec and the width comes from the caller.
+   Caption inset measured 18.5pt from the left edge and 22.5pt up from the
+   bottom; eyebrow and title share that left edge.
+
+   The scrim is ours, not Music's. Music relies on artwork commissioned to carry
+   white text -- the one hero measured puts white on #F4B63F, which is 1.81:1
+   and nowhere near AA. An App Kit card takes whatever artwork the adopting app
+   has, so the text needs a backing that does not depend on the image. The
+   gradient bottom is opaque enough that white over it clears 4.5:1 regardless
+   of what is underneath. */
+.dc-herocard { position: relative; display: block; border: 0; padding: 0; background: var(--surface-sunk); text-align: left; cursor: pointer; overflow: hidden; border-radius: var(--radius-lg); width: var(--hero-w, 258px); aspect-ratio: 3 / 4; }
+.dc-herocard-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Stops chosen against the WORST case, a pure white image: at the title's band
+   the scrim is 0.74 opaque, giving 10.0:1, and at the eyebrow's 0.71, giving
+   6.5:1 even with the eyebrow's own 0.82 alpha. A gentler 0.72-to-0.38 ramp was
+   tried first and put the eyebrow at 3.16:1. */
+.dc-herocard-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.70) 16%, rgba(0,0,0,0.30) 34%, rgba(0,0,0,0) 56%); }
+.dc-herocard-cap { position: absolute; left: 18px; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 2px; }
+.dc-herocard-eyebrow { font: var(--type-caption-2); color: rgba(255,255,255,0.82); }
+.dc-herocard-title { font: var(--type-glance); color: #FFFFFF; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Top-right slot: Music puts its own wordmark here. Anything the caller passes
+   sits over the art with no scrim, so it has to be artwork-safe by itself. */
+.dc-herocard-badge { position: absolute; top: 14px; right: 14px; color: #FFFFFF; display: flex; align-items: center; gap: 4px; }
+.dc-herocard:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
+
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --
    32pt rows, 19pt section headers, a rounded inset selection fill. The real
    article is a vibrant material that samples the desktop; `glass` is the web

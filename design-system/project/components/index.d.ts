@@ -104,6 +104,21 @@ export function Shelf(props: {
   children?: ReactNode;
   className?: string;
 }): JSX.Element;
+/** Full-bleed artwork at 3:4 with the caption over it. The ratio is the spec, not a size: measured 0.751 / 0.748 / 0.748 across three window widths. Carries a built-in bottom scrim so white text clears AA over any artwork. */
+export function HeroCard(props: {
+  art: string;
+  title: string;
+  /** A line above the title, e.g. "Made for You". */
+  eyebrow?: string;
+  /** Top-right slot, over the art with NO scrim -- it must be legible unaided. */
+  badge?: ReactNode;
+  /** A colour the app derived from the artwork. Shows while the art loads and behind a transparent one; nothing here reads the image. */
+  tone?: string;
+  /** Card width in px; height derives as width / 0.75. */
+  width?: number;
+  onClick?: () => void;
+  className?: string;
+}): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
 export function SidebarList(props: {
   sections: SidebarSection[];

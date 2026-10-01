@@ -676,10 +676,21 @@ def _check_contrast(tokens):
     # These assert which side of mid-grey each token belongs on.
     # music-primary is the transport button, which is DARK on a light page and
     # light on a dark one -- it inverts against the ground, unlike a surface.
-    LIGHTER_IN_LIGHT = ("ground", "surface", "ground-window", "music-hover",
-                        "music-select-inactive", "on-music-primary")
-    DARKER_IN_LIGHT = ("ink", "ink-soft", "music-ink", "music-ink-soft",
-                       "music-primary")
+    LIGHTER_IN_LIGHT = (
+        "ground",
+        "surface",
+        "ground-window",
+        "music-hover",
+        "music-select-inactive",
+        "on-music-primary",
+    )
+    DARKER_IN_LIGHT = (
+        "ink",
+        "ink-soft",
+        "music-ink",
+        "music-ink-soft",
+        "music-primary",
+    )
     # The reds do not follow the ground: they are deliberately near-equal in both
     # themes, so neither direction applies and a swap would be close to a no-op.
     # Assert that intent instead, which catches one drifting away from the other.
@@ -824,6 +835,33 @@ css = css.replace(
 .dc-artcard-title { font: var(--type-footnote); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
+
+/* HeroCard: full-bleed artwork at 3:4 with the caption INSIDE the card, over
+   the art. Width over height measured 0.751, 0.748 and 0.748 across three
+   window widths, so the ratio is the spec and the width comes from the caller.
+   Caption inset measured 18.5pt from the left edge and 22.5pt up from the
+   bottom; eyebrow and title share that left edge.
+
+   The scrim is ours, not Music's. Music relies on artwork commissioned to carry
+   white text -- the one hero measured puts white on #F4B63F, which is 1.81:1
+   and nowhere near AA. An App Kit card takes whatever artwork the adopting app
+   has, so the text needs a backing that does not depend on the image. The
+   gradient bottom is opaque enough that white over it clears 4.5:1 regardless
+   of what is underneath. */
+.dc-herocard { position: relative; display: block; border: 0; padding: 0; background: var(--surface-sunk); text-align: left; cursor: pointer; overflow: hidden; border-radius: var(--radius-lg); width: var(--hero-w, 258px); aspect-ratio: 3 / 4; }
+.dc-herocard-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Stops chosen against the WORST case, a pure white image: at the title's band
+   the scrim is 0.74 opaque, giving 10.0:1, and at the eyebrow's 0.71, giving
+   6.5:1 even with the eyebrow's own 0.82 alpha. A gentler 0.72-to-0.38 ramp was
+   tried first and put the eyebrow at 3.16:1. */
+.dc-herocard-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.70) 16%, rgba(0,0,0,0.30) 34%, rgba(0,0,0,0) 56%); }
+.dc-herocard-cap { position: absolute; left: 18px; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 2px; }
+.dc-herocard-eyebrow { font: var(--type-caption-2); color: rgba(255,255,255,0.82); }
+.dc-herocard-title { font: var(--type-glance); color: #FFFFFF; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Top-right slot: Music puts its own wordmark here. Anything the caller passes
+   sits over the art with no scrim, so it has to be artwork-safe by itself. */
+.dc-herocard-badge { position: absolute; top: 14px; right: 14px; color: #FFFFFF; display: flex; align-items: center; gap: 4px; }
+.dc-herocard:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --
    32pt rows, 19pt section headers, a rounded inset selection fill. The real
@@ -1045,6 +1083,24 @@ js = js.replace(
         p.subtitle ? h("span", { className: "dc-artcard-sub" }, p.subtitle) : null));
   }
 
+  // Full-bleed artwork at 3:4 with the caption over it. `tone` is the colour
+  // the adopting app derived from the artwork; nothing here reads the image,
+  // because no part of this pipeline reads a colour at runtime. It only shows
+  // while the artwork loads, and behind a transparent one.
+  function HeroCard(p) {
+    var style = {};
+    if (p.width) style["--hero-w"] = p.width + "px";
+    if (p.tone) style.background = p.tone;
+    return h("button", { type: "button", className: cx("dc-herocard", p.className), onClick: p.onClick,
+                         style: style },
+      h("img", { className: "dc-herocard-art", src: p.art, alt: "" }),
+      h("span", { className: "dc-herocard-scrim" }),
+      p.badge ? h("span", { className: "dc-herocard-badge" }, p.badge) : null,
+      h("span", { className: "dc-herocard-cap" },
+        p.eyebrow ? h("span", { className: "dc-herocard-eyebrow" }, p.eyebrow) : null,
+        h("span", { className: "dc-herocard-title" }, p.title)));
+  }
+
   function Shelf(p) {
     // Arrow keys scroll by one card pitch, so the shelf snaps the way Music's
     // does (measured: an ease-out settling on a card boundary).
@@ -1143,11 +1199,11 @@ js = js.replace(
 )
 js = js.replace(
     '{"name":"Panel"},',
-    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},',
+    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},',
 )
 js = js.replace(
     "Panel: Panel, ListRow: ListRow,",
-    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, ListRow: ListRow,",
+    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, ListRow: ListRow,",
 )
 assert (
     "dc-tint-" in js
@@ -1159,6 +1215,8 @@ assert (
     and '{"name":"SidebarList"}' in js
     and "Shelf: Shelf" in js
     and "ArtworkCard: ArtworkCard" in js
+    and "HeroCard: HeroCard" in js
+    and '{"name":"HeroCard"}' in js
 )
 w("components/bundle.js", js)
 
@@ -1235,6 +1293,21 @@ export function Shelf(props: {
   /** 16px gap instead of 20px. Music switches at a narrow window; where exactly is unmeasured. */
   compact?: boolean;
   children?: ReactNode;
+  className?: string;
+}): JSX.Element;
+/** Full-bleed artwork at 3:4 with the caption over it. The ratio is the spec, not a size: measured 0.751 / 0.748 / 0.748 across three window widths. Carries a built-in bottom scrim so white text clears AA over any artwork. */
+export function HeroCard(props: {
+  art: string;
+  title: string;
+  /** A line above the title, e.g. "Made for You". */
+  eyebrow?: string;
+  /** Top-right slot, over the art with NO scrim -- it must be legible unaided. */
+  badge?: ReactNode;
+  /** A colour the app derived from the artwork. Shows while the art loads and behind a transparent one; nothing here reads the image. */
+  tone?: string;
+  /** Card width in px; height derives as width / 0.75. */
+  width?: number;
+  onClick?: () => void;
   className?: string;
 }): JSX.Element;
 /** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
@@ -1514,6 +1587,88 @@ CSS uses `scroll-snap-type: x mandatory` and arrow keys scroll by exactly one
 card pitch.
 """
 
+docs["HeroCard/README.md"] = r"""# HeroCard
+
+The large card at the top of Music's Home: artwork filling the whole card, with
+an eyebrow and a title set over it at the bottom-left, and a slot top-right where
+Music puts its own wordmark.
+
+## 3:4 is the spec, the size is not
+
+Width over height measured 0.751, 0.748 and 0.748 across three window widths,
+while the card itself went from 257.5x343pt to 271.0x362.5pt as the sidebar
+moved. So `HeroCard` takes a `width` and derives the height; see
+[Shelf](../Shelf/README.md) for the same decision on the row around it.
+
+Caption geometry, measured from the same capture: 18.5pt in from the left edge,
+title sitting 22.5pt up from the bottom, eyebrow 7.5pt above the title.
+
+## The scrim is ours, not Music's
+
+Music's heroes are commissioned artwork that happens to carry white text. The one
+measured here puts white on `#F4B63F`, which is **1.81:1** -- nowhere near the
+4.5:1 this design system asserts everywhere else. Music gets away with it because
+Apple controls the image.
+
+An adopting app does not, so the card carries its own bottom gradient and the
+white text sits on that rather than on the artwork. The cost is a card that is
+slightly darker at the bottom than Music's; the alternative is text whose
+legibility depends on an image nobody checked.
+
+The stops were picked against the worst artwork there is, a pure white image,
+and checked rather than eyeballed:
+
+| | scrim alpha at that band | contrast over white artwork |
+|---|---|---|
+| title | 0.74 | **10.0:1** |
+| eyebrow (itself 82% white) | 0.71 | **6.5:1** |
+
+A gentler first attempt, `0.72` ramping to `0.38` by 22%, measured **3.16:1** at
+the eyebrow and was replaced.
+
+The `badge` slot has **no** scrim behind it, because Music's wordmark sits on
+open artwork. Anything placed there has to be legible unaided.
+
+## `tone` does not read the artwork
+
+Nothing in this pipeline reads a colour at runtime. `tone` is a colour the app
+derived itself; the card only shows it while the artwork loads and behind a
+transparent one.
+"""
+
+docs[
+    "HeroCard/preview.html"
+] = r"""<!-- @dsCard group="Navigation" height=430 subtitle="3:4 artwork card with the caption over the art" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>HeroCard</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  function art(a, b) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="258" height="344">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/>' +
+      '</linearGradient></defs><rect width="258" height="344" fill="url(#g)"/></svg>');
+  }
+  var cards = [
+    ['#FF5E3A', '#FFB300', 'Made for You', "Daniel Decena's Station"],
+    ['#2C5364', '#0F2027', 'Updated Playlist', 'New Music Mix'],
+    ['#8E2DE2', '#4A00E0', 'Station', 'Soulection Radio']
+  ];
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(D.Shelf, { title: 'Top Picks for You', onMore: function () {} },
+      cards.map(function (c, i) {
+        return h(D.HeroCard, { key: i, art: art(c[0], c[1]), eyebrow: c[2], title: c[3],
+                               tone: c[0], width: 258 });
+      })));
+</script>
+</body>
+</html>
+"""
+
 docs["SidebarList/README.md"] = r"""# SidebarList
 
 A Mac source list, as in Music for macOS: sections with small grey headers and an
@@ -1588,7 +1743,9 @@ SwiftUI, docked (Footage Library): the row is an `HStack(spacing: 10)` padded 16
 
 SwiftUI, native on macOS 26 and later (Claude Spinner's SessionToolbar): Liquid Glass instead of a bar. Wrap the row in `GlassEffectContainer(spacing: 8) { HStack(spacing: 8) { ... } }`, give the search field `.glassEffect(.regular, in: Capsule())` and the tools `.buttonStyle(.glass)` with `.help(reason ?? title)`, put the notice under it on a card (radius 6), and pin the whole stack with `.safeAreaInset(edge: .top, spacing: 0)` so content scrolls beneath.
 """
-docs["Shelf/preview.html"] = r'''<!-- @dsCard group="Navigation" height=320 subtitle="Scrolling row of artwork cards; square art over a 37px caption" -->
+docs[
+    "Shelf/preview.html"
+] = r"""<!-- @dsCard group="Navigation" height=320 subtitle="Scrolling row of artwork cards; square art over a 37px caption" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Shelf</title></head>
@@ -1613,9 +1770,11 @@ docs["Shelf/preview.html"] = r'''<!-- @dsCard group="Navigation" height=320 subt
 </script>
 </body>
 </html>
-'''
+"""
 
-docs["SidebarList/preview.html"] = r'''<!-- @dsCard group="Navigation" height=420 subtitle="Source list: sections, tinted glyphs, playlist thumbnails, active and inactive selection" -->
+docs[
+    "SidebarList/preview.html"
+] = r"""<!-- @dsCard group="Navigation" height=420 subtitle="Source list: sections, tinted glyphs, playlist thumbnails, active and inactive selection" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>SidebarList</title></head>
@@ -1654,7 +1813,7 @@ docs["SidebarList/preview.html"] = r'''<!-- @dsCard group="Navigation" height=42
 </script>
 </body>
 </html>
-'''
+"""
 
 docs[
     "Toolbar/preview.html"

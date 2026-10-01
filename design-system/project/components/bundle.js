@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
+/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"Shelf"},{"name":"ArtworkCard"},{"name":"HeroCard"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -104,6 +104,24 @@
       h("span", { className: "dc-artcard-cap" },
         h("span", { className: "dc-artcard-title" }, p.title),
         p.subtitle ? h("span", { className: "dc-artcard-sub" }, p.subtitle) : null));
+  }
+
+  // Full-bleed artwork at 3:4 with the caption over it. `tone` is the colour
+  // the adopting app derived from the artwork; nothing here reads the image,
+  // because no part of this pipeline reads a colour at runtime. It only shows
+  // while the artwork loads, and behind a transparent one.
+  function HeroCard(p) {
+    var style = {};
+    if (p.width) style["--hero-w"] = p.width + "px";
+    if (p.tone) style.background = p.tone;
+    return h("button", { type: "button", className: cx("dc-herocard", p.className), onClick: p.onClick,
+                         style: style },
+      h("img", { className: "dc-herocard-art", src: p.art, alt: "" }),
+      h("span", { className: "dc-herocard-scrim" }),
+      p.badge ? h("span", { className: "dc-herocard-badge" }, p.badge) : null,
+      h("span", { className: "dc-herocard-cap" },
+        p.eyebrow ? h("span", { className: "dc-herocard-eyebrow" }, p.eyebrow) : null,
+        h("span", { className: "dc-herocard-title" }, p.title)));
   }
 
   function Shelf(p) {
@@ -281,6 +299,6 @@
 
   window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {
     Button: Button, FilterPill: FilterPill, SegmentedControl: SegmentedControl, Badge: Badge,
-    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
+    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, Shelf: Shelf, ArtworkCard: ArtworkCard, HeroCard: HeroCard, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
   });
 })();

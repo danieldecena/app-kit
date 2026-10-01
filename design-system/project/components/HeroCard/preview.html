@@ -1,0 +1,29 @@
+<!-- @dsCard group="Navigation" height=430 subtitle="3:4 artwork card with the caption over the art" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>HeroCard</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  function art(a, b) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="258" height="344">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/>' +
+      '</linearGradient></defs><rect width="258" height="344" fill="url(#g)"/></svg>');
+  }
+  var cards = [
+    ['#FF5E3A', '#FFB300', 'Made for You', "Daniel Decena's Station"],
+    ['#2C5364', '#0F2027', 'Updated Playlist', 'New Music Mix'],
+    ['#8E2DE2', '#4A00E0', 'Station', 'Soulection Radio']
+  ];
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(D.Shelf, { title: 'Top Picks for You', onMore: function () {} },
+      cards.map(function (c, i) {
+        return h(D.HeroCard, { key: i, art: art(c[0], c[1]), eyebrow: c[2], title: c[3],
+                               tone: c[0], width: 258 });
+      })));
+</script>
+</body>
+</html>
