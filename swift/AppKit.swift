@@ -131,6 +131,28 @@ public extension Color {
         public static let glassEdge = dyn((1.000, 1.000, 1.000, 0.70), (1.000, 1.000, 1.000, 0.14))
         /// Toasts and hints over content, white text.
         public static let scrim = dyn((0.000, 0.000, 0.000, 0.80), (0.000, 0.000, 0.000, 0.78))
+        /// Music's fixed red. Icons, text actions, the favorited star, the active queue icon, and CTA button fills. NOT t
+        public static let musicAccent = dyn((0.980, 0.137, 0.231, 1.00), (0.980, 0.180, 0.282, 1.00))
+        /// Accent TEXT, where 4.5:1 must hold. Music itself uses the raw accent here and fails AA; this is the one delibe
+        public static let musicAccentInk = dyn((0.918, 0.024, 0.137, 1.00), (0.980, 0.220, 0.318, 1.00))
+        /// Selected row fill while the window is key, with a white label. Not derivable from the accent: stepping the acc
+        public static let musicSelect = dyn((0.863, 0.071, 0.161, 1.00), (0.800, 0.075, 0.176, 1.00))
+        /// Selected row fill when another app is frontmost. The normal state for a monitor app, so do not treat it as an 
+        public static let musicSelectInactive = dyn((0.863, 0.863, 0.867, 1.00), (0.275, 0.275, 0.275, 1.00))
+        /// Row hover fill. Drawn as a rounded inset pill, 40pt in from each side of the row and ~6pt radius, never a full
+        public static let musicHover = dyn((0.941, 0.941, 0.941, 1.00), (0.173, 0.173, 0.176, 1.00))
+        /// The transport button (Play). Maximum contrast against the ground, so it inverts with appearance. Never the acc
+        public static let musicPrimary = dyn((0.055, 0.055, 0.055, 1.00), (0.953, 0.953, 0.953, 1.00))
+        /// Label on music-primary. Inverts with it.
+        public static let onMusicPrimary = dyn((1.000, 1.000, 1.000, 1.00), (0.055, 0.055, 0.055, 1.00))
+        /// Label on a selected row, white in both themes.
+        public static let onMusicSelect = dyn((1.000, 1.000, 1.000, 1.00), (1.000, 1.000, 1.000, 1.00))
+        /// The Music window's content ground. Flat, not graded and not tinted by artwork. Differs from App Kit's iOS-deri
+        public static let groundWindow = dyn((1.000, 1.000, 1.000, 1.00), (0.122, 0.122, 0.125, 1.00))
+        /// Primary text in the Music variant. Deliberately softer than App Kit's ink in both directions; do not inherit i
+        public static let musicInk = dyn((0.153, 0.153, 0.153, 1.00), (0.867, 0.867, 0.867, 1.00))
+        /// Secondary text. Music measures #808080 in light, which is only 3.95:1 on white; #767676 is the first grey that
+        public static let musicInkSoft = dyn((0.463, 0.463, 0.463, 1.00), (0.604, 0.604, 0.604, 1.00))
     }
 }
 

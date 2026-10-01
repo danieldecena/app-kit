@@ -285,6 +285,86 @@ colors += [
         "Toasts and hints over content, white text.",
     ),
 ]
+
+# ---- Music variant (opt-in)
+# Measured from the macOS Music app, not designed. Every value and its
+# instrument is in build/source/music-capture.md. Captures are Display P3 and
+# were converted to sRGB before sampling; reading the raw bytes gives P3 numbers
+# that render visibly wrong as CSS hex.
+#
+# Two values deliberately depart from the measurement, because Music's own
+# palette fails WCAG AA in those places. Both keep the measured hue and
+# saturation and move lightness only as far as the 4.5 gate requires. Do not
+# "restore" them to the measured values; that reintroduces the failure.
+colors += [
+    T(
+        "music-accent",
+        "#FA233B",
+        "#FA2E48",
+        "Music's fixed red. Icons, text actions, the favorited star, the active queue icon, and CTA button fills. NOT the transport button, which is neutral. Only 4.35:1 on ground-window, so use music-accent-ink for text.",
+    ),
+    T(
+        "music-accent-ink",
+        "#EA0623",
+        "#FA3851",
+        "Accent TEXT, where 4.5:1 must hold. Music itself uses the raw accent here and fails AA; this is the one deliberate departure for the accent.",
+    ),
+    T(
+        "music-select",
+        "#DC1229",
+        "#CC132D",
+        "Selected row fill while the window is key, with a white label. Not derivable from the accent: stepping the accent 20% toward black gives #C8253A, not this.",
+    ),
+    T(
+        "music-select-inactive",
+        "#DCDCDD",
+        "#464646",
+        "Selected row fill when another app is frontmost. The normal state for a monitor app, so do not treat it as an edge case.",
+    ),
+    T(
+        "music-hover",
+        "#F0F0F0",
+        "#2C2C2D",
+        "Row hover fill. Drawn as a rounded inset pill, 40pt in from each side of the row and ~6pt radius, never a full-bleed row.",
+    ),
+    T(
+        "music-primary",
+        "#0E0E0E",
+        "#F3F3F3",
+        "The transport button (Play). Maximum contrast against the ground, so it inverts with appearance. Never the accent.",
+    ),
+    T(
+        "on-music-primary",
+        "#FFFFFF",
+        "#0E0E0E",
+        "Label on music-primary. Inverts with it.",
+    ),
+    T(
+        "on-music-select",
+        "#FFFFFF",
+        "#FFFFFF",
+        "Label on a selected row, white in both themes.",
+    ),
+    T(
+        "ground-window",
+        "#FFFFFF",
+        "#1F1F20",
+        "The Music window's content ground. Flat, not graded and not tinted by artwork. Differs from App Kit's iOS-derived ground, which is #000 in dark.",
+    ),
+    T(
+        "music-ink",
+        "#272727",
+        "#DDDDDD",
+        "Primary text in the Music variant. Deliberately softer than App Kit's ink in both directions; do not inherit ink here.",
+    ),
+    T(
+        "music-ink-soft",
+        "#767676",
+        "#9A9A9A",
+        "Secondary text. Music measures #808080 in light, which is only 3.95:1 on white; #767676 is the first grey that clears 4.5. The second deliberate departure.",
+    ),
+]
+
 tok["name"] = "App Kit"
 tok["color"]["tokens"] = colors
 tok["type"]["families"] = {
@@ -511,11 +591,18 @@ CONTRAST_PAIRS = (
         ("on-accent", "accent-fill", 4.5),
         ("accent-ink", "ground", 4.5),
         ("accent-ink", "surface", 4.5),
-    ("accent-ink", "surface-sunk", 4.5),
+        ("accent-ink", "surface-sunk", 4.5),
         ("edge", "ground", 3.0),
         ("edge", "surface", 3.0),
         ("warn-ink", "warn-wash", 4.6),
         ("heat-1", "surface", 3.0),
+        # Music variant. music-accent is deliberately absent: it is 4.35:1 on
+        # ground-window and is not for text, which is why music-accent-ink exists.
+        ("music-accent-ink", "ground-window", 4.5),
+        ("on-music-primary", "music-primary", 4.5),
+        ("on-music-select", "music-select", 4.5),
+        ("music-ink", "ground-window", 4.5),
+        ("music-ink-soft", "ground-window", 4.5),
     ]
     + [
         (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
@@ -583,6 +670,33 @@ def _check_contrast(tokens):
                 failures.append(
                     f"  {fg} on {bg} ({theme}) is {r:.2f}:1, below the claimed {floor}:1"
                 )
+    # Contrast is blind to a light/dark swap: invert a whole theme pair and the
+    # ratios are unchanged. T() takes (name, light, dark), and the Music tokens
+    # were first written dark-first from a notes table, which the gate passed.
+    # These assert which side of mid-grey each token belongs on.
+    # music-primary is the transport button, which is DARK on a light page and
+    # light on a dark one -- it inverts against the ground, unlike a surface.
+    LIGHTER_IN_LIGHT = ("ground", "surface", "ground-window", "music-hover",
+                        "music-select-inactive", "on-music-primary")
+    DARKER_IN_LIGHT = ("ink", "ink-soft", "music-ink", "music-ink-soft",
+                       "music-primary")
+    for name in LIGHTER_IN_LIGHT + DARKER_IN_LIGHT:
+        if name not in by:
+            continue
+        v = by[name]["value"]
+        if not isinstance(v, dict):
+            continue
+        try:
+            light, dark = _lum(v["light"]), _lum(v["dark"])
+        except ValueError:
+            continue  # rgba or similar; orientation is not checkable here
+        wants_lighter = name in LIGHTER_IN_LIGHT
+        if (light > dark) != wants_lighter:
+            failures.append(
+                f"  {name} is the wrong way round: light {v['light']} / dark {v['dark']}. "
+                f"T() takes (name, light, dark)."
+            )
+
     if failures:
         raise SystemExit("contrast gate failed:\n" + "\n".join(failures))
 
