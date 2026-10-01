@@ -79,6 +79,38 @@ Note when extracting frames: `ffmpeg` re-times to constant frame rate by
 default and duplicated 542 source frames into 1148 strips. Pass
 `-fps_mode passthrough` to keep the real frames.
 
+### Measured motion: page navigation is NOT animated
+
+From `motion-04.mov` (Home -> playlist detail -> back -> Home -> another
+detail), by per-frame difference against the VFR timestamps.
+
+Navigating to a detail page produces a **single-frame** change with a difference
+peak of 48-60 against a median of 0.07. One frame. There is no push, no
+cross-fade, no slide.
+
+What happens instead, measured as the fraction of the content area holding the
+flat ground colour:
+
+```
+ t=2.45s   0.12   content present
+ t=2.60s   1.00   CONTENT AREA COMPLETELY BLANK
+ t=2.90s   0.60   content back, still sparse
+ t=4.00s   0.36   artwork still filling in
+```
+
+So the sequence is: **clear the content area to flat ground instantly, hold a
+blank state for roughly 0.15-0.4s, then populate, with artwork continuing to
+load progressively for seconds afterwards.** The sidebar and the MiniPlayer
+never blank; only the content region does.
+
+Consequence for the variant: do not build an animated page transition. Build an
+empty state for the content region and an async artwork placeholder. An
+animated push would be *more* work and *less* faithful.
+
+Not yet measured: the 9.942-10.575s event (0.633s, 22 frames, peak 63) which is
+a different and genuinely animated change, and the shelf horizontal scroll in
+`motion-02`, which is what answers "does it snap to a card?".
+
 ## Measured
 
 All sRGB unless marked. Values taken before the P3 discovery have been redone.
