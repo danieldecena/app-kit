@@ -89,7 +89,7 @@ All sRGB unless marked. Values taken before the P3 discovery have been redone.
 | **accent, sidebar icon** | **`#FF275C`** | **`#FF0029`** | same scan, 626 px in both. Differs from the content accent because the sidebar is a vibrancy material; treat as one token through material, not two tokens, until proven otherwise |
 | **primary button fill** | **`#F3F3F3`** | **`#0E0E0E`** | widest dark/light run in the header band. Light: 124pt wide at y=294pt, 2484 px of `#0E0E0E`. **It inverts with appearance**: maximum contrast against the ground, never the accent |
 | surface (detail panel) | not yet | `#FFFFFF` | vertical sweep, y=60-540pt on the album page |
-| ground (content below) | `#1F1F20` | `#F8F8F8` | vertical sweep. Dark value from a row-wise sweep where every sample agrees |
+| ground | `#1F1F20` | `#FFFFFF` | row-wise sweep where every sample agrees. Light confirmed on Home; `#F8F8F8` is a section background on album pages, not the ground |
 | sidebar ground | `#262629` | `#EDEDEE` | same sweep. **Wallpaper-dependent in dark**, see below |
 | track title ink | `#DDDDDD` | not yet | solid glyph interior |
 | column header ink | `#9A9A9A` | not yet | solid glyph interior |
@@ -99,10 +99,23 @@ All sRGB unless marked. Values taken before the P3 discovery have been redone.
 it. App Kit light is `ground #F2F2F7` / `surface #FFFFFF`, so the surface matches
 and the ground needs lightening.
 
-Unresolved: a light-mode Home frame measured `#FDFDFD` for its ground, against
-`#F8F8F8` on the album page. That frame was sampled before the P3 fix, and Home
-has no detail panel, so this is either a page difference or a stale reading. One
-light Home capture settles it.
+Resolved by a light Home capture: **light ground is `#FFFFFF`**. The `#F8F8F8`
+measured on the album page is a *section* background under "More By" and
+"Featured On", not the global ground, and the `#FDFDFD` from the pre-P3 motion
+frame is superseded. So the album page has three bands: `#FFFFFF` detail panel,
+`#F8F8F8` related-content section, `#FFFFFF` elsewhere.
+
+### The hero gutter does not invert
+
+The gap between Top Picks hero cards measures `#EEEEEE` in dark and
+`#EDEDED`-`#F1F1F1` in light. A background would invert between appearances;
+this does not move. So it is **not** ground showing through, and modelling it as
+`ground` would be wrong in dark mode by a very visible margin.
+
+What it actually is remains unknown. It runs the full height of the hero row
+(478pt, between two 189.5pt artwork rows) and appears between every pair of hero
+cards. Measured in both appearances, explained in neither. Do not model it until
+someone looks at a hero card's edge directly at high zoom.
 
 For reference, Apple's dark system colours in sRGB are `systemRed #FF453A` and
 `systemPink #FF375F`. The measured content accent sits between them and matches
