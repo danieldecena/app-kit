@@ -267,8 +267,15 @@ All sRGB unless marked. Values taken before the P3 discovery have been redone.
 | surface (detail panel) | not yet | `#FFFFFF` | vertical sweep, y=60-540pt on the album page |
 | ground | `#1F1F20` | `#FFFFFF` | row-wise sweep where every sample agrees. Light confirmed on Home; `#F8F8F8` is a section background on album pages, not the ground |
 | sidebar ground | `#262629` | `#EDEDEE` | same sweep. **Wallpaper-dependent in dark**, see below |
-| track title ink | `#DDDDDD` | not yet | solid glyph interior |
-| column header ink | `#9A9A9A` | not yet | solid glyph interior |
+| **ink** (track titles) | `#DDDDDD` | **`#272727`** | darkest-common glyph interior, found by searching the content area rather than sampling a guessed coordinate. 4547 px light |
+| **ink-soft** (duration, "…") | `#9A9A9A` | **`#808080`** | same method, 2449 px light |
+
+**Music runs lower contrast than App Kit in both directions.** App Kit is
+`ink #F5F5F7 / #1D1D1F` and `ink-soft #98989D / #636366`. Music is a dimmer
+white on dark, a lighter black on light, and a notably lighter secondary grey.
+The variant therefore softens text rather than inheriting App Kit's inks, which
+is the opposite of what a design system usually wants and needs stating
+explicitly or it will be "corrected" back.
 
 **Light mode has two grounds**, which maps onto App Kit's existing `surface` /
 `ground` split: `#FFFFFF` for the detail panel, `#F8F8F8` for the content below
