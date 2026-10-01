@@ -61,6 +61,33 @@ before it was wrong. Pixel counts are identical either side of the conversion
 (707 and 626), which is what confirms it is a straight remap rather than
 resampling.
 
+### Driving the window width without touching Music
+
+Music is policy-blocked for automation, so its window cannot be resized
+directly. But **changing a display's resolution resizes the windows on it**, and
+BetterDisplay exposes that from the command line:
+
+```
+betterdisplaycli get --name="Virtual 16:9" --resolution        # 2560x1440
+betterdisplaycli set --name="Virtual 16:9" --resolution=1600x900
+```
+
+With Music parked on a virtual display this gives hands-off control of the one
+variable the layout actually responds to. A descending sweep produced six
+distinct window widths (2049, 2049, 1792, 1600, 1376, 1280) with no interaction
+with Music at all.
+
+Two things about the mechanism:
+
+- **Only shrinking works.** macOS resizes a window down to fit a smaller display
+  but does not grow it back, so a sweep must descend. An ascending sweep gave
+  two widths out of six attempts.
+- It changes a real display, so record the starting resolution and restore it.
+
+This is what makes the gap breakpoint (16pt narrow, 20pt wide) findable: it
+needs many widths, and widths were previously only available by asking a human
+to drag a window.
+
 ### Finding interaction states: `state-diff.py`
 
 ```
