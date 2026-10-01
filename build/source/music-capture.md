@@ -181,6 +181,30 @@ are exact.
 The two shelves share one gap value and one left edge but differ in card shape,
 so a Shelf component should take the card as a slot rather than owning its size.
 
+### SidebarList
+
+| Dimension | Measured | How |
+|---|---|---|
+| **row pitch** | **32.2pt** | median of 19 of 23 consecutive label-row pitches, clustered 30.5-33.2 |
+| **sidebar width** | **200pt** | ground `#EDEDEE` runs x 0-200pt, then white content |
+| section break | ~63pt, about 2x the row pitch | the two outliers among those pitches, at Library-to-Store and Store-to-Playlists |
+
+So a section header occupies roughly one extra row slot rather than a bespoke
+margin, which is worth copying.
+
+### MiniPlayer — not measurable from these captures
+
+The capsule is translucent and floats over album artwork, so it has no stable
+edge: a threshold finds nothing (it is not pale, it is mid-grey over dark art)
+and a translucency-lift comparison finds nothing either, because the lift
+changes with whatever is behind it.
+
+**It becomes measurable in one shot:** scroll the page so the capsule sits over
+flat ground rather than artwork, then capture. Its edges are then a simple step
+against a known colour. Until then its width, height and corner radius are
+unknown, and the ~690 x 60pt suggested by eye on a crop is an estimate, not a
+measurement, and must not be used.
+
 ## Not measured, and why
 
 - ~~The accent.~~ **Measured, see the table above.** Taken from large-title stroke
