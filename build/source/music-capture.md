@@ -456,9 +456,21 @@ exists.
    selection. Matching Music's red needs an explicit override, which slice 3
    must budget for.
 2. **`.foregroundStyle` on a `Label` tints the symbol AND the text.** Music
-   tints only the symbol and leaves the label in normal ink. The spike gets this
-   wrong on purpose-adjacent accident, and the screenshot shows the difference
-   clearly: all-red rows read as decorative rather than as Music's quieter list.
+   tints only the symbol and leaves the label in normal ink. Fixed in the spike
+   by building the Label from explicit `Text`/`Image` closures and tinting only
+   the `Image`; that renders correctly and matches Music.
+
+### A third thing the spike gives for free
+
+**The inactive selection is automatic.** With the spike window not key, its
+sidebar selection renders grey rather than any accent, exactly as Music does.
+That behaviour needs no code: SwiftUI already does it. Given Spinner is a
+monitor app whose window is usually unfocused, this is the state its users will
+mostly see, and it is free.
+
+Still open: whether `.tint(_:)` on the List reaches the **active** selection
+fill. The spike applies it, but the window was never key during capture, so only
+the inactive grey was observed. Settling it needs the spike window frontmost.
 
 ## Contrast audit
 

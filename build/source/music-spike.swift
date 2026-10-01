@@ -51,9 +51,13 @@ struct SpikeView: View {
             // on purpose -- setting one would defeat the thing being tested.
             List(selection: $selection) {
                 ForEach(nav, id: \.0) { name, icon in
-                    Label(name, systemImage: icon)
-                        .foregroundStyle(Color.musicAccent)
-                        .tag(name)
+                    // Music tints only the symbol; the label stays normal ink.
+                    Label {
+                        Text(name)
+                    } icon: {
+                        Image(systemName: icon).foregroundStyle(Color.musicAccent)
+                    }
+                    .tag(name)
                 }
                 Section("Library") {
                     ForEach(library, id: \.self) { name in
@@ -64,6 +68,11 @@ struct SpikeView: View {
                 }
             }
             .listStyle(.sidebar)
+            // Open question for slice 3: sidebar selection draws the SYSTEM
+            // accent, not music-accent, even with every label tinted. .tint on
+            // the List is the documented lever; this spike exists to check
+            // whether it actually reaches the selection fill.
+            .tint(Color.musicSelect)
             .navigationSplitViewColumnWidth(min: 180, ideal: 270)
         } detail: {
             ScrollView {
