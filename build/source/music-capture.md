@@ -95,9 +95,26 @@ separator or the playing row.
 
 **Same shape, different fill.** The selected row is the identical pill:
 
+**Selection has two appearances, and which one you see depends on window focus.**
+
+| state | fill | when |
+|---|---|---|
+| hover | **`#2C2C2D`** | pointer over the row. Measured twice independently, same value |
+| selected, window **active** | **`#CC132D`** | Music is the key window |
+| selected, window **inactive** | **`#464646`** | any other app is frontmost |
+
+This is standard macOS active/inactive selection, and it caught me out: the
+first "selected" capture read red because Music was still key at that moment,
+and a later capture of the same state read grey because it was not.
+
+**It matters more than usual for the first adopter.** Claude Spinner is a
+monitor app, so its window is unfocused most of the time. The inactive grey is
+therefore the state its users will see most, and it is the one most likely to be
+skipped by a build that only ever tests with the window in front.
+
 | | hover | selected |
 |---|---|---|
-| fill | `#2C2C2D` | **`#CC132D`** |
+| fill | `#2C2C2D` | **`#CC132D`** (active) |
 | width | 1238pt | 1238pt |
 | x span | 310.0-1547.5pt | 310.0-1547.5pt |
 | height | 45.0pt | ~45.5pt |
