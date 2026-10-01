@@ -1,6 +1,6 @@
 ## Tasks
 
-- [ ] MiniPlayer has no SwiftUI spike check. The plan makes the spike the fidelity gate for slice 6 and only the CSS preview exists, so the glass capsule has never been judged against a real material
+- [x] Slice 6 spike gate: MiniPlayer judged against a real material, passes
 - [ ] [you] Contextual toolbar: deferred, not dropped. Music's is per-page (Home has none, a playlist has a back chevron, an action capsule and a search field), so it needs its own capture pass before it is a component
 - [ ] [you] Window chrome (unified titlebar, traffic-light inset, back/forward): deferred to the adopting app. It is contextual per page, so App Kit would be guessing; revisit if Spinner needs it
 - [x] Slice 7: document and publish -- design system artifact at v24
@@ -12,7 +12,7 @@
 
 - [x] Dark CTA button fill: #FA2E48, which is exactly the dark accent, so no separate token is needed
 - [ ] [you] Capture a row with the mouse held down, to settle whether a pressed state exists
-- [ ] [you] Click the spike window, then it self-captures: .tint vs the ACTIVE selection. Four attempts incl. in-process NSApp.activate all report isKeyWindow=false -- macOS denies focus to a shell-launched binary, so this needs a human click
+- [x] .tint does NOT reach the sidebar selection: a key, active window fills #434346, a neutral grey. Answered without a human click; the "macOS denies focus" note is retracted as too strong
 - [ ] [you] Capture the dark transport button with the window inactive, for music-primary-inactive
 - [x] Verify the Home AX dump was complete -- depth 9 reports no truncation; card size turned out to track the resizable sidebar width
 - [x] Slice 2: 11 music-* tokens added, gate extended to 29 pairs plus an orientation check

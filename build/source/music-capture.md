@@ -890,6 +890,49 @@ against a known colour. Until then its width, height and corner radius are
 unknown, and the ~690 x 60pt suggested by eye on a crop is an estimate, not a
 measurement, and must not be used.
 
+## Slice 6's spike gate, 2026-10-01
+
+`music-spike.swift` now carries the MiniPlayer capsule, which is what the plan
+asks for: the CSS preview answers geometry and nothing else, because `glass`
+there is a `backdrop-filter` sampling the page while a real capsule samples what
+is behind it in a window. Captured at `spike-miniplayer-key-dark.png`.
+
+**It passes.** 700 x 54 at a stadium radius over `.regularMaterial`, 19pt up,
+centred on the content column, reads as Music's capsule against scrolled
+content. Transport left, now-playing centre, actions right, and the progress
+hairline on the capsule's own bottom edge below the text.
+
+One spike-only bug on the way, worth the note because it is the same mistake the
+CSS avoids by accident: letting the text set the stack height put the line
+*through* the subtitle. The line belongs to the capsule's bottom edge, so the
+group has to be the full 54 tall with the text centred inside it.
+
+## `.tint` does NOT reach the sidebar selection -- ANSWERED
+
+Open since slice 2 and tagged for a human, because four earlier self-capture
+attempts all reported `isKeyWindow=false`.
+
+Measured on a **key, active** window (`isKeyWindow=true isActive=true`), with
+`.tint(Color.musicSelect)` on the `List`: the selected "Home" row fills
+**`#434346`**, sampled identically at two x positions. That is a neutral grey. It
+is not `music-select` `#CC132D` and not a red of any kind.
+
+So `.tint` is not the lever for a sidebar selection fill, and a SwiftUI
+`SidebarList` cannot get Music's red selection from `.listStyle(.sidebar)` plus a
+tint. It needs a custom row background, which is what the CSS component already
+does.
+
+### Retraction: "macOS denies focus to a shell-launched binary"
+
+Written down after four failed attempts. **Too strong.** Five attempts today
+returned `isKeyWindow=true` four times and `false` once. Focus for a
+shell-launched binary is *unreliable*, not denied, and the earlier run simply
+hit the unlucky side of it four times.
+
+The capture tool was right to report the focus state alongside every shot --
+that is the only reason this could be distinguished at all. The wrong move was
+reading four failures as a rule.
+
 ## Not measured, and why
 
 - ~~The accent.~~ **Measured, see the table above.** Taken from large-title stroke

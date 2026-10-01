@@ -39,6 +39,56 @@ extension Color {
     static let musicHover = dyn("#F0F0F0", "#2C2C2D")
 }
 
+struct MiniPlayerSpike: View {
+    var body: some View {
+        HStack(spacing: 11) {
+            ForEach(["shuffle", "backward.fill", "pause.fill", "forward.fill", "repeat"], id: \.self) {
+                Image(systemName: $0).foregroundStyle(Color.musicInk)
+            }
+            ZStack(alignment: .bottom) {
+                // The line belongs to the capsule's bottom edge, not the text's,
+                // so this stack has to be the full 54 tall and the text centred
+                // inside it. First attempt let the text set the height and the
+                // line struck through the subtitle.
+                Color.clear.frame(height: 54)
+                HStack(spacing: 8) {
+                    RoundedRectangle(cornerRadius: 3).fill(Color(red: 0.79, green: 0.28, blue: 0.18))
+                        .frame(width: 34, height: 34)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Nights").font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.musicInk)
+                        Text("Frank Ocean \u{2014} Blonde").font(.system(size: 13))
+                            .foregroundStyle(Color.musicInkSoft)
+                    }
+                    Spacer()
+                }
+                .frame(height: 54)
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.musicInkSoft.opacity(0.35))
+                        Capsule().fill(Color.musicInkSoft).frame(width: g.size.width * 0.54)
+                    }
+                }
+                .frame(height: 1)
+                .padding(.bottom, 2)
+            }
+            HStack(spacing: 14) {
+                ForEach(["quote.bubble", "list.bullet", "speaker.wave.2.fill"], id: \.self) {
+                    Image(systemName: $0).foregroundStyle(Color.musicInk)
+                }
+            }
+        }
+        .padding(.leading, 15)
+        .padding(.trailing, 20)
+        // The whole point of running this in SwiftUI: a REAL material, not a
+        // backdrop-filter. If this reads wrong against the scrolled content
+        // behind it, the CSS preview could never have told us.
+        .background(.regularMaterial, in: Capsule())
+        .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.18), radius: 12, y: 4)
+    }
+}
+
 struct SpikeView: View {
     @State private var selection: String? = "Home"
     private let nav = [("Search", "magnifyingglass"), ("Home", "house.fill"), ("New", "square.grid.2x2"), ("Radio", "dot.radiowaves.left.and.right")]
@@ -75,6 +125,7 @@ struct SpikeView: View {
             .tint(Color.musicSelect)
             .navigationSplitViewColumnWidth(min: 180, ideal: 270)
         } detail: {
+            ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("Home").font(.system(size: 34, weight: .bold))
@@ -105,6 +156,16 @@ struct SpikeView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .background(Color.groundWindow)
+
+            // Slice 6's actual fidelity gate. The CSS preview answers geometry
+            // and nothing else: `glass` there is a backdrop-filter that samples
+            // the page, while this capsule samples what is behind it in a real
+            // window. 700 x 54 at a stadium radius, 19pt up, centred on THIS
+            // column rather than the window, which is what the AX frames say.
+            MiniPlayerSpike()
+                .frame(width: 700, height: 54)
+                .padding(.bottom, 19)
+            }
         }
         .frame(minWidth: 900, minHeight: 600)
     }
