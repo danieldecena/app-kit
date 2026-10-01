@@ -2,6 +2,7 @@
 
 - [x] Dark CTA button fill: #FA2E48, which is exactly the dark accent, so no separate token is needed
 - [ ] [you] Capture a row with the mouse held down, to settle whether a pressed state exists
+- [ ] [you] Click the spike window so it is key, to settle whether .tint reaches the ACTIVE sidebar selection fill (run build/source/music-spike.swift; three capture attempts all caught it unfocused)
 - [ ] [you] Capture the dark transport button with the window inactive, for music-primary-inactive
 - [x] Verify the Home AX dump was complete -- depth 9 reports no truncation; card size turned out to track the resizable sidebar width
 - [x] Slice 2: 11 music-* tokens added, gate extended to 29 pairs plus an orientation check
