@@ -61,7 +61,7 @@ Web pages and artifacts use **Artifact Kit**, the same palette for the browser; 
 
 ## Components
 
-Button, FilterPill, SegmentedControl, Badge, Flag, StatTile, Panel, Fact, Eyebrow, Toolbar, ListRow, Highlight, BarChart. Each card below has its guidelines and a live preview. In SwiftUI prefer the system control (`.bordered`, `.borderedProminent`, `.glass`, `Picker(.segmented)`) and read colours from `AppKit.swift` in `~/developer/app-kit/swift`, which mirrors these tokens.
+Button, FilterPill, SegmentedControl, Badge, Flag, StatTile, Panel, Fact, Eyebrow, Toolbar, SidebarList, Shelf, ArtworkCard, HeroCard, TrackList, MiniPlayer, ListRow, Highlight, BarChart. Each card below has its guidelines and a live preview. In SwiftUI prefer the system control (`.bordered`, `.borderedProminent`, `.glass`, `Picker(.segmented)`) and read colours from `AppKit.swift` in `~/developer/app-kit/swift`, which mirrors these tokens.
 
 ## Iconography
 
@@ -71,3 +71,77 @@ SF Symbols, regular weight, sized to the text beside them, hierarchical renderin
 
 - Focus ring: 2px solid `accent`, offset 2px (the system focus ring follows the accent).
 - Motion is short and functional: 150ms ease-out for state changes, spring on sheet presentation (system default). Respect Reduce Motion.
+
+## The Music variant
+
+A second palette and six components that make an app read as Music for macOS
+rather than as a generic Mac app. Opt in per screen: the `music-*` tokens sit
+beside the core ones and nothing here replaces `accent`, `ink` or `ground`.
+
+**Every value was measured from the native Mac app**, sampled from
+`screencapture` PNGs converted to sRGB and from Accessibility Inspector frames.
+The web player is not a source for anything the Mac app also has. An early
+scrape of music.apple.com gave `#D60017` for the accent; the Mac app measures
+`#FA233B`, which is how far off that route was.
+
+### Three reds, none derived from another
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `music-accent` | `#FA233B` | `#FA2E48` | sidebar glyphs, text actions, the favorited star, promotional CTA fills |
+| `music-accent-ink` | `#EA0623` | `#FA3851` | the same red as *text*, stepped to pass 4.5:1 |
+| `music-select` | `#DC1229` | `#CC132D` | the selected row pill |
+
+App Kit's convention is the accent stepped 20% toward black, which from
+`#FA2E48` gives `#C8253A`. Music uses `#CC132D`. So none of these is reachable
+from another and all three are in `tokens.json` as measured values.
+
+`music-accent` fails 4.5:1 on its own ground (`#FA2E48` on `#1F1F20` is 4.35),
+which is why `music-accent-ink` exists. Fidelity and accessibility genuinely
+disagree there and one token cannot carry both.
+
+### The accent is a fill for exactly one kind of button
+
+| Kind | Example | Fill | Label |
+|---|---|---|---|
+| transport / primary | Play on an album | neutral, inverting: `#0E0E0E` light, `#F3F3F3` dark | the opposite neutral |
+| CTA / promotional | "Set Location" in a Concerts card | the accent | white |
+
+The thing you press to *play* is neutral; the thing that *sells* you something
+is red. Backwards gives a red Play button, which reads as not-Music at a glance.
+
+### Inactive is the normal state
+
+macOS greys a selection when the window is not key, and a monitor app spends
+most of its life there. `SidebarList` and `TrackList` both take
+`windowInactive`, which swaps `music-select` for `music-select-inactive` and
+returns labels to normal ink. Sidebar glyphs lose their red entirely.
+
+### Sizes are not the spec; ratios and gaps are
+
+Three readings of the same window disagreed on card size and agreed on
+everything else, because cards track the width left over by a user-resizable
+sidebar. So:
+
+- `Shelf` owns the **gap**: 20px, or 16px when `compact`. That is a breakpoint,
+  measured at ~1300px and 772px of content; where it switches is unknown.
+- `ArtworkCard` is a square artwork plus a **37px** caption that does not scale.
+- `HeroCard` is **3:4** and derives its height.
+- `TrackList` rows are **56px** and the highlight is a pill inset **40px** each
+  side, 45px tall, ~6px radius -- never a full-bleed row fill.
+- `MiniPlayer` is **700x54** with a stadium radius, floating 19px up and centred
+  on the *content area*, not the window.
+
+Nothing here ships a fixed card size, because a component shipping 188x225 is
+correct only at the one sidebar position it was measured at.
+
+### What is ours and not Music's
+
+`HeroCard` carries a bottom scrim. Music's heroes are commissioned artwork that
+happens to carry white text -- the one measured puts white on `#F4B63F`, which
+is 1.81:1. An adopting app has whatever artwork it has, so the card backs its
+own text: 10.0:1 at the title and 6.5:1 at the eyebrow over a pure white image,
+the worst case.
+
+The full measurement record, including what was measured, how, and what was
+retracted, is `build/source/music-capture.md` in the repo.
