@@ -120,12 +120,23 @@ Spinner is a monitor app, so an unfocused window is its normal condition, and
 every value in the inactive column is what its users will actually see. A build
 tested only with the window in front would render none of them.
 
-Not supported by measurement: the window *appears* to desaturate overall when
-inactive, and the sidebar icons look like they lose their red. An active/inactive
-comparison of sidebar saturation did **not** show that (max saturation 15 vs 3,
-with no strongly-coloured pixels in either), so either the sidebar icons are not
-red in light mode at all, or the effect is elsewhere. Recorded as unverified
-rather than asserted from one reading.
+**The sidebar icons lose their red entirely.** Sampled at the icon column
+(x 20-47pt), not the label text:
+
+| | red-ish pixels | most saturated |
+|---|---|---|
+| dark, active | 1562 | `#FF2156` |
+| light, active | 1796 | `#FF003C` |
+| light, **inactive** | **0** | `#E7E7E7` |
+
+So an inactive window renders its accent-tinted symbols as plain grey. Combined
+with the Play button inversion, **losing focus is a whole-window state change,
+not a single control's dim.**
+
+Method note: a first attempt at this sampled x 97-132pt and found no red in any
+appearance, which nearly got written down as "the icons are not red in light
+mode". That range is the label text. The icon column had already been located at
+x=31pt in an earlier measurement and simply was not reused.
 
 Geometry is identical across both appearances and both states: **1238pt wide,
 45pt tall, x 310.0-1547.5pt**. The selected pill is the reliable one to measure
