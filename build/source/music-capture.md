@@ -615,17 +615,36 @@ The scrollable row inside each: hero `x=304 y=145 w=2476 h=343`, artwork
 `x=304 y=545 w=2476 h=225`. The 2476pt width is the horizontal scroll extent
 against a 1318pt viewport.
 
-| Card | Size | Pitch | Gap |
+| Card | Size (at one sidebar width) | Pitch | Gap |
 |---|---|---|---|
-| **HeroCard** | **257.5 x 343pt** | 277.5pt | **20pt** |
-| **ArtworkCard** | **188 x 225pt** | 208pt | **20pt** |
+| **HeroCard** | 257.5 x 343pt | 277.5pt | **20pt** |
+| **ArtworkCard** | 188 x 225pt | 208pt | **20pt** |
 
-**The gap is constant; the card size is not.** An earlier pixel measurement of
-the same 1588pt window gave a 219.5pt artwork pitch against AX's 208pt, and
-200x200pt against 188x225pt. Two readings of the same window cannot both
-describe a fixed size, so card dimensions are computed from available width (or
-vary by shelf content) while the 20pt gap holds across every measurement in both
-methods.
+These sizes are a snapshot at one sidebar width, not constants. See below.
+
+**The gap is constant; the card size is not, and the mechanism is now known.**
+
+Three measurements of the *same* 1588pt window disagree on card size and agree
+on the gap:
+
+| Run | content left edge | ArtworkCard | pitch | gap |
+|---|---|---|---|---|
+| AX, sidebar wide | 304pt | 188 x 225 | 208.0 | 20 |
+| AX, sidebar narrow | **242pt** | **198.5 x 235.3** | 218.3 | ~20 |
+| pixel scan | - | ~200 x 200 | 219.5 | 20 |
+
+The left edge moves because **the sidebar is user-resizable**. A narrower
+sidebar gives a wider content area, and the cards grow to fill it while the gap
+stays at 20pt. Both AX runs fit about 6.17 columns, so the column count holds
+and the card width absorbs the difference.
+
+HeroCard behaves identically: 257.5 x 343pt at the wide sidebar, 271.0 x 362.5pt
+at the narrow one, pitch 277.5 then 291.0, gap 20pt throughout.
+
+So **no card dimension in this file is a constant**. The only transferable
+numbers are the 20pt gap and the aspect ratios (ArtworkCard about 1:1.19,
+HeroCard about 1:1.34). A component that hard-codes 188x225 will be wrong for
+every user whose sidebar is not where mine was.
 
 Consequence for the component: **do not ship a fixed card size.** Ship the 20pt
 gap and let the card size derive, which is also what the earlier finding implied
