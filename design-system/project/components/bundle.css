@@ -117,6 +117,30 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-eyebrow { font: var(--type-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-soft); }
 .dc-eyebrow-act { color: var(--warn); }
 
+/* SidebarList: a Mac source list. Geometry measured from Music for macOS --
+   32pt rows, 19pt section headers, a rounded inset selection fill. The real
+   article is a vibrant material that samples the desktop; `glass` is the web
+   stand-in and cannot reproduce it. See the component README. */
+.dc-sidebar { background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); padding: var(--space-3) var(--space-4) 0; display: flex; flex-direction: column; min-width: 180px; height: 100%; box-sizing: border-box; }
+.dc-sidebar-scroll { flex: 1; overflow-y: auto; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4); }
+.dc-sidebar-head { display: flex; align-items: center; justify-content: space-between; height: 19px; margin: var(--space-5) 0 var(--space-2); }
+.dc-sidebar-head-label { font: var(--type-caption-2); color: var(--ink-soft); }
+.dc-sidebar-head-action { border: 0; padding: 0; background: none; font: var(--type-caption-2); color: var(--music-accent-ink); cursor: pointer; }
+.dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
+.dc-sidebar-row:hover { background: var(--music-hover); }
+.dc-sidebar-row[aria-current="true"] { background: var(--music-select); color: var(--on-music-select); font-weight: 600; }
+.dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--on-music-select); }
+/* Inactive selection. Set data-window="inactive" on the sidebar when the window
+   is not key; macOS does this itself and a monitor app is in this state most of
+   the time, so it is not an edge case. */
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--ink); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--ink-soft); }
+.dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
+.dc-sidebar-thumb { flex: none; width: 16px; height: 16px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); }
+.dc-sidebar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-sidebar-foot { display: flex; align-items: center; gap: var(--space-5); height: 50px; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-6); }
+.dc-sidebar-avatar { width: 24px; height: 24px; border-radius: var(--radius-pill); background: var(--accent-wash); flex: none; }
+
 /* Toolbar: one row pinned above scrolling content */
 .dc-toolbar { position: sticky; top: 0; z-index: 1; padding: var(--space-3) var(--space-6); background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: 0 1px 0 var(--hair); }
 .dc-toolbar-row { display: flex; align-items: center; gap: var(--space-4); }

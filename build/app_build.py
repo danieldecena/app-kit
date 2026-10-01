@@ -798,6 +798,30 @@ css = css.replace(
 .dc-eyebrow { font: 600 11px/13px var(--font-mono); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--ink-soft); }
 .dc-eyebrow-act { color: var(--warn); }
 
+/* SidebarList: a Mac source list. Geometry measured from Music for macOS --
+   32pt rows, 19pt section headers, a rounded inset selection fill. The real
+   article is a vibrant material that samples the desktop; `glass` is the web
+   stand-in and cannot reproduce it. See the component README. */
+.dc-sidebar { background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); padding: var(--space-3) var(--space-4) 0; display: flex; flex-direction: column; min-width: 180px; height: 100%; box-sizing: border-box; }
+.dc-sidebar-scroll { flex: 1; overflow-y: auto; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4); }
+.dc-sidebar-head { display: flex; align-items: center; justify-content: space-between; height: 19px; margin: var(--space-5) 0 var(--space-2); }
+.dc-sidebar-head-label { font: 400 11px/13px var(--font-sans); color: var(--ink-soft); }
+.dc-sidebar-head-action { border: 0; padding: 0; background: none; font: 400 11px/13px var(--font-sans); color: var(--music-accent-ink); cursor: pointer; }
+.dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
+.dc-sidebar-row:hover { background: var(--music-hover); }
+.dc-sidebar-row[aria-current="true"] { background: var(--music-select); color: var(--on-music-select); font-weight: 600; }
+.dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--on-music-select); }
+/* Inactive selection. Set data-window="inactive" on the sidebar when the window
+   is not key; macOS does this itself and a monitor app is in this state most of
+   the time, so it is not an edge case. */
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--ink); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--ink-soft); }
+.dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
+.dc-sidebar-thumb { flex: none; width: 16px; height: 16px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); }
+.dc-sidebar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-sidebar-foot { display: flex; align-items: center; gap: var(--space-5); height: 50px; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-6); }
+.dc-sidebar-avatar { width: 24px; height: 24px; border-radius: var(--radius-pill); background: var(--accent-wash); flex: none; }
+
 /* Toolbar: one row pinned above scrolling content */
 .dc-toolbar { position: sticky; top: 0; z-index: 1; padding: var(--space-3) var(--space-6); background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: 0 1px 0 var(--hair); }
 .dc-toolbar-row { display: flex; align-items: center; gap: var(--space-4); }
@@ -985,6 +1009,49 @@ js = js.replace(
     return h("span", { className: cx("dc-eyebrow", p.act && "dc-eyebrow-act", p.className) }, p.children);
   }
 
+  function SidebarList(p) {
+    // sections: [{ label, action, onAction, items: [{ id, label, icon, thumb }] }]
+    // Selection is controlled. Arrow keys move it, matching SegmentedControl.
+    var flat = [];
+    (p.sections || []).forEach(function (sec) { (sec.items || []).forEach(function (it) { flat.push(it.id); }); });
+    function move(d) {
+      var i = flat.indexOf(p.selection);
+      var n = flat[Math.min(flat.length - 1, Math.max(0, (i < 0 ? 0 : i) + d))];
+      if (n && p.onSelect) p.onSelect(n);
+    }
+    return h("nav", {
+      className: cx("dc-sidebar", p.className),
+      "data-window": p.windowInactive ? "inactive" : undefined,
+      "aria-label": p.label || "Sidebar"
+    },
+      h("div", { className: "dc-sidebar-scroll" },
+        (p.sections || []).map(function (sec, si) {
+          return h("div", { key: sec.label || si },
+            sec.label ? h("div", { className: "dc-sidebar-head" },
+              h("span", { className: "dc-sidebar-head-label" }, sec.label),
+              sec.action ? h("button", { type: "button", className: "dc-sidebar-head-action", onClick: sec.onAction }, sec.action) : null) : null,
+            (sec.items || []).map(function (it) {
+              var on = it.id === p.selection;
+              return h("button", {
+                key: it.id, type: "button", className: "dc-sidebar-row",
+                "aria-current": on ? "true" : undefined,
+                onClick: function () { if (p.onSelect) p.onSelect(it.id); },
+                onKeyDown: function (e) {
+                  if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
+                  if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
+                }
+              },
+                it.thumb
+                  ? h("img", { className: "dc-sidebar-thumb", src: it.thumb, alt: "" })
+                  : h("span", { className: "dc-sidebar-icon", "aria-hidden": "true" }, it.icon),
+                h("span", { className: "dc-sidebar-label" }, it.label));
+            }));
+        })),
+      p.footer ? h("div", { className: "dc-sidebar-foot" },
+        h("span", { className: "dc-sidebar-avatar" }),
+        h("span", { className: "dc-sidebar-label" }, p.footer)) : null);
+  }
+
   function Toolbar(p) {
     var st = React.useState("");
     var query = p.query != null ? p.query : st[0];
@@ -1015,11 +1082,11 @@ js = js.replace(
 )
 js = js.replace(
     '{"name":"Panel"},',
-    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},',
+    '{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},',
 )
 js = js.replace(
     "Panel: Panel, ListRow: ListRow,",
-    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, ListRow: ListRow,",
+    "Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, ListRow: ListRow,",
 )
 assert (
     "dc-tint-" in js
@@ -1027,6 +1094,8 @@ assert (
     and "onKeyDown" in js
     and "Toolbar: Toolbar" in js
     and '{"name":"Toolbar"}' in js
+    and "SidebarList: SidebarList" in js
+    and '{"name":"SidebarList"}' in js
 )
 w("components/bundle.js", js)
 
@@ -1070,6 +1139,32 @@ export function Toolbar(props: {
   noticeTone?: "neutral" | "bad";
   /** Leading controls, such as a SegmentedControl. */
   children?: ReactNode;
+}): JSX.Element;
+export interface SidebarItem {
+  id: string;
+  label: string;
+  /** An SF-Symbol-shaped glyph, tinted music-accent. Omit when using thumb. */
+  icon?: ReactNode;
+  /** Artwork for playlist rows, which take a thumbnail instead of a glyph. */
+  thumb?: string;
+}
+export interface SidebarSection {
+  label?: string;
+  /** A trailing text action on the section header, e.g. "Edit". */
+  action?: string;
+  onAction?: () => void;
+  items: SidebarItem[];
+}
+/** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
+export function SidebarList(props: {
+  sections: SidebarSection[];
+  selection?: string;
+  onSelect?: (id: string) => void;
+  /** Renders the inactive selection fill, as macOS does when the window is not key. */
+  windowInactive?: boolean;
+  footer?: ReactNode;
+  label?: string;
+  className?: string;
 }): JSX.Element;""",
 )
 dts = dts.replace(
@@ -1304,6 +1399,65 @@ docs[
 </body>
 </html>
 """
+docs["SidebarList/README.md"] = r"""# SidebarList
+
+A Mac source list, as in Music for macOS: sections with small grey headers and an
+optional trailing action, rows carrying either a tinted glyph or a playlist
+thumbnail, and a rounded selection fill.
+
+## Geometry
+
+Measured from the Music app, not designed.
+
+| | |
+|---|---|
+| row height | 32pt |
+| section header | 19pt |
+| selection | rounded fill inset within the row |
+
+The sidebar's **width is not a token**. It is a user-resizable split, so ship a
+default and a minimum and let the person drag it. Card and shelf sizes elsewhere
+in the variant derive from the width this leaves, so hard-coding it is wrong
+twice over.
+
+## The material is not CSS
+
+The real sidebar is a vibrant material that samples the **desktop behind the
+window**. `glass` here is a `backdrop-filter` stand-in that samples the page, and
+it cannot reproduce that; this preview approximates, it does not match.
+
+In SwiftUI you get the real thing for free:
+
+```swift
+NavigationSplitView {
+    List(selection: $selection) { ... }
+        .listStyle(.sidebar)          // real vibrancy; set NO background
+} detail: { ... }
+```
+
+Measured against Music: stock `.listStyle(.sidebar)` with no background set lands
+within 2 units of Music's own sidebar. **Setting a background defeats it.**
+
+Two SwiftUI behaviours worth knowing before you build this natively:
+
+- Sidebar selection draws the **system accent**, not your colour. Matching
+  Music's red needs an explicit override.
+- `.foregroundStyle` on a `Label` tints the symbol **and** the text. Music tints
+  only the symbol. Build the Label from explicit `Text`/`Image` closures and
+  tint the `Image`.
+
+## Inactive windows
+
+Pass `windowInactive` when the window is not key, and the selection switches to
+`music-select-inactive`. macOS does this itself natively. It is not an edge
+case: a monitor app is unfocused most of the time, so this is the state most
+users see most often.
+
+## Keyboard
+
+Arrow keys move the selection, matching SegmentedControl.
+"""
+
 docs["Toolbar/README.md"] = r"""# Toolbar
 
 One row pinned above the content it acts on, which scrolls under it. From Footage Library's library bar and Claude Spinner's session toolbar. A Mac pattern: on iPhone use the system toolbar and keep `touch` targets.
@@ -1319,6 +1473,47 @@ SwiftUI, docked (Footage Library): the row is an `HStack(spacing: 10)` padded 16
 
 SwiftUI, native on macOS 26 and later (Claude Spinner's SessionToolbar): Liquid Glass instead of a bar. Wrap the row in `GlassEffectContainer(spacing: 8) { HStack(spacing: 8) { ... } }`, give the search field `.glassEffect(.regular, in: Capsule())` and the tools `.buttonStyle(.glass)` with `.help(reason ?? title)`, put the notice under it on a card (radius 6), and pin the whole stack with `.safeAreaInset(edge: .top, spacing: 0)` so content scrolls beneath.
 """
+docs["SidebarList/preview.html"] = r'''<!-- @dsCard group="Navigation" height=420 subtitle="Source list: sections, tinted glyphs, playlist thumbnails, active and inactive selection" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>SidebarList</title></head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  var s = { width: 16, height: 16, viewBox: '0 0 16 16', fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' };
+  function g(d) { return h('svg', s, h('path', { d: d })); }
+  // Flat colour squares stand in for artwork; the kit ships no album art.
+  function art(c) { return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="16" height="16" fill="' + c + '"/></svg>'); }
+  var sections = [
+    { items: [
+      { id: 'search', label: 'Search', icon: g('M7 2.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zM10.5 10.5 14 14') },
+      { id: 'home', label: 'Home', icon: g('M2.5 7 8 2.5 13.5 7v6.5h-11z') },
+      { id: 'new', label: 'New', icon: g('M2.5 2.5h5v5h-5zM8.5 2.5h5v5h-5zM2.5 8.5h5v5h-5zM8.5 8.5h5v5h-5z') } ] },
+    { label: 'Library', action: 'Edit', items: [
+      { id: 'songs', label: 'Songs', icon: g('M6 12V3.5l7-1.5V11') },
+      { id: 'albums', label: 'Albums', icon: g('M3.5 2.5h9v11h-9zM6 5h4') } ] },
+    { label: 'Playlists', items: [
+      { id: 'beats', label: 'Beats', thumb: art('#CC132D') },
+      { id: 'focus', label: 'Deep Focus', thumb: art('#8944AB') },
+      { id: 'morning', label: 'Good morning', thumb: art('#0B7771') } ] }
+  ];
+  function Demo(props) {
+    var st = React.useState('home');
+    return h('div', { style: { height: 380, width: 220, overflow: 'hidden', borderRadius: 'var(--radius-md)' } },
+      h(D.SidebarList, {
+        sections: sections, selection: st[0], onSelect: st[1],
+        windowInactive: props.inactive, footer: 'Daniel Decena'
+      }));
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', { className: 'dc-row', style: { gap: 16, alignItems: 'flex-start' } },
+      h(Demo), h(Demo, { inactive: true })));
+</script>
+</body>
+</html>
+'''
+
 docs[
     "Toolbar/preview.html"
 ] = r"""<!-- @dsCard group="Navigation" height=300 subtitle="Search, tools, one primary action; a notice after Export" -->

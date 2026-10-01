@@ -70,6 +70,32 @@ export function Toolbar(props: {
   /** Leading controls, such as a SegmentedControl. */
   children?: ReactNode;
 }): JSX.Element;
+export interface SidebarItem {
+  id: string;
+  label: string;
+  /** An SF-Symbol-shaped glyph, tinted music-accent. Omit when using thumb. */
+  icon?: ReactNode;
+  /** Artwork for playlist rows, which take a thumbnail instead of a glyph. */
+  thumb?: string;
+}
+export interface SidebarSection {
+  label?: string;
+  /** A trailing text action on the section header, e.g. "Edit". */
+  action?: string;
+  onAction?: () => void;
+  items: SidebarItem[];
+}
+/** A Mac source list: 32pt rows, 19pt section headers, a rounded selection fill. Pass windowInactive when the window is not key -- a monitor app is in that state most of the time. */
+export function SidebarList(props: {
+  sections: SidebarSection[];
+  selection?: string;
+  onSelect?: (id: string) => void;
+  /** Renders the inactive selection fill, as macOS does when the window is not key. */
+  windowInactive?: boolean;
+  footer?: ReactNode;
+  label?: string;
+  className?: string;
+}): JSX.Element;
 
 /** Selectable row with optional thumbnail and trailing value. Place inside a `.dc-list` with role="listbox". */
 export function ListRow(props: ButtonHTMLAttributes<HTMLButtonElement> & {

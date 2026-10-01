@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
+/* @ds-bundle: {"format":4,"namespace":"AppKit","components":[{"name":"Button"},{"name":"FilterPill"},{"name":"SegmentedControl"},{"name":"Badge"},{"name":"Flag"},{"name":"StatTile"},{"name":"Panel"},{"name":"Fact"},{"name":"Eyebrow"},{"name":"Toolbar"},{"name":"SidebarList"},{"name":"ListRow"},{"name":"Highlight"},{"name":"BarChart"}]} */
 (function () {
   var React = window.React;
   var h = React.createElement;
@@ -95,6 +95,49 @@
 
   function Eyebrow(p) {
     return h("span", { className: cx("dc-eyebrow", p.act && "dc-eyebrow-act", p.className) }, p.children);
+  }
+
+  function SidebarList(p) {
+    // sections: [{ label, action, onAction, items: [{ id, label, icon, thumb }] }]
+    // Selection is controlled. Arrow keys move it, matching SegmentedControl.
+    var flat = [];
+    (p.sections || []).forEach(function (sec) { (sec.items || []).forEach(function (it) { flat.push(it.id); }); });
+    function move(d) {
+      var i = flat.indexOf(p.selection);
+      var n = flat[Math.min(flat.length - 1, Math.max(0, (i < 0 ? 0 : i) + d))];
+      if (n && p.onSelect) p.onSelect(n);
+    }
+    return h("nav", {
+      className: cx("dc-sidebar", p.className),
+      "data-window": p.windowInactive ? "inactive" : undefined,
+      "aria-label": p.label || "Sidebar"
+    },
+      h("div", { className: "dc-sidebar-scroll" },
+        (p.sections || []).map(function (sec, si) {
+          return h("div", { key: sec.label || si },
+            sec.label ? h("div", { className: "dc-sidebar-head" },
+              h("span", { className: "dc-sidebar-head-label" }, sec.label),
+              sec.action ? h("button", { type: "button", className: "dc-sidebar-head-action", onClick: sec.onAction }, sec.action) : null) : null,
+            (sec.items || []).map(function (it) {
+              var on = it.id === p.selection;
+              return h("button", {
+                key: it.id, type: "button", className: "dc-sidebar-row",
+                "aria-current": on ? "true" : undefined,
+                onClick: function () { if (p.onSelect) p.onSelect(it.id); },
+                onKeyDown: function (e) {
+                  if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
+                  if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
+                }
+              },
+                it.thumb
+                  ? h("img", { className: "dc-sidebar-thumb", src: it.thumb, alt: "" })
+                  : h("span", { className: "dc-sidebar-icon", "aria-hidden": "true" }, it.icon),
+                h("span", { className: "dc-sidebar-label" }, it.label));
+            }));
+        })),
+      p.footer ? h("div", { className: "dc-sidebar-foot" },
+        h("span", { className: "dc-sidebar-avatar" }),
+        h("span", { className: "dc-sidebar-label" }, p.footer)) : null);
   }
 
   function Toolbar(p) {
@@ -204,6 +247,6 @@
 
   window.AppKit = window.Decena = Object.assign(window.AppKit || {}, {
     Button: Button, FilterPill: FilterPill, SegmentedControl: SegmentedControl, Badge: Badge,
-    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
+    Flag: Flag, StatTile: StatTile, Panel: Panel, Fact: Fact, Eyebrow: Eyebrow, Toolbar: Toolbar, SidebarList: SidebarList, ListRow: ListRow, Highlight: Highlight, BarChart: BarChart
   });
 })();
