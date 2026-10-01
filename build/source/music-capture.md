@@ -91,6 +91,31 @@ a full-width fill it would read wrong immediately. Exactly one band in the
 capture matched, which is what confirms it is the hovered row and not a
 separator or the playing row.
 
+#### Track-row selected, measured (dark)
+
+**Same shape, different fill.** The selected row is the identical pill:
+
+| | hover | selected |
+|---|---|---|
+| fill | `#2C2C2D` | **`#CC132D`** |
+| width | 1238pt | 1238pt |
+| x span | 310.0-1547.5pt | 310.0-1547.5pt |
+| height | 45.0pt | ~45.5pt |
+| corner radius | ~6pt | ~5pt |
+| label | normal ink | white |
+
+One rounded pill, two fills. That is a single component with a state, not two
+layouts.
+
+**`#CC132D` is its own value, not a derivation.** App Kit's convention is the
+accent stepped 20% toward black, which from `#FA2E48` would give `#C8253A`.
+The measured fill is `#CC132D` — close in lightness, different in hue and
+saturation. Deriving it would be visibly wrong, so it ships as a measured token.
+
+Note also that the accent-derived fills do **not** collapse into one value:
+the light-mode CTA button is `#FA233B` (the accent itself) while the dark
+selected row is `#CC132D`. Different contexts, different tokens.
+
 **Anatomy** (structure only, corroborated by two sources):
 
 - the track number is replaced by a play triangle
