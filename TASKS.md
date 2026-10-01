@@ -3,7 +3,7 @@
 - [ ] [you] Capture dark Home at Concerts, for the dark CTA button fill
 - [ ] [you] Capture a row with the mouse held down, to settle whether a pressed state exists
 - [ ] [you] Capture the dark transport button with the window inactive, for music-primary-inactive
-- [ ] [you] Put Music on Home, then re-run ax-dump deep enough that it reports no truncation; the card geometry came from a depth-9 run whose completeness was never checked
+- [x] Verify the Home AX dump was complete -- depth 9 reports no truncation; card size turned out to track the resizable sidebar width
 - [ ] Slice 2: add the music-* tokens from the measured table in app-kit-music.md
 - [ ] Slice 2: write the WCAG contrast assertion, proving it with a failing and a passing pair
 - [ ] Slice 2: SwiftUI spike in claude-spinner for ground-window and sidebar vibrancy
