@@ -165,9 +165,21 @@ The header area above the rows is not on the 56pt grid: the gaps there measure
 
 ### Shelf
 
+Source: `window-home-unfocused-light.png`. Content bands were located by a
+vertical non-white fraction sweep first, then measured horizontally. Card runs
+fragment on artwork detail, so **widths are derived from gap positions**, which
+are exact.
+
 | Dimension | Measured | How |
 |---|---|---|
-| hero card gap | **20.0pt** | 1px-step line profile, hard edges both sides |
+| **shelf gap** | **20.0pt** | repeats exactly: 5 times in the hero row, 7 in the artwork row, and confirmed by a 1px line profile with hard edges on both sides |
+| **ArtworkCard** | **200 x 200pt, square** | pitch 219.5-220.0pt across 5 consecutive gaps, minus the 20pt gap. Height confirmed independently by the band sweep, y 570-770pt |
+| **HeroCard** | **273 x 395pt** | pitch 293.0pt across 3 consecutive gaps, minus the gap. Height from the band sweep, y 145-540pt, caption included inside the card |
+| content left edge | x = 310pt | first card's left edge in both rows |
+| artwork caption block | y 780-800pt | title and subtitle under each card, outside the card |
+
+The two shelves share one gap value and one left edge but differ in card shape,
+so a Shelf component should take the card as a slot rather than owning its size.
 
 ## Not measured, and why
 
