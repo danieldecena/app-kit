@@ -392,6 +392,28 @@ an earlier capture had one. So TrackList takes its columns as configuration, and
 the pixel-derived column positions recorded earlier describe a *different*
 column set, not a contradiction.
 
+### Detail page button row (AX, exact)
+
+| Element | Frame |
+|---|---|
+| Shuffle | x=611, y=285, **38 x 38pt** |
+| Play | x=655, y=285, **132 x 38pt** |
+| "+" | x=793, y=285, **38 x 38pt** |
+| gap between them | **6pt** on each side of Play |
+| artist link | x=611, y=134, 502 x 33pt |
+| column header row | 32pt tall (Song x=318 w=454.5, Artist x=772.5 w=292.5, Album x=1065 w=364.5) |
+
+All three buttons share a 38pt height and sit on one baseline; the two circular
+ones are exactly square. Play is the only one with a width of its own.
+
+### Cards are drag sources
+
+Dragging a hero card does not pan the shelf, it begins a drag of the **music
+item** itself. Worth knowing before building the shelf: the card needs to be a
+drag source, and any press-and-move gesture intended for scrolling will fight
+it. This surfaced while trying to zoom into a card edge, which turned out to be
+impossible by dragging for exactly this reason.
+
 ### Detail page header (AX, exact)
 
 | Element | Frame |
