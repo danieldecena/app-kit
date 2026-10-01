@@ -24,8 +24,16 @@ func frame(_ el: AXUIElement) -> (CGPoint, CGSize)? {
     AXValueGetValue(sv as! AXValue, .cgSize, &sz)
     return (pt, sz)
 }
+// A silently truncated tree is the trap here: a shallow run shows a shelf with
+// no cards in it, which reads as "there are no cards" rather than "you did not
+// go deep enough". Count what was cut and say so at the end.
+var truncated = 0
+
 func walk(_ el: AXUIElement, _ depth: Int, _ originX: CGFloat, _ originY: CGFloat) {
-    guard depth <= maxDepth else { return }
+    guard depth <= maxDepth else {
+        truncated += 1
+        return
+    }
     let role = str(el, kAXRoleAttribute as String) ?? "?"
     let title = str(el, kAXTitleAttribute as String) ?? str(el, kAXDescriptionAttribute as String) ?? ""
     let value = str(el, kAXValueAttribute as String) ?? ""
@@ -49,3 +57,8 @@ let win = wv as! AXUIElement
 let (wp, ws) = frame(win) ?? (.zero, .zero)
 print("window  \(Int(ws.width))x\(Int(ws.height))pt at (\(Int(wp.x)),\(Int(wp.y)))  -- child frames are window-relative")
 walk(win, 0, wp.x, wp.y)
+if truncated > 0 {
+    let msg = "\n[truncated] \(truncated) subtree(s) were cut off at depth \(maxDepth). "
+        + "An element shown with no children may still have some. Re-run deeper.\n"
+    FileHandle.standardError.write(msg.data(using: .utf8)!)
+}
