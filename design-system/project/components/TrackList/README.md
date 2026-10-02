@@ -8,11 +8,22 @@ This is the whole component, and getting it wrong reads as not-Music instantly.
 
 | | |
 |---|---|
-| row height | **56pt** (AX and pixels agree) |
-| pill | **1238 x 45pt**, x 310.0-1547.5 |
-| inset | **40pt** each side of the 1318pt content width |
-| vertical | **5.5pt** above and below, inside the 56pt row |
+| row height | **56pt** pitch on a playlist (artwork rows); 46pt on an album (numbered rows) |
+| pill | fills the row between its hairlines: **55pt** on a playlist, **45pt** on an album |
+| inset | **40pt** each side of the content width (1238pt of 1318 at a 1588pt window) |
+| vertical | **0.5pt** above and below, in either row |
 | radius | **~6pt** |
+
+This component draws the playlist row. An earlier version put the album's 45pt
+pill inside the playlist's 56pt row, 5.5pt short at top and bottom, which Music
+draws on neither page.
+
+**A departure, on purpose:** in light, Music's playlist selection is not a pill.
+It runs full-bleed from the content edge with square corners (x 208-963 of a
+208-966 content area), key or not key, while its light hover is still an inset
+pill. Here the selection is an inset pill in both appearances, so one shape
+carries hover and selection. No light album page was captured, so whether
+full-bleed belongs to the appearance or to the page is not known.
 
 Hover and selection are the *same* pill with different fills, which is one
 component with a state rather than two layouts. The pill is a pseudo-element here
@@ -138,8 +149,8 @@ struct TrackList: View {
                 }
                 .font(.subheadline)
                 .padding(.horizontal, 12)
-                // 45pt pill inside a 56pt row: 5.5pt above and below.
-                .frame(height: 45)
+                // The pill fills the row between hairlines: 55pt inside a 56pt row.
+                .frame(height: 55)
                 .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(fill(r.id)))
                 .padding(.horizontal, 40)   // the measured inset
                 .frame(height: 56)

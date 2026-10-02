@@ -167,7 +167,8 @@ sidebar. So:
 - `ArtworkCard` is a square artwork plus a **37px** caption that does not scale.
 - `HeroCard` is **3:4** and derives its height.
 - `TrackList` rows are **56px** and the highlight is a pill inset **40px** each
-  side, 45px tall, ~6px radius -- never a full-bleed row fill.
+  side, filling the row between its hairlines (55px), ~6px radius. Music's
+  light playlist selection is full-bleed; this keeps the pill in both themes.
 - `MiniPlayer` is **700x54** with a stadium radius, floating 19px up and centred
   on the *content area*, not the window. Its layout is set by hit frames, not
   glyphs (28pt transport, Play 36, 36pt actions), so the now-playing group runs

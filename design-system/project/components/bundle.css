@@ -218,9 +218,10 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-herocard:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
 /* TrackList: Music's song table. 56pt rows, and the highlight is a ROUNDED
-   INSET PILL rather than a full-bleed row fill -- 1238 x 45pt inset 40pt each
-   side of the 1318pt content width, 5.5pt above and below inside the 56pt row,
-   ~6pt radius. Built full-bleed it reads wrong immediately.
+   INSET PILL rather than a full-bleed row fill -- inset 40pt each side of the
+   content width, filling the row between its hairlines (55pt in a 56pt row),
+   ~6pt radius. Built full-bleed it reads wrong immediately in dark; Music's
+   light playlist IS full-bleed, which this does not copy (see the README).
 
    Hover and selection are the same pill with different fills, which is one
    component with a state and not two layouts. The selected fill is music-select,
@@ -233,8 +234,9 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-tracklist-head { display: grid; align-items: center; gap: 0; padding: 0 40px 6px; font: var(--type-caption-2); color: var(--music-ink-soft); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); box-shadow: inset 0 -1px 0 var(--hair); }
 .dc-tracklist-row { display: grid; align-items: center; height: 56px; padding: 0 40px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: default; position: relative; }
 /* The pill is a pseudo-element so it can be inset inside the 56pt row without
-   moving the cells. 45pt tall centred leaves 5.5pt each side, as measured. */
-.dc-tracklist-row::before { content: ""; position: absolute; left: 40px; right: 40px; top: 5.5px; bottom: 5.5px; border-radius: 6px; background: transparent; }
+   moving the cells. It fills the row between hairlines: 0.5pt each side, so
+   55pt in a 56pt row. The old 5.5pt was a 45pt album pill put in a playlist row. */
+.dc-tracklist-row::before { content: ""; position: absolute; left: 40px; right: 40px; top: 0.5px; bottom: 0.5px; border-radius: 6px; background: transparent; }
 .dc-tracklist-row:hover::before { background: var(--music-hover); }
 .dc-tracklist-row[aria-selected="true"]::before { background: var(--music-select); }
 .dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"]::before { background: var(--music-select-inactive); }

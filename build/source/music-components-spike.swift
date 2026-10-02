@@ -185,8 +185,8 @@ struct TrackList: View {
                 }
                 .font(.subheadline)
                 .padding(.horizontal, 12)
-                // 45pt pill inside a 56pt row: 5.5pt above and below.
-                .frame(height: 45)
+                // The pill fills the row between hairlines: 55pt inside a 56pt row.
+                .frame(height: 55)
                 .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(fill(r.id)))
                 .padding(.horizontal, 40)   // the measured inset
                 .frame(height: 56)

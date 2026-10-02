@@ -1133,9 +1133,10 @@ css = css_sub(
 .dc-herocard:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
 /* TrackList: Music's song table. 56pt rows, and the highlight is a ROUNDED
-   INSET PILL rather than a full-bleed row fill -- 1238 x 45pt inset 40pt each
-   side of the 1318pt content width, 5.5pt above and below inside the 56pt row,
-   ~6pt radius. Built full-bleed it reads wrong immediately.
+   INSET PILL rather than a full-bleed row fill -- inset 40pt each side of the
+   content width, filling the row between its hairlines (55pt in a 56pt row),
+   ~6pt radius. Built full-bleed it reads wrong immediately in dark; Music's
+   light playlist IS full-bleed, which this does not copy (see the README).
 
    Hover and selection are the same pill with different fills, which is one
    component with a state and not two layouts. The selected fill is music-select,
@@ -1148,8 +1149,9 @@ css = css_sub(
 .dc-tracklist-head { display: grid; align-items: center; gap: 0; padding: 0 40px 6px; font: var(--type-caption-2); color: var(--music-ink-soft); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); box-shadow: inset 0 -1px 0 var(--hair); }
 .dc-tracklist-row { display: grid; align-items: center; height: 56px; padding: 0 40px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: default; position: relative; }
 /* The pill is a pseudo-element so it can be inset inside the 56pt row without
-   moving the cells. 45pt tall centred leaves 5.5pt each side, as measured. */
-.dc-tracklist-row::before { content: ""; position: absolute; left: 40px; right: 40px; top: 5.5px; bottom: 5.5px; border-radius: 6px; background: transparent; }
+   moving the cells. It fills the row between hairlines: 0.5pt each side, so
+   55pt in a 56pt row. The old 5.5pt was a 45pt album pill put in a playlist row. */
+.dc-tracklist-row::before { content: ""; position: absolute; left: 40px; right: 40px; top: 0.5px; bottom: 0.5px; border-radius: 6px; background: transparent; }
 .dc-tracklist-row:hover::before { background: var(--music-hover); }
 .dc-tracklist-row[aria-selected="true"]::before { background: var(--music-select); }
 .dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"]::before { background: var(--music-select-inactive); }
@@ -2411,11 +2413,22 @@ This is the whole component, and getting it wrong reads as not-Music instantly.
 
 | | |
 |---|---|
-| row height | **56pt** (AX and pixels agree) |
-| pill | **1238 x 45pt**, x 310.0-1547.5 |
-| inset | **40pt** each side of the 1318pt content width |
-| vertical | **5.5pt** above and below, inside the 56pt row |
+| row height | **56pt** pitch on a playlist (artwork rows); 46pt on an album (numbered rows) |
+| pill | fills the row between its hairlines: **55pt** on a playlist, **45pt** on an album |
+| inset | **40pt** each side of the content width (1238pt of 1318 at a 1588pt window) |
+| vertical | **0.5pt** above and below, in either row |
 | radius | **~6pt** |
+
+This component draws the playlist row. An earlier version put the album's 45pt
+pill inside the playlist's 56pt row, 5.5pt short at top and bottom, which Music
+draws on neither page.
+
+**A departure, on purpose:** in light, Music's playlist selection is not a pill.
+It runs full-bleed from the content edge with square corners (x 208-963 of a
+208-966 content area), key or not key, while its light hover is still an inset
+pill. Here the selection is an inset pill in both appearances, so one shape
+carries hover and selection. No light album page was captured, so whether
+full-bleed belongs to the appearance or to the page is not known.
 
 Hover and selection are the *same* pill with different fills, which is one
 component with a state rather than two layouts. The pill is a pseudo-element here
@@ -3309,7 +3322,8 @@ sidebar. So:
 - `ArtworkCard` is a square artwork plus a **37px** caption that does not scale.
 - `HeroCard` is **3:4** and derives its height.
 - `TrackList` rows are **56px** and the highlight is a pill inset **40px** each
-  side, 45px tall, ~6px radius -- never a full-bleed row fill.
+  side, filling the row between its hairlines (55px), ~6px radius. Music's
+  light playlist selection is full-bleed; this keeps the pill in both themes.
 - `MiniPlayer` is **700x54** with a stadium radius, floating 19px up and centred
   on the *content area*, not the window. Its layout is set by hit frames, not
   glyphs (28pt transport, Play 36, 36pt actions), so the now-playing group runs
