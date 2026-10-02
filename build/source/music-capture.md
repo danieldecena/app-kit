@@ -1303,3 +1303,44 @@ needs an alpha, not a hex; if it holds at `#1F1F1F` it is a flat value and
 
 Found while looking for something else: this file was shot as `row-pressed-dark`
 and turned out to be Home, which has no track rows at all. Renamed to what it is.
+
+### Resolved: the progress line's span, and why 555 was short
+
+The two figures were not two captures disagreeing -- both came from
+`home-reduced-transparency-dark.png`. Re-measured against the capsule's **true**
+edges, taken at its widest row rather than near the bottom where the stadium
+curve pulls the run inwards:
+
+| | |
+|---|---|
+| capsule at the centre row | x 1088-2487 device = **700.0pt**, confirming the recorded 700 |
+| played | **166.5 - 546.0pt** from the capsule's left edge |
+| unplayed | **546.5 - 571.0pt** |
+| whole line | **166.5 - 571.0pt**, 404.5pt |
+
+The earlier `165-555` had the **start right** (166.5 against the artwork's 166.0)
+and the end 16pt short. The unplayed tail is only 15 units above the capsule, so
+a scan thresholding on brightness keeps the played run and loses most of the
+tail. My own first pass made the matching error in the other direction, measuring
+from a row near the capsule's bottom edge where the stadium is ~14 device px
+narrower, which is what produced the spurious 405.5pt absolute span.
+
+**What sets the right end is still unexplained.** An occupancy scan of the
+capsule at the icons' vertical band, with the line's own rows excluded, gives:
+
+| region | pt |
+|---|---|
+| transport | 16.5 - 148.5 |
+| artwork | 166.0 - 199.5 |
+| title + subtitle glyphs | 208.5 - 335.0 |
+| nothing at all | 335 - 507 |
+| trailing cluster | 507 - 680, in five groups |
+
+So 571 matches neither the text (stops at 335) nor the cluster's start (507). It
+falls in a gap *between* two trailing items. Worth its own look; the colours and
+the 2pt height do not depend on it.
+
+**The component is 36.8pt long here.** `.dc-miniplayer-now` is `flex: 1` between
+the transport and the actions, which gives 167 - 607.8 against Music's
+166.5 - 571.0: the start is right to half a point, the length is not. Not changed,
+because reproducing 571 means knowing what sets it.

@@ -5,7 +5,7 @@
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
 
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
-- [ ] [code] Progress-line span: 405pt measured vs 390pt in the README
+- [ ] [code] MiniPlayer line ends 36.8pt long; what sets Music's 571pt?
 - [ ] [you] Sidebar inactive selection: reshoot over a different desktop
 - [ ] [you] Row mid-press: music-shot.sh Music row-pressed-dark 5, hold a row
 - [ ] [you] Contextual toolbar: needs its own capture pass
