@@ -1428,3 +1428,32 @@ It also shows the protocol working: fired from the agent side while the person
 had left Music frontmost, the window came back key. The state still missing is
 light **with the list focused**, which needs a click directly on a sidebar row
 rather than anywhere else in the window.
+
+### Music has a second list idiom, and App Kit models only the first
+
+`songs-light-key.png` (980x662pt, window key, light) is the **Songs** library
+table, not an album's track list, and it is a different thing:
+
+| | Songs table (library) | album track list (what `TrackList` models) |
+|---|---|---|
+| row pitch | **22pt** | 56pt |
+| row background | **alternating `#FFFFFF` / `#F2F2F2`** | none; the highlight is an inset pill |
+| columns | Title, cloud, Time, Artist, Album, Genre, star, Rating | configurable, measured set had 7 |
+
+The zebra striping is the part `TrackList` has no equivalent for, and the 22pt
+pitch is less than half the 56pt the album list measures. These are two idioms,
+not one component at two densities, and the variant currently documents only the
+album one. Recorded, not built: nothing has asked for the library table yet.
+
+### Why the light focused sidebar fill is still missing
+
+Clicking a sidebar row **navigates**, so Music hands first responder to the
+content table and the sidebar immediately shows its unfocused grey. Both light
+attempts (`sidebar-light-key-unfocused.png`, `songs-light-key.png`) came back
+`#E0E0E0` for exactly that reason, with the window genuinely key both times
+(traffic-light spreads 157 and 194).
+
+The dark capture that gave `#FA2E48` was an Albums **grid**, where the click did
+not move focus out of the sidebar. So the way to get the light value is to click a
+sidebar row that is already selected, which selects nothing new and leaves focus
+where it is.
