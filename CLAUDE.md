@@ -175,7 +175,10 @@ because it needs the generated Swift, and its message says not to install that
 build; and without `swiftc` it prints NOT CHECKED rather than passing quietly.
 
 Render it with `swiftc build/source/music-components-spike.swift swift/AppKit.swift -o <bin>`
-then `<bin> --selfshot <out.png>`, adding `--light` for the light appearance.
+then `<bin> --dark --selfshot <out.png>`, or `--light`. The output path is read
+as the **last** argument, so the appearance flag goes first: put it after and the
+capture is written to a file named `--light`, with exit 0. With neither flag the
+window follows the system appearance.
 
 ## Design work
 

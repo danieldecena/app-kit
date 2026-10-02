@@ -3,9 +3,11 @@
 - [x] Publish provenance and token corrections to the artifact -- v58
 - [x] TrackList pill height follows the row, 55pt on artwork rows -- 0fcbf9a
 - [x] Build design runbook artifact for the measure-to-publish process -- fe8bdbe
-- [ ] Publish the TrackList pill change to the artifact
+- [x] Render the spike and run accessibility-review on the 55pt pill
+- [x] Draw the TrackList focus ring on the pill, not under it -- a92945a
+- [ ] Publish the TrackList pill and focus ring to the artifact
 - [ ] Add the design runbook binding to the terminal-kit register
-- [ ] Render the spike and run accessibility-review on the 55pt pill
+- [ ] Check the TrackList focus ring in WebKit
 
 ## Completed
 
