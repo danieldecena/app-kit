@@ -90,11 +90,16 @@ scrape of music.apple.com gave `#D60017` for the accent; the Mac app measures
 |---|---|---|---|
 | `music-accent` | `#FA233B` | `#FA2E48` | sidebar glyphs, text actions, the active queue icon, promotional CTA fills |
 | `music-accent-ink` | `#EA0623` | `#FA3851` | the same red as *text*, stepped to pass 4.5:1 |
-| `music-select` | `#DC1229` | `#CC132D` | the selected row pill |
+| `music-select` | `#DC1229` | `#CC132D` | the selected track row pill |
 
 App Kit's convention is the accent stepped 20% toward black, which from
 `#FA2E48` gives `#C8253A`. Music uses `#CC132D`. So none of these is reachable
 from another and all three are in `tokens.json` as measured values.
+
+The sidebar's selection is none of the three: it is not red at all. It is a
+translucent grey, `music-sidebar-select` and `music-sidebar-select-inactive`
+(white at 13.4% and 6.3% in dark, black at 9.3% and 4.5% in light), an alpha
+because it composites over whatever the vibrancy puts behind it.
 
 `music-accent` fails 4.5:1 on its own ground (`#FA2E48` on `#1F1F20` is 4.35),
 which is why `music-accent-ink` exists. Fidelity and accessibility genuinely
@@ -113,9 +118,12 @@ is red. Backwards gives a red Play button, which reads as not-Music at a glance.
 ### Inactive is the normal state
 
 macOS greys a selection when the window is not key, and a monitor app spends
-most of its life there. `SidebarList` and `TrackList` both take
-`windowInactive`, which swaps `music-select` for `music-select-inactive` and
-returns labels to normal ink. Sidebar glyphs lose their red entirely.
+most of its life there. `TrackList` takes `windowInactive`, which swaps
+`music-select` for `music-select-inactive` and returns labels to normal ink.
+`SidebarList` takes it too and swaps `music-sidebar-select` for
+`music-sidebar-select-inactive`. Sidebar glyphs keep their accent in the web
+component; the SwiftUI recipe steps a selected row's glyph to
+`music-ink-soft-on-fill` once the window is inactive.
 
 Music's own secondary ink on a filled row was never measured, and the measured
 `music-ink-soft` reaches only 3.31:1 on the inactive fill and 3.99:1 on hover in
@@ -136,7 +144,9 @@ sidebar. So:
 - `TrackList` rows are **56px** and the highlight is a pill inset **40px** each
   side, 45px tall, ~6px radius -- never a full-bleed row fill.
 - `MiniPlayer` is **700x54** with a stadium radius, floating 19px up and centred
-  on the *content area*, not the window.
+  on the *content area*, not the window. Its layout is set by hit frames, not
+  glyphs (28pt transport, Play 36, 36pt actions), so the now-playing group runs
+  166-572 whatever glyphs are passed.
 
 Nothing here ships a fixed card size, because a component shipping 188x225 is
 correct only at the one sidebar position it was measured at.
@@ -148,6 +158,13 @@ happens to carry white text -- the one measured puts white on `#F4B63F`, which
 is 1.81:1. An adopting app has whatever artwork it has, so the card backs its
 own text: 10.0:1 at the title and 6.5:1 at the eyebrow over a pure white image,
 the worst case.
+
+### Not here, on purpose
+
+- **A contextual toolbar.** Music's toolbar content is per page (the share and
+  edit buttons, the search field), so there is no one component to ship.
+- **Window chrome.** Traffic lights, the sidebar toggle and the title area belong
+  to the adopting app's window, not to this kit.
 
 ### SwiftUI
 
@@ -162,7 +179,9 @@ Three things the spike settled that a browser could not:
 
 - **`.tint()` does not reach a sidebar selection.** With the list focused the
   row fills `#007AFF`, the system accent, against a tint set to `#CC132D`. Music's
-  red needs an explicit row background, which `SidebarList`'s recipe shows.
+  own sidebar selection is neutral, not red, so the recipe draws its own neutral
+  row background and binds no `selection:` on the `List`, because the native
+  highlight would draw underneath it. The cost is the List's arrow keys.
 - **A key window is not a focused list.** The same row fills `#434346` when the
   window is key but focus is elsewhere, which is neither the accent nor the
   tint. Establish which state you are in before reading a colour off a screen.
