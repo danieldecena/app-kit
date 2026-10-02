@@ -958,14 +958,42 @@ the opposite is true elsewhere in this app -- the album Play button inverts and
 the sidebar loses its red entirely -- so "inactive dims everything" would have
 been a reasonable and wrong generalisation.
 
-### Why no token was added from this
+### Re-measured with Reduce Transparency, same session
 
-The capsule is translucent over scrolled content, so every value above is
-contaminated by whatever sat behind it at that moment. `#FFFFFF` on the solid
-glyph interiors is safe; the two text rows are not, and the toggle greys are
-upper bounds. The capture record's own rule applies: **Reduce Transparency is
-the only way to measure anything on this capsule**, and that pass has not been
-run for ink. Re-measure before minting `music-ink-on-glass`.
+`home-miniplayer-reduced-dark.png`. The capsule is opaque here, so these are
+readings rather than upper bounds.
+
+| Element | Measured |
+|---|---|
+| play/pause, previous, next, queue | **`#FFFFFF`** |
+| title | **`#FFFFFF`** (1175 px) |
+| **artist** | **`#FFFFFF`** (999 px) -- *not* a softer grey |
+| shuffle OFF | `#4F4F4F` |
+| repeat OFF | `#4E4F50` |
+| capsule fill | `#151515` |
+| width | **701.0pt**, independently confirming the recorded 700 |
+
+So `on-music-glass` is `#FFFFFF` dark, and the artist line shares it. The
+component had the title on `ink` and the artist on `ink-soft`, both CORE tokens
+on a Music surface, which is the root error: a ground ink on a glass surface.
+Light is not measured and inherits `music-ink`'s light value, so the departure
+is dark-only.
+
+**Music's own OFF toggle fails 3:1.** `#4F4F4F` on `#151515` is 2.23:1, under
+the bar for a graphical object. Recorded, not copied -- the same fidelity-
+versus-accessibility split already made for `music-accent` / `music-accent-ink`.
+
+### Unresolved: two Reduce Transparency readings of the same fill disagree
+
+This capture gives the capsule `#151515` over the Home ground `#1E1E20`. The
+earlier entry in this file gives `#3B3B3D`, also with Reduce Transparency on,
+over the Concerts card `#1C1C1E`.
+
+If Reduce Transparency made the capsule fully opaque, one fill would not depend
+on what is behind it. Either it only *reduces* translucency rather than removing
+it -- which would undercut the method note above -- or one of the two readings
+sampled something other than the capsule. **Not resolved here, and neither value
+is being overwritten.** Settle it by capturing both surfaces in one session.
 
 ## Not measured, and why
 

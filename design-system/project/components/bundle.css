@@ -244,9 +244,14 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
    Dropped into a window-width wrapper it would centre on the window, which is
    the thing the measurement says it does not do. */
 .dc-miniplayer[data-floating="true"] { position: absolute; left: 50%; transform: translateX(-50%); bottom: 19px; z-index: 2; }
-.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--ink); }
+/* Ink here is on-music-glass, not ink or music-ink. The capsule is a glass
+   surface, and Music draws every glyph, the title AND the artist line in pure
+   white on it -- measured #FFFFFF off a Reduce Transparency capture, where
+   music-ink would be #DDDDDD and core ink-soft would be #9A9A9A. Borrowing a
+   ground ink for a glass surface was the original mistake. */
+.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
 .dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
-.dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
+.dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
 .dc-miniplayer-btn[aria-pressed="true"] { color: var(--music-accent); }
 /* The now-playing group owns the progress line, which is why the line stops at
@@ -254,12 +259,13 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-miniplayer-now { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; align-self: stretch; }
 .dc-miniplayer-art { width: 34px; height: 34px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); flex: none; }
 .dc-miniplayer-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-.dc-miniplayer-title { font: var(--type-glance); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dc-miniplayer-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-miniplayer-title { font: var(--type-glance); color: var(--on-music-glass); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The artist line is white too: 999 solid pixels, not a softer grey. */
+.dc-miniplayer-sub { font: var(--type-footnote); color: var(--on-music-glass); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* A 1pt hairline 2pt up from the capsule's inner bottom edge. */
 .dc-miniplayer-track { position: absolute; left: 0; right: 0; bottom: 2px; height: 1px; background: var(--music-select-inactive); border-radius: 1px; }
 .dc-miniplayer-fill { display: block; height: 100%; background: var(--ink-soft); border-radius: 1px; }
-.dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--ink); }
+.dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--on-music-glass); }
 .dc-miniplayer-btn:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 3px; border-radius: 4px; }
 
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --

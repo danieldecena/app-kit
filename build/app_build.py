@@ -371,6 +371,12 @@ colors += [
         "The favorited star. Dark is MEASURED (#FFD700, sampled from album-detail-unfocused-dark.png, 11.74:1 on ground-window). Light is NOT measured: the same gold is 1.40:1 on white, far under the 3:1 a glyph needs, so light is stepped to the first gold that clears it. NOT the accent -- the star is gold, which is why the accent was taken from title strokes instead.",
     ),
     T(
+        "on-music-glass",
+        "#272727",
+        "#FFFFFF",
+        "Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF from a Reduce Transparency capture -- every glyph, the title AND the artist line, all pure white, where music-ink would be #DDDDDD. Light is NOT measured and inherits music-ink's light value, so the departure is dark-only. Gated against ground-window as a conservative stand-in, because the capsule fill itself is only measured in dark.",
+    ),
+    T(
         "music-ink-soft-on-fill",
         "#5F5F5F",
         "#B4B4B4",
@@ -625,6 +631,9 @@ CONTRAST_PAIRS = (
         ("music-ink", "music-select-inactive", 4.5),
         # A star is a graphical object, so 3:1 is the bar, not 4.5.
         ("music-star", "ground-window", 3.0),
+        # ground-window stands in for the capsule, whose fill is measured in dark
+        # only (#151515, darker than the ground, so the real ratio is higher).
+        ("on-music-glass", "ground-window", 4.5),
     ]
     + [
         (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
@@ -730,6 +739,7 @@ def _check_contrast(tokens):
         "music-ink-soft",
         "music-ink-soft-on-fill",
         "music-star",
+        "on-music-glass",
         "music-primary",
     )
     # The reds do not follow the ground: they are deliberately near-equal in both
@@ -1039,9 +1049,14 @@ css = css_sub(
    Dropped into a window-width wrapper it would centre on the window, which is
    the thing the measurement says it does not do. */
 .dc-miniplayer[data-floating="true"] { position: absolute; left: 50%; transform: translateX(-50%); bottom: 19px; z-index: 2; }
-.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--ink); }
+/* Ink here is on-music-glass, not ink or music-ink. The capsule is a glass
+   surface, and Music draws every glyph, the title AND the artist line in pure
+   white on it -- measured #FFFFFF off a Reduce Transparency capture, where
+   music-ink would be #DDDDDD and core ink-soft would be #9A9A9A. Borrowing a
+   ground ink for a glass surface was the original mistake. */
+.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
 .dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
-.dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--ink); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
+.dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
 .dc-miniplayer-btn[aria-pressed="true"] { color: var(--music-accent); }
 /* The now-playing group owns the progress line, which is why the line stops at
@@ -1049,12 +1064,13 @@ css = css_sub(
 .dc-miniplayer-now { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; align-self: stretch; }
 .dc-miniplayer-art { width: 34px; height: 34px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); flex: none; }
 .dc-miniplayer-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-.dc-miniplayer-title { font: var(--type-glance); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dc-miniplayer-sub { font: var(--type-footnote); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-miniplayer-title { font: var(--type-glance); color: var(--on-music-glass); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The artist line is white too: 999 solid pixels, not a softer grey. */
+.dc-miniplayer-sub { font: var(--type-footnote); color: var(--on-music-glass); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* A 1pt hairline 2pt up from the capsule's inner bottom edge. */
 .dc-miniplayer-track { position: absolute; left: 0; right: 0; bottom: 2px; height: 1px; background: var(--music-select-inactive); border-radius: 1px; }
 .dc-miniplayer-fill { display: block; height: 100%; background: var(--ink-soft); border-radius: 1px; }
-.dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--ink); }
+.dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--on-music-glass); }
 .dc-miniplayer-btn:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 3px; border-radius: 4px; }
 
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --

@@ -302,7 +302,7 @@ struct MiniPlayer: View {
 
     private func control(_ symbol: String, _ label: String, _ act: @escaping () -> Void) -> some View {
         Button(action: act) {
-            Image(systemName: symbol).foregroundStyle(Color.Kit.musicInk)
+            Image(systemName: symbol).foregroundStyle(Color.Kit.onMusicGlass)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
@@ -315,7 +315,7 @@ struct MiniPlayer: View {
                         _ act: @escaping () -> Void) -> some View {
         Button(action: act) {
             Image(systemName: symbol)
-                .foregroundStyle(on ? Color.Kit.musicAccent : Color.Kit.musicInk)
+                .foregroundStyle(on ? Color.Kit.musicAccent : Color.Kit.onMusicGlass)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
@@ -338,8 +338,8 @@ struct MiniPlayer: View {
                         .fill(art).frame(width: 34, height: 34)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(title).font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(Color.Kit.musicInk)
-                        Text(subtitle).font(.footnote).foregroundStyle(Color.Kit.musicInkSoft)
+                            .foregroundStyle(Color.Kit.onMusicGlass)
+                        Text(subtitle).font(.footnote).foregroundStyle(Color.Kit.onMusicGlass)
                     }
                     Spacer()
                 }
@@ -450,9 +450,15 @@ enum SpikeMain {
         win.titlebarAppearsTransparent = true
         win.contentView = NSHostingView(rootView: SpikeView())
         // Both appearances, because dyn() tokens are only half-verified by one.
+        // Pinned explicitly rather than inherited: a capture that follows the
+        // system appearance silently measures whichever mode the Mac happened
+        // to be in, which already produced one light reading labelled as dark.
         if CommandLine.arguments.contains("--light") {
             app.appearance = NSAppearance(named: .aqua)
             win.appearance = NSAppearance(named: .aqua)
+        } else if CommandLine.arguments.contains("--dark") {
+            app.appearance = NSAppearance(named: .darkAqua)
+            win.appearance = NSAppearance(named: .darkAqua)
         }
         win.makeKeyAndOrderFront(nil)
         app.activate(ignoringOtherApps: true)

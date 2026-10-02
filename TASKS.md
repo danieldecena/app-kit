@@ -1,6 +1,6 @@
 ## Tasks
 
-- [ ] MiniPlayer ink: Music uses #FFFFFF, our component uses music-ink
+- [ ] Capsule fill: two Reduce-Transparency reads disagree (#151515 vs #3B3B3D)
 
 - [ ] [you] Capture a LIGHT album page with a favorited track, to measure music-star light
 
