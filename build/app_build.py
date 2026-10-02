@@ -3168,6 +3168,75 @@ body = edit(
     "StatTile, Panel, Fact, Eyebrow, Toolbar, SidebarList, Shelf, ArtworkCard, HeroCard, TrackList, MiniPlayer, ListRow, Highlight, BarChart. Each card below",
 )
 
+MUSIC_PROVENANCE_CLASSES = {
+    "M": "measured",
+    "N": "no instrument recorded",
+    "D": "derived",
+    "U": "not observed",
+}
+# One row per Music colour token: (light class, dark class, evidence). A new
+# music token fails the build until it has a row, so provenance cannot be left
+# to the usage prose. The log's own rule is that a value with no instrument is
+# not a measurement; the N rows are the ones that break it.
+MUSIC_PROVENANCE = {
+    "music-accent": ("M", "M", "pixel scan of the title stroke interiors: 707 px dark, ~445 px light"),
+    "music-accent-ink": ("D", "D", "measured accent, lightness stepped only as far as 4.5:1 needs (hue and saturation kept)"),
+    "music-select": ("M", "M", "selected-row pill scan, `row-selected-key-*-vd.png`"),
+    "music-select-inactive": ("N", "N", "state table in the log names no instrument; light re-read one unit off (`#DCDCDC`) in `row-selected-inactive-light-vd.png`"),
+    "music-sidebar-select": ("D", "D", "alpha back-solved from a measured pair (dark `#434346` over `#262629`, light `#E0E0E0` over `#F7F7F7`); the build recomposites it to within 2/255"),
+    "music-sidebar-select-inactive": ("D", "D", "alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture"),
+    "music-hover": ("M", "M", "inset-pill scan of still captures; dark measured twice"),
+    "music-primary": ("M", "M", "run scan of the header band; light also at the Play button's AX frame"),
+    "on-music-primary": ("M", "N", "light sampled at the Play button's AX frame; dark label is logged as recorded earlier with no capture"),
+    "on-music-select": ("U", "N", "dark label logged as white with no instrument; light assumed the same, never sampled"),
+    "ground-window": ("M", "M", "row-wise sweep where every sample agrees; light confirmed on Home"),
+    "music-ink": ("M", "M", "darkest-common glyph interior (4547 px light)"),
+    "music-ink-soft": ("D", "M", "dark measured; light measured `#808080` (3.95:1) stepped to the first grey that clears 4.5"),
+    "music-star": ("M", "M", "`album-light-inactive.png` (light), `album-detail-unfocused-dark.png` (dark, solid interior)"),
+    "music-primary-inactive": ("M", "M", "`album-light-inactive.png` and AX frame (light), `album-transport-inactive-dark.png` (dark)"),
+    "on-music-glass": ("N", "M", "dark 516-1175 px solid on the `#3A3A3D` capsule; light read from `album-light-inactive.png`, and its `#FFFFFF` capsule fill was never sampled"),
+    "music-ink-soft-on-fill": ("D", "D", "no capture: stepped to clear 4.5:1 on hover and the inactive fill, a decision rather than a measurement"),
+}
+_music_names = {
+    t["name"]
+    for t in tok["color"]["tokens"]
+    if t["name"].startswith(("music-", "on-music-")) or t["name"] == "ground-window"
+}
+_prov_problems = [f"no provenance row for {n}" for n in sorted(_music_names - set(MUSIC_PROVENANCE))]
+_prov_problems += [f"provenance row for unknown token {n}" for n in sorted(set(MUSIC_PROVENANCE) - _music_names)]
+for _n, (_l, _d, _ev) in MUSIC_PROVENANCE.items():
+    if _l not in MUSIC_PROVENANCE_CLASSES or _d not in MUSIC_PROVENANCE_CLASSES:
+        _prov_problems.append(f"{_n}: class not one of {sorted(MUSIC_PROVENANCE_CLASSES)}")
+    if not _ev.strip():
+        _prov_problems.append(f"{_n}: empty evidence")
+if _prov_problems:
+    raise SystemExit("MUSIC_PROVENANCE out of step with the tokens:\n" + "".join(f"  {m}\n" for m in _prov_problems))
+
+
+def _prov_cell(name, appearance, cls):
+    v = {t["name"]: t["value"] for t in tok["color"]["tokens"]}[name]
+    hexval = v[appearance] if isinstance(v, dict) else v
+    return f"`{hexval}` {MUSIC_PROVENANCE_CLASSES[cls]}"
+
+
+_prov_rows = "".join(
+    f"| `{n}` | {_prov_cell(n, 'light', l)} | {_prov_cell(n, 'dark', d)} | {ev} |\n"
+    for n, (l, d, ev) in MUSIC_PROVENANCE.items()
+)
+MUSIC_PROVENANCE_SECTION = (
+    "### Where each colour came from\n\n"
+    "The hex values are read from the tokens at build time; the basis for each is "
+    "recorded in `build/app_build.py`, and a Music token without a row fails the "
+    "build. **Measured** means sampled from a still capture of Music. "
+    "**No instrument recorded** means the capture log states the value but names "
+    "no capture or method, which the log's own rule says is not a measurement. "
+    "**Derived** means computed here from measured values. **Not observed** means "
+    "assumed.\n\n"
+    "| Token | Light | Dark | Evidence |\n|---|---|---|---|\n"
+    + _prov_rows
+    + "\n"
+)
+
 MUSIC_SECTION = """
 ## The Music variant
 
@@ -3175,8 +3244,9 @@ A second palette and six components that make an app read as Music for macOS
 rather than as a generic Mac app. Opt in per screen: the `music-*` tokens sit
 beside the core ones and nothing here replaces `accent`, `ink` or `ground`.
 
-**Every value was measured from the native Mac app**, sampled from
-`screencapture` PNGs converted to sRGB and from Accessibility Inspector frames.
+**Colours come from the native Mac app**, sampled from `screencapture` PNGs
+converted to sRGB and from Accessibility Inspector frames, except where the
+table below says otherwise: several values are derived or were never observed.
 The web player is not a source for anything the Mac app also has. An early
 scrape of music.apple.com gave `#D60017` for the accent; the Mac app measures
 `#FA233B`, which is how far off that route was.
@@ -3290,6 +3360,10 @@ Three things the spike settled that a browser could not:
 The full measurement record, including what was measured, how, and what was
 retracted, is `build/source/music-capture.md` in the repo.
 """
+
+_sizes = "### Sizes are not the spec; ratios and gaps are"
+assert MUSIC_SECTION.count(_sizes) == 1
+MUSIC_SECTION = MUSIC_SECTION.replace(_sizes, MUSIC_PROVENANCE_SECTION + _sizes)
 
 w("README.md", intro + body + MUSIC_SECTION)
 w(

@@ -78,8 +78,9 @@ A second palette and six components that make an app read as Music for macOS
 rather than as a generic Mac app. Opt in per screen: the `music-*` tokens sit
 beside the core ones and nothing here replaces `accent`, `ink` or `ground`.
 
-**Every value was measured from the native Mac app**, sampled from
-`screencapture` PNGs converted to sRGB and from Accessibility Inspector frames.
+**Colours come from the native Mac app**, sampled from `screencapture` PNGs
+converted to sRGB and from Accessibility Inspector frames, except where the
+table below says otherwise: several values are derived or were never observed.
 The web player is not a source for anything the Mac app also has. An early
 scrape of music.apple.com gave `#D60017` for the accent; the Mac app measures
 `#FA233B`, which is how far off that route was.
@@ -130,6 +131,30 @@ Music's own secondary ink on a filled row was never measured, and the measured
 light. So secondary cells step to `music-ink-soft-on-fill` whenever a fill is
 under them. That is a decision rather than a measurement, and it is the same
 split App Kit already makes between `accent` and `accent-ink`.
+
+### Where each colour came from
+
+The hex values are read from the tokens at build time; the basis for each is recorded in `build/app_build.py`, and a Music token without a row fails the build. **Measured** means sampled from a still capture of Music. **No instrument recorded** means the capture log states the value but names no capture or method, which the log's own rule says is not a measurement. **Derived** means computed here from measured values. **Not observed** means assumed.
+
+| Token | Light | Dark | Evidence |
+|---|---|---|---|
+| `music-accent` | `#FA233B` measured | `#FA2E48` measured | pixel scan of the title stroke interiors: 707 px dark, ~445 px light |
+| `music-accent-ink` | `#EA0623` derived | `#FA3851` derived | measured accent, lightness stepped only as far as 4.5:1 needs (hue and saturation kept) |
+| `music-select` | `#DC1229` measured | `#CC132D` measured | selected-row pill scan, `row-selected-key-*-vd.png` |
+| `music-select-inactive` | `#DCDCDD` no instrument recorded | `#464646` no instrument recorded | state table in the log names no instrument; light re-read one unit off (`#DCDCDC`) in `row-selected-inactive-light-vd.png` |
+| `music-sidebar-select` | `rgba(0, 0, 0, 0.093)` derived | `rgba(255, 255, 255, 0.134)` derived | alpha back-solved from a measured pair (dark `#434346` over `#262629`, light `#E0E0E0` over `#F7F7F7`); the build recomposites it to within 2/255 |
+| `music-sidebar-select-inactive` | `rgba(0, 0, 0, 0.045)` derived | `rgba(255, 255, 255, 0.063)` derived | alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture |
+| `music-hover` | `#F0F0F0` measured | `#2C2C2D` measured | inset-pill scan of still captures; dark measured twice |
+| `music-primary` | `#0E0E0E` measured | `#F3F3F3` measured | run scan of the header band; light also at the Play button's AX frame |
+| `on-music-primary` | `#FFFFFF` measured | `#0E0E0E` no instrument recorded | light sampled at the Play button's AX frame; dark label is logged as recorded earlier with no capture |
+| `on-music-select` | `#FFFFFF` not observed | `#FFFFFF` no instrument recorded | dark label logged as white with no instrument; light assumed the same, never sampled |
+| `ground-window` | `#FFFFFF` measured | `#1F1F20` measured | row-wise sweep where every sample agrees; light confirmed on Home |
+| `music-ink` | `#272727` measured | `#DDDDDD` measured | darkest-common glyph interior (4547 px light) |
+| `music-ink-soft` | `#767676` derived | `#9A9A9A` measured | dark measured; light measured `#808080` (3.95:1) stepped to the first grey that clears 4.5 |
+| `music-star` | `#FFCC00` measured | `#FFD700` measured | `album-light-inactive.png` (light), `album-detail-unfocused-dark.png` (dark, solid interior) |
+| `music-primary-inactive` | `#ECECEC` measured | `#2F2F30` measured | `album-light-inactive.png` and AX frame (light), `album-transport-inactive-dark.png` (dark) |
+| `on-music-glass` | `#000000` no instrument recorded | `#FFFFFF` measured | dark 516-1175 px solid on the `#3A3A3D` capsule; light read from `album-light-inactive.png`, and its `#FFFFFF` capsule fill was never sampled |
+| `music-ink-soft-on-fill` | `#5F5F5F` derived | `#B4B4B4` derived | no capture: stepped to clear 4.5:1 on hover and the inactive fill, a decision rather than a measurement |
 
 ### Sizes are not the spec; ratios and gaps are
 
