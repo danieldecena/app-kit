@@ -72,12 +72,34 @@ is approximate there: `tokens.json` names font families but carries no stacks,
 so the harness guesses them. Judge type on the published artifact; judge colour,
 spacing, radius, state and layout in the harness.
 
+Two things that cost a session each when measuring in the harness:
+
+- **The browser caches `bundle.js`.** A rebuild does not reach the page, so the
+  "fixed" code under test is the old code and the result reads as a pass. Add a
+  `?v=<epoch>` to the script src, and have the page assert *which* build it
+  loaded before measuring anything.
+- **The harness re-renders, detaching node references.** A `track` captured
+  before an `await` can be a detached node by the time you read it, which reports
+  `clientWidth: 0` and silently makes every scroll a no-op. Re-query inside each
+  step, or measure on an isolated static page instead.
+- **Smooth scrolling cannot be measured there at all** when the browser pane is
+  hidden: `document.hidden` is true, and Chromium does not run scroll animations
+  on a hidden document even though `requestAnimationFrame` keeps ticking. Every
+  instant scroll form still works, so the asymmetry is the tell.
+
+Use `/usr/bin/python3` for anything needing pillow. `uv run --with pillow`
+re-resolves against pypi and fails with no network; the system python has it.
+
 ## Publish
 
 `README.md` holds the rule and `artifacts.json` holds the URL. Publish with the
 recorded URL; omitting it mints a second artifact and the existing link goes
 stale. The index (`design-system.json`) goes last, re-read right before, with
-`lastChange` set. Current artifact version is 20.
+`lastChange` set. Current artifact version is 34.
+
+**`index.d.ts` needs an explicit `contentType`.** `.ts` is not a served extension,
+and the refusal publishes *nothing at all* rather than skipping that one file:
+pass `{"from": "...", "contentType": "text/plain"}`.
 
 ## Adding a component
 
@@ -95,14 +117,43 @@ Font declarations are rewritten into `--type-*` vars by a sweep that asserts it
 matched. Write a size/leading/family triple that already exists in
 `tokens.json`, or the build fails rather than emitting a raw `px` size.
 
-## What the build does not check
+## What the build checks
 
-The 12 assertions are structural: no raw `px` font size survives, no `clay` or
-`--signal` leaks through, each README surgery matches exactly once. **No
-assertion computes a contrast ratio.** Every "4.5:1" in `tokens.json` is a
-hand-written usage string verified out of band in a browser. A new colour's
-contrast is on the honour system until a check exists, so measure it and say
-where you measured it.
+Most assertions are structural: no raw `px` font size survives, no `clay` or
+`--signal` leaks through, each README surgery matches exactly once. Three are
+not, and they are the ones to know about.
+
+- **Contrast is computed, not promised.** `_check_contrast` walks 25 (fg, bg,
+  floor) pairs at floors from 3.0 to 13.0 and raises, so a colour that misses
+  its claim fails the build. It raises rather than asserts, which keeps it alive
+  under `python -O`. This section used to say no assertion computed a ratio and
+  that new colours were on the honour system; that stopped being true on
+  2026-10-01 and the stale sentence was worth more than the gate for a while.
+- **Orientation.** Contrast is blind to a light/dark swap, since inverting both
+  sides leaves every ratio unchanged. A separate check asserts which side of
+  mid-grey each token belongs on. It caught all eleven Music tokens written
+  dark-first from a notes table.
+- **The SwiftUI recipes typecheck.** See below.
+
+A new colour still needs its contrast measured and the measurement recorded --
+the gate proves the claim you made, not that you picked the right value.
+
+## The SwiftUI recipes are generated
+
+The `## SwiftUI` block in Shelf, HeroCard, TrackList, MiniPlayer and SidebarList
+is **extracted at build time** from `build/source/music-components-spike.swift`,
+by `// MARK: - <Name>` section. Edit the spike, never the README block, exactly
+as with every other generated file here.
+
+The build typechecks that spike against the Swift it just generated
+(`swiftc -typecheck`, not `-parse` -- a parse accepts `var w: CGFloat = "nope"`),
+so a recipe that stops compiling fails the build instead of shipping. Two limits
+are deliberate and stated in the code: it runs *after* the tree is written,
+because it needs the generated Swift, and its message says not to install that
+build; and without `swiftc` it prints NOT CHECKED rather than passing quietly.
+
+Render it with `swiftc build/source/music-components-spike.swift swift/AppKit.swift -o <bin>`
+then `<bin> --selfshot <out.png>`, adding `--light` for the light appearance.
 
 ## Design work
 
