@@ -933,6 +933,40 @@ The capture tool was right to report the focus state alongside every shot --
 that is the only reason this could be distinguished at all. The wrong move was
 reading four failures as a rule.
 
+## MiniPlayer ink is WHITE, not music-ink -- 2026-10-01
+
+Capture `home-miniplayer-inactive-dark.png`, Home, dark, window **inactive**,
+a track playing.
+
+| Element | Reads | Note |
+|---|---|---|
+| play/pause, previous, next | **`#FFFFFF`** | 817 and 516 solid px, not antialiasing |
+| queue icon | `#FFFFFF` | |
+| shuffle, OFF | ~`#7E7E80` | an off toggle is dimmed, not hidden |
+| repeat, OFF | ~`#6B6E6F` | |
+
+**Two things follow, and the first is a defect in what shipped.**
+
+`music-ink` dark is `#DDDDDD`, and both the CSS and SwiftUI MiniPlayer use it
+for the transport glyphs and the title. Music uses pure white. That is not a
+rounding difference: the capsule is a glass surface, not the window ground, and
+a token named for ink *on the ground* was the wrong one to reach for. The
+component needs its own on-glass value rather than borrowing `music-ink`.
+
+**The glyphs do NOT dim when the window goes inactive.** Worth recording because
+the opposite is true elsewhere in this app -- the album Play button inverts and
+the sidebar loses its red entirely -- so "inactive dims everything" would have
+been a reasonable and wrong generalisation.
+
+### Why no token was added from this
+
+The capsule is translucent over scrolled content, so every value above is
+contaminated by whatever sat behind it at that moment. `#FFFFFF` on the solid
+glyph interiors is safe; the two text rows are not, and the toggle greys are
+upper bounds. The capture record's own rule applies: **Reduce Transparency is
+the only way to measure anything on this capsule**, and that pass has not been
+run for ink. Re-measure before minting `music-ink-on-glass`.
+
 ## Not measured, and why
 
 - ~~The accent.~~ **Measured, see the table above.** Taken from large-title stroke
