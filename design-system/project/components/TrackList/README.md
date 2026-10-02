@@ -108,6 +108,8 @@ struct TrackList: View {
     let rows: [Track]
     @Binding var selection: Int?
     var windowInactive: Bool = false
+    var onPlay: (Int) -> Void = { _ in }
+    @FocusState private var focused: Bool
 
     private func fill(_ id: Int) -> Color {
         guard id == selection else { return .clear }
@@ -143,8 +145,30 @@ struct TrackList: View {
                 .frame(height: 56)
                 .contentShape(Rectangle())
                 .onTapGesture { selection = r.id }
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(r.id == selection ? [.isSelected] : [])
             }
         }
+        // One focus target for the whole table, with the arrows moving inside
+        // it -- a row-per-tab-stop would be 200 stops on a real playlist. This
+        // mirrors the keyboard model the web component documents.
+        .focusable()
+        .focused($focused)
+        .onMoveCommand { direction in
+            guard let current = selection ?? rows.first?.id,
+                  let i = rows.firstIndex(where: { $0.id == current }) else { return }
+            switch direction {
+            case .up:   selection = rows[max(0, i - 1)].id
+            case .down: selection = rows[min(rows.count - 1, i + 1)].id
+            default:    break
+            }
+        }
+        // Return plays, which is what Music does.
+        .onKeyPress(.return) {
+            if let s = selection { onPlay(s); return .handled }
+            return .ignored
+        }
+        .accessibilityLabel("Tracks")
     }
 }
 ```

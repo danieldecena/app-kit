@@ -55,15 +55,20 @@ struct Shelf<Content: View>: View {
     /// Leading inset of the content column: 40pt, the same line TrackList's
     /// pill starts on, measured from the Music window.
     var inset: CGFloat = 40
+    var onMore: () -> Void = {}
     @ViewBuilder var content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
                 Text(title).font(.title3.bold()).foregroundStyle(Color.Kit.musicInk)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.Kit.musicInkSoft)
+                Button(action: onMore) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.Kit.musicInkSoft)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("See all \(title)")
             }
             .padding(.leading, inset)
             ScrollView(.horizontal, showsIndicators: false) {
@@ -87,8 +92,19 @@ struct ArtworkCard: View {
     let title: String
     let subtitle: String
     var width: CGFloat = 188
+    var action: () -> Void = {}
 
     var body: some View {
+        Button(action: action) { card }
+            .buttonStyle(.plain)
+            // One label for the pair: VoiceOver should say "Episode 740,
+            // Soulection playgroup", not read two separate static texts.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(title), \(subtitle)")
+            .accessibilityAddTraits(.isButton)
+    }
+
+    private var card: some View {
         VStack(alignment: .leading, spacing: 0) {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(art)

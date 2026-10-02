@@ -63,8 +63,17 @@ struct HeroCard: View {
     let eyebrow: String
     let title: String
     var width: CGFloat = 258
+    var action: () -> Void = {}
 
     var body: some View {
+        Button(action: action) { card }
+            .buttonStyle(.plain)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(eyebrow), \(title)")
+            .accessibilityAddTraits(.isButton)
+    }
+
+    private var card: some View {
         ZStack(alignment: .bottomLeading) {
             art
             // The scrim is ours, not Music's: Music's heroes are commissioned to

@@ -59,15 +59,46 @@ struct MiniPlayer: View {
     var progress: Double = 0.54
     var playing: Bool = true
     var shuffle: Bool = false
+    var repeatOn: Bool = false
+    var onPlayPause: () -> Void = {}
+    var onPrevious: () -> Void = {}
+    var onNext: () -> Void = {}
+    var onShuffle: () -> Void = {}
+    var onRepeat: () -> Void = {}
+    var onLyrics: () -> Void = {}
+    var onQueue: () -> Void = {}
+    var onVolume: () -> Void = {}
+
+    private func control(_ symbol: String, _ label: String, _ act: @escaping () -> Void) -> some View {
+        Button(action: act) {
+            Image(systemName: symbol).foregroundStyle(Color.Kit.musicInk)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+
+    /// A toggle says whether it is ON, which a plain button cannot. The accent
+    /// is the only visual signal otherwise, so without this the state is
+    /// colour-only and invisible to VoiceOver.
+    private func toggle(_ symbol: String, _ label: String, _ on: Bool,
+                        _ act: @escaping () -> Void) -> some View {
+        Button(action: act) {
+            Image(systemName: symbol)
+                .foregroundStyle(on ? Color.Kit.musicAccent : Color.Kit.musicInk)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityValue(on ? "On" : "Off")
+        .accessibilityAddTraits(on ? [.isSelected] : [])
+    }
 
     var body: some View {
         HStack(spacing: 11) {
-            Image(systemName: "shuffle")
-                .foregroundStyle(shuffle ? Color.Kit.musicAccent : Color.Kit.musicInk)
-            Image(systemName: "backward.fill").foregroundStyle(Color.Kit.musicInk)
-            Image(systemName: playing ? "pause.fill" : "play.fill").foregroundStyle(Color.Kit.musicInk)
-            Image(systemName: "forward.fill").foregroundStyle(Color.Kit.musicInk)
-            Image(systemName: "repeat").foregroundStyle(Color.Kit.musicInk)
+            toggle("shuffle", "Shuffle", shuffle, onShuffle)
+            control("backward.fill", "Previous", onPrevious)
+            control(playing ? "pause.fill" : "play.fill", playing ? "Pause" : "Play", onPlayPause)
+            control("forward.fill", "Next", onNext)
+            toggle("repeat", "Repeat", repeatOn, onRepeat)
 
             ZStack(alignment: .bottom) {
                 Color.clear.frame(height: 54)   // the line belongs to the CAPSULE's edge
@@ -90,12 +121,15 @@ struct MiniPlayer: View {
                     }
                 }
                 .frame(height: 1).padding(.bottom, 2)
+                .accessibilityElement()
+                .accessibilityLabel("Playback position")
+                .accessibilityValue("\(Int(progress * 100)) percent")
             }
 
             HStack(spacing: 14) {
-                Image(systemName: "quote.bubble").foregroundStyle(Color.Kit.musicInk)
-                Image(systemName: "list.bullet").foregroundStyle(Color.Kit.musicInk)
-                Image(systemName: "speaker.wave.2.fill").foregroundStyle(Color.Kit.musicInk)
+                control("quote.bubble", "Lyrics", onLyrics)
+                control("list.bullet", "Queue", onQueue)
+                control("speaker.wave.2.fill", "Volume", onVolume)
             }
         }
         .padding(.leading, 15).padding(.trailing, 20)

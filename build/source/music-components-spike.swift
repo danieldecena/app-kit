@@ -27,8 +27,19 @@ struct ArtworkCard: View {
     let title: String
     let subtitle: String
     var width: CGFloat = 188
+    var action: () -> Void = {}
 
     var body: some View {
+        Button(action: action) { card }
+            .buttonStyle(.plain)
+            // One label for the pair: VoiceOver should say "Episode 740,
+            // Soulection playgroup", not read two separate static texts.
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(title), \(subtitle)")
+            .accessibilityAddTraits(.isButton)
+    }
+
+    private var card: some View {
         VStack(alignment: .leading, spacing: 0) {
             RoundedRectangle(cornerRadius: 6, style: .continuous)
                 .fill(art)
@@ -55,8 +66,17 @@ struct HeroCard: View {
     let eyebrow: String
     let title: String
     var width: CGFloat = 258
+    var action: () -> Void = {}
 
     var body: some View {
+        Button(action: action) { card }
+            .buttonStyle(.plain)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(eyebrow), \(title)")
+            .accessibilityAddTraits(.isButton)
+    }
+
+    private var card: some View {
         ZStack(alignment: .bottomLeading) {
             art
             // The scrim is ours, not Music's: Music's heroes are commissioned to
@@ -88,15 +108,20 @@ struct Shelf<Content: View>: View {
     /// Leading inset of the content column: 40pt, the same line TrackList's
     /// pill starts on, measured from the Music window.
     var inset: CGFloat = 40
+    var onMore: () -> Void = {}
     @ViewBuilder var content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
                 Text(title).font(.title3.bold()).foregroundStyle(Color.Kit.musicInk)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.Kit.musicInkSoft)
+                Button(action: onMore) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.Kit.musicInkSoft)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("See all \(title)")
             }
             .padding(.leading, inset)
             ScrollView(.horizontal, showsIndicators: false) {
@@ -129,6 +154,8 @@ struct TrackList: View {
     let rows: [Track]
     @Binding var selection: Int?
     var windowInactive: Bool = false
+    var onPlay: (Int) -> Void = { _ in }
+    @FocusState private var focused: Bool
 
     private func fill(_ id: Int) -> Color {
         guard id == selection else { return .clear }
@@ -164,8 +191,30 @@ struct TrackList: View {
                 .frame(height: 56)
                 .contentShape(Rectangle())
                 .onTapGesture { selection = r.id }
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(r.id == selection ? [.isSelected] : [])
             }
         }
+        // One focus target for the whole table, with the arrows moving inside
+        // it -- a row-per-tab-stop would be 200 stops on a real playlist. This
+        // mirrors the keyboard model the web component documents.
+        .focusable()
+        .focused($focused)
+        .onMoveCommand { direction in
+            guard let current = selection ?? rows.first?.id,
+                  let i = rows.firstIndex(where: { $0.id == current }) else { return }
+            switch direction {
+            case .up:   selection = rows[max(0, i - 1)].id
+            case .down: selection = rows[min(rows.count - 1, i + 1)].id
+            default:    break
+            }
+        }
+        // Return plays, which is what Music does.
+        .onKeyPress(.return) {
+            if let s = selection { onPlay(s); return .handled }
+            return .ignored
+        }
+        .accessibilityLabel("Tracks")
     }
 }
 
@@ -179,15 +228,46 @@ struct MiniPlayer: View {
     var progress: Double = 0.54
     var playing: Bool = true
     var shuffle: Bool = false
+    var repeatOn: Bool = false
+    var onPlayPause: () -> Void = {}
+    var onPrevious: () -> Void = {}
+    var onNext: () -> Void = {}
+    var onShuffle: () -> Void = {}
+    var onRepeat: () -> Void = {}
+    var onLyrics: () -> Void = {}
+    var onQueue: () -> Void = {}
+    var onVolume: () -> Void = {}
+
+    private func control(_ symbol: String, _ label: String, _ act: @escaping () -> Void) -> some View {
+        Button(action: act) {
+            Image(systemName: symbol).foregroundStyle(Color.Kit.musicInk)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+
+    /// A toggle says whether it is ON, which a plain button cannot. The accent
+    /// is the only visual signal otherwise, so without this the state is
+    /// colour-only and invisible to VoiceOver.
+    private func toggle(_ symbol: String, _ label: String, _ on: Bool,
+                        _ act: @escaping () -> Void) -> some View {
+        Button(action: act) {
+            Image(systemName: symbol)
+                .foregroundStyle(on ? Color.Kit.musicAccent : Color.Kit.musicInk)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityValue(on ? "On" : "Off")
+        .accessibilityAddTraits(on ? [.isSelected] : [])
+    }
 
     var body: some View {
         HStack(spacing: 11) {
-            Image(systemName: "shuffle")
-                .foregroundStyle(shuffle ? Color.Kit.musicAccent : Color.Kit.musicInk)
-            Image(systemName: "backward.fill").foregroundStyle(Color.Kit.musicInk)
-            Image(systemName: playing ? "pause.fill" : "play.fill").foregroundStyle(Color.Kit.musicInk)
-            Image(systemName: "forward.fill").foregroundStyle(Color.Kit.musicInk)
-            Image(systemName: "repeat").foregroundStyle(Color.Kit.musicInk)
+            toggle("shuffle", "Shuffle", shuffle, onShuffle)
+            control("backward.fill", "Previous", onPrevious)
+            control(playing ? "pause.fill" : "play.fill", playing ? "Pause" : "Play", onPlayPause)
+            control("forward.fill", "Next", onNext)
+            toggle("repeat", "Repeat", repeatOn, onRepeat)
 
             ZStack(alignment: .bottom) {
                 Color.clear.frame(height: 54)   // the line belongs to the CAPSULE's edge
@@ -210,12 +290,15 @@ struct MiniPlayer: View {
                     }
                 }
                 .frame(height: 1).padding(.bottom, 2)
+                .accessibilityElement()
+                .accessibilityLabel("Playback position")
+                .accessibilityValue("\(Int(progress * 100)) percent")
             }
 
             HStack(spacing: 14) {
-                Image(systemName: "quote.bubble").foregroundStyle(Color.Kit.musicInk)
-                Image(systemName: "list.bullet").foregroundStyle(Color.Kit.musicInk)
-                Image(systemName: "speaker.wave.2.fill").foregroundStyle(Color.Kit.musicInk)
+                control("quote.bubble", "Lyrics", onLyrics)
+                control("list.bullet", "Queue", onQueue)
+                control("speaker.wave.2.fill", "Volume", onVolume)
             }
         }
         .padding(.leading, 15).padding(.trailing, 20)
