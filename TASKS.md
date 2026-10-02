@@ -9,7 +9,7 @@
 - [x] Add the design runbook binding to the terminal-kit register -- terminal-kit 4aaa164
 - [x] Check the TrackList focus ring in WebKit -- passes, WebKit 26.6
 - [x] Fix TrackList preview: inactive list shows no selection -- 3453e65
-- [ ] Publish the TrackList preview fix and WebKit note (needs Daniel's ok)
+- [x] Publish the TrackList preview fix and WebKit note -- v63
 
 ## Completed
 
