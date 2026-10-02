@@ -18,7 +18,7 @@
 ## Next Up
 
 - Colour and geometry are measured end to end, and five defects found by auditing *relations* rather than components were fixed on 2026-10-01: see the decision log.
-- Nothing left is actionable without Daniel, and each was attempted first. The cheapest is the row **mid-press**, now one command: `./build/source/music-shot.sh Music row-pressed-dark 5`, holding a track row through the countdown. The **contextual toolbar** and **window chrome** are scoping calls, not captures: Music's are per-page, so each needs its own pass before it can be a component.
+- Nothing left is actionable without Daniel, and each was attempted first. The **contextual toolbar** and **window chrome** are scoping calls, not captures: Music's are per-page, so each needs its own pass before it can be a component. Light-appearance captures (sidebar key fill beyond the existing four, row press) need the system appearance switched by Daniel.
 - The two deferred token renames (`ground-window` -> `music-ground`, `music-ink-soft-on-fill` -> `on-music-fill`) wait for the variant's next breaking change; that call stands.
 
 Full list: `TASKS.md`.
@@ -26,6 +26,7 @@ Full list: `TASKS.md`.
 ## Decision log
 
 ### 2026-10-02
+- **Row mid-press closed, dark: a press has no visual state.** Held a track row for 400 ms and captured: no fill (`#1F1F20`, same as the rows around it); on release the row is `#CC132C`, one unit from `music-select`, which also corroborates that token and shows the detector can see a fill. `TrackList` needs no pressed state. Light not done (needs the system appearance switched).
 - **The sidebar selection was wrong, not unmeasured: `SidebarList` painted the track row's red, and Music's sidebar never does.** Dark and light, key and not key, focused or not, mouse down or not, the fill is a translucent grey: white at 13.4% / 6.3% in dark, black at 9.3% / 4.5% in light. The 6.3% reproduced across two backdrops, which is what makes it an alpha. Two tokens (`music-sidebar-select`, `music-sidebar-select-inactive`) replace the borrowed ones in the CSS and the SwiftUI recipe; the label is pure `on-music-glass` and the glyph keeps its accent. Observed after the change in the browser (computed `rgba(255,255,255,0.133)` dark, `rgba(0,0,0,0.094)` light, labels and glyphs as measured) and in the spike render (`#424244` over `#262628`, Music `#434346` over `#262629`). The old `#FA2E48` reading is dropped: unreproducible by click, mouse-down or keyboard focus, and its only record was a number.
 - The check that guards it composites each token over the backdrop it was measured on, asserts the dark one is built from white and the light from black (an inversion keeps every ratio), and fails on the label ratio. Proved to fire two ways on the real tokens, mutation asserted applied: a wrong alpha (composite `#676769`, label 5.64:1) and an inverted ink.
 - Caught only by rendering: the SwiftUI recipe drew **two pills**. A `List` with a `selection:` binding draws its own highlight under the row's, and the old opaque red hid it; the translucent fill showed it, and the overlap read `#555456` against Music's `#434346`. The recipe now has no `selection:` binding and handles taps itself, which costs the List's arrow keys (said in the recipe's comment). An opaque fill had been masking a defect for as long as the component existed.

@@ -8,7 +8,7 @@
 - [x] MiniPlayer line ends 36.8pt long: Music's 36pt hit frames set 572
 - [x] Sidebar selection: neutral in every state, red was the track row's
 - [x] SidebarList takes its own two neutral selection tokens, CSS and SwiftUI
-- [ ] [you] Row mid-press: music-shot.sh Music row-pressed-dark 5, hold a row
+- [x] Row mid-press: no visual of its own (dark); selection fires on mouse-up
 - [ ] [you] Contextual toolbar: needs its own capture pass
 - [ ] [you] Window chrome: deferred to the adopting app
 

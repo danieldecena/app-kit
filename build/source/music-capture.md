@@ -1534,3 +1534,16 @@ virtual display (set `AXPosition` on the main window to the display's origin
 plus an offset) and the driver saves and restores the cursor and the frontmost
 app around each action. It is 1x there, not 2x.
 The two helpers are `music-park.swift` and `music-drive.swift` beside this file.
+
+### Track row mid-press: no distinct state (2026-10-02, dark only)
+
+`row-pressed-dark-vd.png`: button held down on a track row for 400 ms, window key,
+captured while still held. The row draws **no fill**: `#1F1F20`, identical to the
+rows around it. Releasing the button gives `row-selected-key-dark-vd.png`, where
+the same row is `#CC132C`, one unit from `music-select` (`#CC132D`), which is an
+independent corroboration of that token and also the known-good control for this
+capture: the same pipeline demonstrably sees a fill when there is one.
+
+So selection happens on mouse-up and a press has no visual of its own; App Kit
+needs no pressed state for `TrackList`. Dark only: light needs the system
+appearance switched, which is not done from here.
