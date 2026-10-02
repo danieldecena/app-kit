@@ -1384,3 +1384,37 @@ exact move that produced three wrong values on 2026-10-01.
 1. **light, list focused** -- gives the light counterpart of `#FA2E48`.
 2. **dark, window key, list NOT focused** -- gives the dark counterpart of
    `#E0E0E0` and confirms the middle state is real rather than a light-mode quirk.
+
+### A fourth sidebar state, and why the key-window ones are hard to get
+
+`album-light-inactive-sidebar.png` (980x662pt, so a resized window; traffic lights
+`#E8E8EC #F4F4F5 #EBEBF0`, three near-identical greys, so **not key**):
+
+| | measured |
+|---|---|
+| sidebar background | `#F4F4F5` |
+| selected row (Albums) | **`#E9E9EA`**, 32pt tall |
+
+That is the light counterpart of the dark not-key `#1F1F1F`, and it is a fourth
+distinct sidebar fill. `music-select-inactive` light is `#DCDCDD` -- measured on a
+track row, and again not what the sidebar draws.
+
+Two values from the same capture **corroborate** existing tokens from an
+independent shot, which is worth more than the first measurement of either:
+
+| | measured here | token |
+|---|---|---|
+| Play pill, window not key | `#ECECEC` fill, `#242424` label | `music-primary-inactive` light `#ECECEC`; the label is 3 units off `music-ink`'s `#272727` |
+| artist line | `#FA233B` | `music-accent` light, exactly |
+
+**The protocol problem.** Every capture taken while the user types the command
+shows Music **not key**, because typing puts the terminal frontmost. I guessed
+that a shot fired from tooling would keep Music key, since `screencapture -l` does
+not raise the window -- and tested it: my own shot of the same window also came
+back not key. The theory was wrong. The window is simply whatever was last
+clicked, and nothing about who fires the shutter changes that.
+
+So a key-window capture needs the person to click into Music **and then not
+touch the keyboard**, with the shot fired from the agent side. That is the only
+arrangement in which Music is frontmost at the moment the shutter runs, and it is
+why nearly every still in this project is an inactive window.
