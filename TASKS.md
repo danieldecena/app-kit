@@ -1,7 +1,8 @@
 ## Tasks
 
-- [ ] Publish provenance and token corrections to the artifact
-- [ ] Decide TrackList selected-row shape, light and playlist
+- [x] Publish provenance and token corrections to the artifact -- v58
+- [ ] TrackList pill height follows the row, 55pt on artwork rows
+- [ ] Build design runbook artifact for the measure-to-publish process
 
 ## Completed
 
