@@ -1669,3 +1669,54 @@ So `album-selected-inactive-dark.png` is a key-window shot: `#464646` is the fil
 a selected row in a key window whose list is not focused, and **no dark
 app-inactive selected-row capture exists**. Any claim about a dark inactive
 selected row is unmeasured.
+
+#### Label, light-fill and capsule samples (2026-10-02)
+
+Every row is `/usr/bin/python3 ../swatch-scan.py <file> <flags>` run from
+`build/source/music-reference`. Coordinates are 1x window pixels for the
+`*-vd.png` files (980x779) and 1x points for `album-selected-inactive-dark.png`
+(3176x2014, `--scale 2` default). Window state is the `--lights` verdict printed
+by the same command, and agrees with the Task 2 table above. In a `--glyph` result
+the fields are `glyph <far colour> <pixel count> <box background>`, where the
+background is the box's most common colour and the far colour is the most common
+colour among the pixels farthest from it.
+
+| Quantity | Capture and command | Window state | Observed |
+|---|---|---|---|
+| `music-select-inactive` fill, light | `row-selected-inactive-light-vd.png --lights --hist 480:330:700` | not key (0.02) | `[('#DCDCDC', 370)] 370`: all 370 samples one colour. Token is `#DCDCDD`, one unit off |
+| `on-music-select` label, dark | `row-selected-key-dark-vd.png --lights --glyph 305:516:360:531` | key (1.00) | `glyph #FFFFFF 63 #CC132C`: white label on the key-window dark selected fill |
+| `on-music-select` label, light | `row-selected-key-light-vd.png --lights --glyph 305:597:410:613` | key (0.83) | `glyph #FFFFFF 93 #DC1229`: white label on the key-window light selected fill |
+| `on-music-primary` Play label, dark, playlist page | `row-selected-key-dark-vd.png --lights --glyph 630:295:690:313` | key (1.00) | `glyph #000000 111 #F3F3F3` |
+| `on-music-primary` Play label, dark, album page | `album-selected-inactive-dark.png --lights --glyph 1400:585:1520:635` | key (1.00) | `glyph #000000 654 #F3F3F3` |
+| MiniPlayer capsule, light | `row-selected-inactive-light-vd.png --hist 712:260:930` | not key (0.02, from the Task 2 table; this command ran without `--lights`) | `[('#F1F1F1', 192), ('#F0F0F0', 94), ('#EAEAEA', 48)] 670`: a range, three values hold 334 of 670 samples |
+| Pause glyph and capsule, light | `row-selected-inactive-light-vd.png --glyph 316:722:338:746` | not key (same note) | `glyph #EDEDED 72 #000000` |
+
+Reading the rows:
+
+- The selected-row label is `#FFFFFF` in both appearances, and in both the box
+  background field is the row fill (`#CC132C` dark, `#DC1229` light), so the box
+  sits on the selected row. Both captures are key-window, so these support
+  `on-music-select` for a key window only.
+- The Play label is `#000000` in two independent captures (a playlist page and an
+  album page, 111 and 654 solid pixels), both with `#F3F3F3` behind it, which is
+  `music-primary` dark. The token `on-music-primary` dark is `#0E0E0E`, so Music
+  uses pure black where the token has `#0E0E0E`.
+- The capsule is not one colour. It is translucent over the rows behind it, so
+  record the range `#EAEAEA` to `#F1F1F1`, not a hex. Over the whole 22x24 pause
+  box the capsule itself varies from `#EAEAEA` to `#EDEDED` (viewed at 10x). The
+  `on-music-glass` usage text says the light capsule is `#FFFFFF`; this capture
+  contradicts that, at least with the window inactive.
+- In the pause-glyph command the printed order is reversed from the label rows: the
+  box is mostly black (178 of 528 pixels exactly `#000000`, the largest single
+  colour, against 72 of `#EDEDED`) because the glyph's two bars fill much of a
+  22x24 box and the capsule colour is spread over several near values. So the
+  tool calls `#000000` the box background and `#EDEDED` the far colour. The glyph
+  is `#000000` and the capsule is about `#EDEDED`; the tool's two labels are
+  swapped by that fill ratio, not by a wrong box. Viewed at 10x: two black bars on
+  a light grey capsule, nothing else in the box.
+
+Against the plan's expectations: every value matched, with one difference
+in framing, the max saturation for `row-selected-key-light-vd.png` reads 0.83
+(the plan saw 0.84, before the key-state check became a fixed-position template).
+The capsule hist top three matched in order and value (`#F1F1F1`, `#F0F0F0`,
+`#EAEAEA`); no coordinate was adjusted.
