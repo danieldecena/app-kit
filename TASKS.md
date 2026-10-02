@@ -6,7 +6,7 @@
 - [x] Render the spike and run accessibility-review on the 55pt pill
 - [x] Draw the TrackList focus ring on the pill, not under it -- a92945a
 - [ ] Publish the TrackList pill and focus ring to the artifact
-- [ ] Add the design runbook binding to the terminal-kit register
+- [x] Add the design runbook binding to the terminal-kit register -- terminal-kit 4aaa164
 - [ ] Check the TrackList focus ring in WebKit
 
 ## Completed
