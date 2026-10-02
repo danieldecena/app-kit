@@ -633,8 +633,9 @@ CONTRAST_PAIRS = (
         ("edge", "surface", 3.0),
         ("warn-ink", "warn-wash", 4.6),
         ("heat-1", "surface", 3.0),
-        # Music variant. music-accent is deliberately absent: it is 4.35:1 on
+        # Music variant. music-accent is deliberately absent at 4.5: it is 4.35:1 on
         # ground-window and is not for text, which is why music-accent-ink exists.
+        # It is held at 3.0 below, as a focus ring.
         ("music-accent-ink", "ground-window", 4.5),
         ("on-music-primary", "music-primary", 4.5),
         ("on-music-select", "music-select", 4.5),
@@ -647,6 +648,11 @@ CONTRAST_PAIRS = (
         ("music-ink-soft-on-fill", "music-select-inactive", 4.5),
         ("music-ink", "music-hover", 4.5),
         ("music-ink", "music-select-inactive", 4.5),
+        # TrackList's focus ring on an empty and a hovered pill. A ring is a
+        # graphical object, so 3:1. On the two selection fills it is
+        # on-music-select and music-ink, which the pairs above already hold.
+        ("music-accent", "ground-window", 3.0),
+        ("music-accent", "music-hover", 3.0),
         # ground-window stands in for the capsule, and the stand-in is the
         # OPTIMISTIC side: the capsule's measured fill (#3A3A3D dark) is lighter
         # than the ground, so white reads 11.34:1 on the real surface against
@@ -863,14 +869,20 @@ def _sidebar_select_failures(value_of, rows):
         if (r, g, b) != (ink, ink, ink):
             out.append(f"  {name} ({theme}) is built from {(r, g, b)}, expected {ink}s")
         bg = [int(backdrop[i : i + 2], 16) for i in (1, 3, 5)]
-        comp = "#%02X%02X%02X" % tuple(round(c * al + k * (1 - al)) for c, k in zip((r, g, b), bg))
+        comp = "#%02X%02X%02X" % tuple(
+            round(c * al + k * (1 - al)) for c, k in zip((r, g, b), bg)
+        )
         want = [int(fill[i : i + 2], 16) for i in (1, 3, 5)]
         got = [int(comp[i : i + 2], 16) for i in (1, 3, 5)]
         if any(abs(x - y) > 2 for x, y in zip(got, want)):
-            out.append(f"  {name} ({theme}) composites to {comp} over {backdrop}, measured {fill}")
+            out.append(
+                f"  {name} ({theme}) composites to {comp} over {backdrop}, measured {fill}"
+            )
         ratio = contrast(value_of(label, theme), comp)
         if ratio < floor:
-            out.append(f"  {label} on {name} ({theme}) is {ratio:.2f}:1, below {floor}:1")
+            out.append(
+                f"  {label} on {name} ({theme}) is {ratio:.2f}:1, below {floor}:1"
+            )
     return out
 
 
@@ -1177,7 +1189,15 @@ css = css_sub(
    each pass on their own. */
 .dc-tracklist-row:not([aria-selected="true"]):hover .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft-on-fill); }
 .dc-tracklist-art { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); display: block; }
-.dc-tracklist-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -4px; border-radius: 6px; }
+/* The ring is on the PILL, not the row. A row outline paints under the pill,
+   which is a positioned pseudo-element and so paints later; once the pill
+   filled the row, the ring survived only as two brackets in the 40px margins.
+   Focus travels with the selection, so that was the normal focused state. The
+   ring takes the ink that reads on whatever the pill holds. */
+.dc-tracklist-row:focus-visible { outline: none; }
+.dc-tracklist-row:focus-visible::before { outline: 2px solid var(--music-accent); outline-offset: -4px; }
+.dc-tracklist-row[aria-selected="true"]:focus-visible::before { outline-color: var(--on-music-select); }
+.dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"]:focus-visible::before { outline-color: var(--music-ink); }
 
 /* MiniPlayer: the floating glass capsule over Music's scrolled content. Not a
    bar in the window chrome -- it floats, 19pt up from the window bottom, and is
@@ -1257,7 +1277,7 @@ css = css_sub(
 .dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--music-ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
 .dc-sidebar-row:hover { background: var(--music-hover); }
 /* The only Music component that had no focus ring, and the one driven by the
-   arrow keys. Matches TrackList: same colour, same inset offset. */
+   arrow keys. Same colour as TrackList's ring on an unselected row. */
 .dc-sidebar-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -2px; }
 /* The sidebar selection is NEUTRAL, not Music's red. music-select was measured on
    track rows, where it is right; in the sidebar Music draws a translucent grey
@@ -1940,8 +1960,8 @@ docs[
     h('div',{className:'dc-row'},h(D.Button,{variant:'filled'},'Import 42 clips'),h(D.Button,{variant:'gray'},'Cancel'),h(D.Button,{variant:'plain'},'Show all'),h(D.Button,{variant:'destructive'},'Delete'),
       h('span',{style:{display:'inline-flex',padding:10,borderRadius:22,background:'linear-gradient(120deg,#5AC8FA,#AF52DE 60%,#FF2D55)'}},h(D.Button,{variant:'glass'},'Play'))),
     h('div',{className:'dc-row',style:{alignItems:'center'}},
-      h(D.Button,{variant:'music'},'\u25B6 Play'),
-      h(D.Button,{variant:'music','data-window-inactive':'true'},'\u25B6 Play'),
+      h(D.Button,{variant:'music'},'\u25b6 Play'),
+      h(D.Button,{variant:'music','data-window-inactive':'true'},'\u25b6 Play'),
       h('span',{style:{font:'var(--type-caption-1)',color:'var(--music-ink-soft)'}},'music: key window, then not key -- it inverts rather than dimming'))));
 </script>
 </body>
@@ -2476,6 +2496,13 @@ Focus moves with the selection rather than trailing it, or the ring stays on the
 row you left and a screen reader never hears the change. Double-click also plays,
 for the pointer.
 
+The ring is drawn on the pill, 4px inside it, not on the row. A row outline
+paints *under* the pill, so with the pill filling the row it showed only as two
+brackets in the margins. Its colour follows what the pill holds: `music-accent`
+on an empty or hovered pill (3.91:1 and 3.43:1 in light, 4.35:1 and 3.69:1 in
+dark), `on-music-select` on the selection (5.05:1, 5.68:1), and `music-ink` on
+the inactive selection.
+
 ## Columns are configuration
 
 The measured playlist has seven columns and no Album; an earlier capture had one.
@@ -2944,7 +2971,9 @@ for comp, (_, sections) in SWIFT_DOC.items():
 # the design system and varies by browser. So the relation to check is
 # focusable-class -> has a :focus-visible rule, which no amount of looking at
 # one component can tell you.
-_focusable = set(re.findall(r'h\(\s*"button"[^)]*?className:\s*(?:cx\()?"(dc-[a-z-]+)', js))
+_focusable = set(
+    re.findall(r'h\(\s*"button"[^)]*?className:\s*(?:cx\()?"(dc-[a-z-]+)', js)
+)
 _focusable |= set(re.findall(r'className:\s*"(dc-[a-z-]+)"[^}]*tabIndex:\s*0', js))
 _focusable |= set(re.findall(r'tabIndex:\s*0[^}]*className:\s*"(dc-[a-z-]+)"', js))
 if len(_focusable) < 8:
@@ -3192,38 +3221,104 @@ MUSIC_PROVENANCE_CLASSES = {
 # to the usage prose. The log's own rule is that a value with no instrument is
 # not a measurement; the N rows are the ones that break it.
 MUSIC_PROVENANCE = {
-    "music-accent": ("M", "M", "pixel scan of the title stroke interiors: 707 px dark, ~445 px light"),
-    "music-accent-ink": ("D", "D", "measured accent, lightness stepped only as far as 4.5:1 needs (hue and saturation kept)"),
+    "music-accent": (
+        "M",
+        "M",
+        "pixel scan of the title stroke interiors: 707 px dark, ~445 px light",
+    ),
+    "music-accent-ink": (
+        "D",
+        "D",
+        "measured accent, lightness stepped only as far as 4.5:1 needs (hue and saturation kept)",
+    ),
     "music-select": ("M", "M", "selected-row pill scan, `row-selected-key-*-vd.png`"),
-    "music-select-inactive": ("M", "M", "window not key in both: light `row-selected-inactive-light-vd.png`, 370 of 370 samples; dark `row-selected-inactive-dark-vd.png`, 920 of 920 samples at two heights. `album-selected-inactive-dark.png` reads the same `#464646` but was shot with the window key and an unfocused list, so it is not the evidence"),
-    "music-sidebar-select": ("D", "D", "alpha back-solved from a measured pair (dark `#434346` over `#262629`, light `#E0E0E0` over `#F7F7F7`); the build recomposites it to within 2/255"),
-    "music-sidebar-select-inactive": ("D", "D", "alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture"),
+    "music-select-inactive": (
+        "M",
+        "M",
+        "window not key in both: light `row-selected-inactive-light-vd.png`, 370 of 370 samples; dark `row-selected-inactive-dark-vd.png`, 920 of 920 samples at two heights. `album-selected-inactive-dark.png` reads the same `#464646` but was shot with the window key and an unfocused list, so it is not the evidence",
+    ),
+    "music-sidebar-select": (
+        "D",
+        "D",
+        "alpha back-solved from a measured pair (dark `#434346` over `#262629`, light `#E0E0E0` over `#F7F7F7`); the build recomposites it to within 2/255",
+    ),
+    "music-sidebar-select-inactive": (
+        "D",
+        "D",
+        "alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture",
+    ),
     "music-hover": ("M", "M", "inset-pill scan of still captures; dark measured twice"),
-    "music-primary": ("M", "M", "run scan of the header band; light also at the Play button's AX frame"),
-    "on-music-primary": ("M", "M", "light sampled at the Play button's AX frame; dark Play label interior on `#F3F3F3` in two key-window captures, `row-selected-key-dark-vd.png` and `album-selected-inactive-dark.png`"),
-    "on-music-select": ("M", "M", "label interior on the selected fill, window key: `row-selected-key-light-vd.png` and `row-selected-key-dark-vd.png`"),
-    "ground-window": ("M", "M", "row-wise sweep where every sample agrees; light confirmed on Home"),
+    "music-primary": (
+        "M",
+        "M",
+        "run scan of the header band; light also at the Play button's AX frame",
+    ),
+    "on-music-primary": (
+        "M",
+        "M",
+        "light sampled at the Play button's AX frame; dark Play label interior on `#F3F3F3` in two key-window captures, `row-selected-key-dark-vd.png` and `album-selected-inactive-dark.png`",
+    ),
+    "on-music-select": (
+        "M",
+        "M",
+        "label interior on the selected fill, window key: `row-selected-key-light-vd.png` and `row-selected-key-dark-vd.png`",
+    ),
+    "ground-window": (
+        "M",
+        "M",
+        "row-wise sweep where every sample agrees; light confirmed on Home",
+    ),
     "music-ink": ("M", "M", "darkest-common glyph interior (4547 px light)"),
-    "music-ink-soft": ("D", "M", "dark measured; light measured `#808080` (3.95:1) stepped to the first grey that clears 4.5"),
-    "music-star": ("M", "M", "`album-light-inactive.png` (light), `album-detail-unfocused-dark.png` (dark, solid interior)"),
-    "music-primary-inactive": ("M", "M", "`album-light-inactive.png` and AX frame (light), `album-transport-inactive-dark.png` (dark)"),
-    "on-music-glass": ("M", "M", "dark 516-1175 px solid on the `#3A3A3D` capsule; light pause glyph in `row-selected-key-light-vd.png` (window key) and `row-selected-inactive-light-vd.png` (not key). The light capsule is translucent, about `#FAFAFA` key and `#EAEAEA` to `#F1F1F1` not key, not `#FFFFFF`"),
-    "music-ink-soft-on-fill": ("D", "D", "no capture: stepped to clear 4.5:1 on hover and the inactive fill, a decision rather than a measurement"),
+    "music-ink-soft": (
+        "D",
+        "M",
+        "dark measured; light measured `#808080` (3.95:1) stepped to the first grey that clears 4.5",
+    ),
+    "music-star": (
+        "M",
+        "M",
+        "`album-light-inactive.png` (light), `album-detail-unfocused-dark.png` (dark, solid interior)",
+    ),
+    "music-primary-inactive": (
+        "M",
+        "M",
+        "`album-light-inactive.png` and AX frame (light), `album-transport-inactive-dark.png` (dark)",
+    ),
+    "on-music-glass": (
+        "M",
+        "M",
+        "dark 516-1175 px solid on the `#3A3A3D` capsule; light pause glyph in `row-selected-key-light-vd.png` (window key) and `row-selected-inactive-light-vd.png` (not key). The light capsule is translucent, about `#FAFAFA` key and `#EAEAEA` to `#F1F1F1` not key, not `#FFFFFF`",
+    ),
+    "music-ink-soft-on-fill": (
+        "D",
+        "D",
+        "no capture: stepped to clear 4.5:1 on hover and the inactive fill, a decision rather than a measurement",
+    ),
 }
 _music_names = {
     t["name"]
     for t in tok["color"]["tokens"]
     if t["name"].startswith(("music-", "on-music-")) or t["name"] == "ground-window"
 }
-_prov_problems = [f"no provenance row for {n}" for n in sorted(_music_names - set(MUSIC_PROVENANCE))]
-_prov_problems += [f"provenance row for unknown token {n}" for n in sorted(set(MUSIC_PROVENANCE) - _music_names)]
+_prov_problems = [
+    f"no provenance row for {n}" for n in sorted(_music_names - set(MUSIC_PROVENANCE))
+]
+_prov_problems += [
+    f"provenance row for unknown token {n}"
+    for n in sorted(set(MUSIC_PROVENANCE) - _music_names)
+]
 for _n, (_l, _d, _ev) in MUSIC_PROVENANCE.items():
     if _l not in MUSIC_PROVENANCE_CLASSES or _d not in MUSIC_PROVENANCE_CLASSES:
-        _prov_problems.append(f"{_n}: class not one of {sorted(MUSIC_PROVENANCE_CLASSES)}")
+        _prov_problems.append(
+            f"{_n}: class not one of {sorted(MUSIC_PROVENANCE_CLASSES)}"
+        )
     if not _ev.strip():
         _prov_problems.append(f"{_n}: empty evidence")
 if _prov_problems:
-    raise SystemExit("MUSIC_PROVENANCE out of step with the tokens:\n" + "".join(f"  {m}\n" for m in _prov_problems))
+    raise SystemExit(
+        "MUSIC_PROVENANCE out of step with the tokens:\n"
+        + "".join(f"  {m}\n" for m in _prov_problems)
+    )
 
 
 def _prov_cell(name, appearance, cls):
@@ -3245,9 +3340,7 @@ MUSIC_PROVENANCE_SECTION = (
     "no capture or method, which the log's own rule says is not a measurement. "
     "**Derived** means computed here from measured values. **Not observed** means "
     "assumed.\n\n"
-    "| Token | Light | Dark | Evidence |\n|---|---|---|---|\n"
-    + _prov_rows
-    + "\n"
+    "| Token | Light | Dark | Evidence |\n|---|---|---|---|\n" + _prov_rows + "\n"
 )
 
 MUSIC_SECTION = """

@@ -71,6 +71,13 @@ Focus moves with the selection rather than trailing it, or the ring stays on the
 row you left and a screen reader never hears the change. Double-click also plays,
 for the pointer.
 
+The ring is drawn on the pill, 4px inside it, not on the row. A row outline
+paints *under* the pill, so with the pill filling the row it showed only as two
+brackets in the margins. Its colour follows what the pill holds: `music-accent`
+on an empty or hovered pill (3.91:1 and 3.43:1 in light, 4.35:1 and 3.69:1 in
+dark), `on-music-select` on the selection (5.05:1, 5.68:1), and `music-ink` on
+the inactive selection.
+
 ## Columns are configuration
 
 The measured playlist has seven columns and no Album; an earlier capture had one.

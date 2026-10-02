@@ -262,7 +262,15 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
    each pass on their own. */
 .dc-tracklist-row:not([aria-selected="true"]):hover .dc-tracklist-cell[data-soft="true"] { color: var(--music-ink-soft-on-fill); }
 .dc-tracklist-art { width: 40px; height: 40px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); display: block; }
-.dc-tracklist-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -4px; border-radius: 6px; }
+/* The ring is on the PILL, not the row. A row outline paints under the pill,
+   which is a positioned pseudo-element and so paints later; once the pill
+   filled the row, the ring survived only as two brackets in the 40px margins.
+   Focus travels with the selection, so that was the normal focused state. The
+   ring takes the ink that reads on whatever the pill holds. */
+.dc-tracklist-row:focus-visible { outline: none; }
+.dc-tracklist-row:focus-visible::before { outline: 2px solid var(--music-accent); outline-offset: -4px; }
+.dc-tracklist-row[aria-selected="true"]:focus-visible::before { outline-color: var(--on-music-select); }
+.dc-tracklist[data-window-inactive="true"] .dc-tracklist-row[aria-selected="true"]:focus-visible::before { outline-color: var(--music-ink); }
 
 /* MiniPlayer: the floating glass capsule over Music's scrolled content. Not a
    bar in the window chrome -- it floats, 19pt up from the window bottom, and is
@@ -342,7 +350,7 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--music-ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
 .dc-sidebar-row:hover { background: var(--music-hover); }
 /* The only Music component that had no focus ring, and the one driven by the
-   arrow keys. Matches TrackList: same colour, same inset offset. */
+   arrow keys. Same colour as TrackList's ring on an unselected row. */
 .dc-sidebar-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -2px; }
 /* The sidebar selection is NEUTRAL, not Music's red. music-select was measured on
    track rows, where it is right; in the sidebar Music draws a translucent grey
