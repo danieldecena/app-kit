@@ -970,7 +970,7 @@ readings rather than upper bounds.
 | **artist** | **`#FFFFFF`** (999 px) -- *not* a softer grey |
 | shuffle OFF | `#4F4F4F` |
 | repeat OFF | `#4E4F50` |
-| capsule fill | `#151515` |
+| capsule fill | ~~`#151515`~~ -- WITHDRAWN, this capture was translucent; the fill is **`#3A3A3D`**, see RESOLVED below |
 | width | **701.0pt**, independently confirming the recorded 700 |
 
 So `on-music-glass` is `#FFFFFF` dark, and the artist line shares it. The
@@ -979,7 +979,7 @@ on a Music surface, which is the root error: a ground ink on a glass surface.
 Light is not measured and inherits `music-ink`'s light value, so the departure
 is dark-only.
 
-**Music's own OFF toggle fails 3:1.** `#4F4F4F` on `#151515` is 2.23:1, under
+**Music's own OFF toggle fails 3:1.** `#4F4F4F` on the capsule is **1.38:1**, under
 the bar for a graphical object. Recorded, not copied -- the same fidelity-
 versus-accessibility split already made for `music-accent` / `music-accent-ink`.
 
@@ -1079,7 +1079,7 @@ stepped to `#B8860B` *specifically* to clear 3:1, and Music uses a value at
 floor produced a colour Apple would not recognise.
 
 **`on-music-glass` is pure black and pure white.** `#000000` on a `#FFFFFF`
-capsule in light, `#FFFFFF` on `#151515` in dark. Symmetric, and in neither
+capsule in light, `#FFFFFF` on `#3A3A3D` in dark. Symmetric, and in neither
 appearance is it the ground ink -- which is the whole reason the token exists.
 
 ### The star now fails the gate, deliberately

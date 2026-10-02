@@ -635,8 +635,12 @@ CONTRAST_PAIRS = (
         ("music-ink-soft-on-fill", "music-select-inactive", 4.5),
         ("music-ink", "music-hover", 4.5),
         ("music-ink", "music-select-inactive", 4.5),
-        # ground-window stands in for the capsule, whose fill is measured in dark
-        # only (#151515, darker than the ground, so the real ratio is higher).
+        # ground-window stands in for the capsule, and the stand-in is the
+        # OPTIMISTIC side: the capsule's measured fill (#3A3A3D dark) is lighter
+        # than the ground, so white reads 11.34:1 on the real surface against
+        # 16.47:1 here. Still clear of 4.5, but it is the capture that shows
+        # that and not this pair. #151515 was an earlier reading of the same
+        # capsule through a translucent capture and is withdrawn.
         ("on-music-glass", "ground-window", 4.5),
         # The label on the inactive transport button. The BUTTON vs the page is
         # deliberately not gated: Music draws it at 1.23:1 and that is recorded
@@ -810,7 +814,9 @@ def _check_contrast(tokens):
             kinds.append("orientation")
         if any("near-equal" in f for f in failures):
             kinds.append("near-equality")
-        raise SystemExit(" and ".join(kinds or ["colour"]) + " check failed:\n" + "\n".join(failures))
+        raise SystemExit(
+            " and ".join(kinds or ["colour"]) + " check failed:\n" + "\n".join(failures)
+        )
 
 
 _check_contrast(tok["color"]["tokens"])
@@ -821,7 +827,9 @@ _check_contrast(tok["color"]["tokens"])
 # built with `swiftc build/source/music-components-spike.swift swift/AppKit.swift`
 # against the real generated tokens, so anything that reaches a README has been
 # through the compiler and rendered in a window.
-_SPIKE_PATH = Path(__file__).resolve().parent / "source" / "music-components-spike.swift"
+_SPIKE_PATH = (
+    Path(__file__).resolve().parent / "source" / "music-components-spike.swift"
+)
 _SPIKE = _SPIKE_PATH.read_text()
 # Which sections the READMEs will need. Checked HERE, before the first w(),
 # because the guard used to raise only at doc-assembly time -- by which point
@@ -851,8 +859,6 @@ def swift_section(name):
     return body
 
 
-
-
 for _n in _SPIKE_SECTIONS:
     swift_section(_n)
 
@@ -874,6 +880,8 @@ for a in (
 ):
     assert a in css, a
     css = css.replace(a, a.replace("--signal", "--warn"))
+
+
 def css_sub(css, old, new, count=1):
     """A replace that fails loudly when its anchor stops matching.
 
@@ -889,7 +897,9 @@ def css_sub(css, old, new, count=1):
     # matters is that it still hits something. An exact number everywhere else.
     ok = got >= 1 if count == "+" else got == count
     if not ok:
-        raise SystemExit(f"css anchor matched {got} times, expected {count}: {old[:70]!r}")
+        raise SystemExit(
+            f"css anchor matched {got} times, expected {count}: {old[:70]!r}"
+        )
     return css.replace(old, new)
 
 
@@ -1208,7 +1218,8 @@ css = css_sub(
 # The thumbnail placeholder was 10/12, the only size below the scale; it takes label, one step up.
 css = css_sub(
     css,
-    "font: 600 10px/12px var(--font-mono);", "font: 600 11px/14px var(--font-mono);"
+    "font: 600 10px/12px var(--font-mono);",
+    "font: 600 11px/14px var(--font-mono);",
 )
 
 
