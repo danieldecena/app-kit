@@ -11,6 +11,8 @@
 - [x] Row mid-press: no visual of its own (dark); selection fires on mouse-up
 - [x] Contextual toolbar: decided not a component, per-page content
 - [x] Window chrome: decided, belongs to the adopting app
+- [ ] Measure Music's shelf and song-row trailing edges, fix spike if they differ
+- [ ] MiniPlayer README: record colour-only toggle and pointer-sized frames
 
 ## Completed
 
