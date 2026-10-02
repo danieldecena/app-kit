@@ -1,9 +1,9 @@
 ## Tasks
 
 - [x] Build swatch-scan tool with key-state witness and controls -- 89b8e3d
-- [ ] Witness window state of every capture behind a provenance row
-- [ ] Sample inactive fill, labels, Play label, capsule from witnessed captures
-- [ ] Measure selected-row shape by appearance and page type
+- [x] Witness window state of every capture behind a provenance row -- d3233a0
+- [x] Sample inactive fill, labels, Play label, capsule from witnessed captures -- 38cf667
+- [x] Measure selected-row shape by appearance and page type -- a8e1d32
 - [ ] Write results into MUSIC_PROVENANCE and tokens, rebuild, stop before publish
 
 
