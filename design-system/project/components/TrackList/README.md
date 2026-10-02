@@ -126,7 +126,7 @@ struct TrackList: View {
             ForEach(rows) { r in
                 HStack(spacing: 12) {
                     Text(r.starred ? "\u{2605}" : " ")
-                        .foregroundStyle(Color.Kit.warn).frame(width: 16)
+                        .foregroundStyle(Color.Kit.musicStar).frame(width: 16)
                     RoundedRectangle(cornerRadius: 4, style: .continuous)
                         .fill(r.art).frame(width: 40, height: 40)
                     Text(r.song).foregroundStyle(ink(r.id, soft: false))

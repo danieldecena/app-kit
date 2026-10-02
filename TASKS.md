@@ -1,5 +1,7 @@
 ## Tasks
 
+- [ ] [you] Capture a LIGHT album page with a favorited track, to measure music-star light
+
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
 
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it

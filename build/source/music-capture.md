@@ -939,6 +939,16 @@ reading four failures as a rule.
   interiors rather than a favorited star, because the favorited star turned out
   to be **gold, not accent red** (`album-detail-unfocused-dark.png`, track row 1).
   The web player's `#D60017` is superseded and must not be used.
+- ~~The star's gold.~~ **Measured 2026-10-01, dark only.** The same capture, star
+  glyph at (450, 729) in the full-res image: the solid interior reads
+  **`#FFD700`**, with `#FFD500` through `#FFD702` across the antialiased body.
+  That is literal gold, and 11.74:1 on `ground-window` dark.
+  **Light is still unmeasured.** The three light album captures do not contain
+  the star at a locatable position, and the dark value cannot simply carry over:
+  `#FFD700` is **1.40:1** on white, far under the 3:1 a graphical object needs.
+  So `music-star` light is `#B8860B`, the first gold that clears 3:1 (3.25:1),
+  and it is a derivation, not a reading. Re-measure it from a light album page
+  with a favorited track when one is captured.
 - **Whether the sidebar can be hidden at all.** Music appears to have no
   hide-sidebar command, unlike most Mac apps. If `View` offers none, drop that
   row from the shot list rather than chasing it; a variant does not need a state

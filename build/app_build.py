@@ -365,6 +365,12 @@ colors += [
         "Secondary text. Music measures #808080 in light, which is only 3.95:1 on white; #767676 is the first grey that clears 4.5. The second deliberate departure.",
     ),
     T(
+        "music-star",
+        "#B8860B",
+        "#FFD700",
+        "The favorited star. Dark is MEASURED (#FFD700, sampled from album-detail-unfocused-dark.png, 11.74:1 on ground-window). Light is NOT measured: the same gold is 1.40:1 on white, far under the 3:1 a glyph needs, so light is stepped to the first gold that clears it. NOT the accent -- the star is gold, which is why the accent was taken from title strokes instead.",
+    ),
+    T(
         "music-ink-soft-on-fill",
         "#5F5F5F",
         "#B4B4B4",
@@ -617,6 +623,8 @@ CONTRAST_PAIRS = (
         ("music-ink-soft-on-fill", "music-select-inactive", 4.5),
         ("music-ink", "music-hover", 4.5),
         ("music-ink", "music-select-inactive", 4.5),
+        # A star is a graphical object, so 3:1 is the bar, not 4.5.
+        ("music-star", "ground-window", 3.0),
     ]
     + [
         (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
@@ -721,6 +729,7 @@ def _check_contrast(tokens):
         "music-ink",
         "music-ink-soft",
         "music-ink-soft-on-fill",
+        "music-star",
         "music-primary",
     )
     # The reds do not follow the ground: they are deliberately near-equal in both
