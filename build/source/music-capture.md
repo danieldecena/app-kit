@@ -1535,7 +1535,7 @@ plus an offset) and the driver saves and restores the cursor and the frontmost
 app around each action. It is 1x there, not 2x.
 The two helpers are `music-park.swift` and `music-drive.swift` beside this file.
 
-### Track row mid-press: no distinct state (2026-10-02, dark only)
+### Track row mid-press: no distinct state (2026-10-02, dark and light)
 
 `row-pressed-dark-vd.png`: button held down on a track row for 400 ms, window key,
 captured while still held. The row draws **no fill**: `#1F1F20`, identical to the
@@ -1546,4 +1546,9 @@ capture: the same pipeline demonstrably sees a fill when there is one.
 
 So selection happens on mouse-up and a press has no visual of its own; App Kit
 needs no pressed state for `TrackList`. Dark only: light needs the system
-appearance switched, which is not done from here.
+appearance switched, which is not done from here. **Light, captured later the same
+day** after Daniel switched it: a press held on a track row is `#FFFFFF`, identical
+to the rows around it (`row-pressed-light-vd.png`). Controls: the selected row is
+`#DC1229` with the window key (`row-selected-key-light-vd.png`, `music-select`
+light exactly) and `#DCDCDC` with it inactive (`row-selected-inactive-light-vd.png`,
+`music-select-inactive` light is `#DCDCDD`). No pressed state in either appearance.

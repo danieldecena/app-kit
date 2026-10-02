@@ -18,7 +18,7 @@
 ## Next Up
 
 - Colour and geometry are measured end to end, and five defects found by auditing *relations* rather than components were fixed on 2026-10-01: see the decision log.
-- The board is empty. Colour, geometry and state are measured for every Music component that exists; the toolbar and window-chrome questions are decided (see the log). The one thing left needs Daniel: light-appearance row press, which needs the system appearance switched.
+- The board is empty. Colour, geometry and state are measured for every Music component that exists; the toolbar and window-chrome questions are decided (see the log). Nothing is waiting on Daniel; the light-appearance row press was captured 2026-10-02 (see the log).
 - The two deferred token renames (`ground-window` -> `music-ground`, `music-ink-soft-on-fill` -> `on-music-fill`) wait for the variant's next breaking change; that call stands.
 
 Full list: `TASKS.md`.
@@ -38,6 +38,7 @@ Full list: `TASKS.md`.
 - `MiniPlayer` actions are now 36pt slots 1pt apart and the capsule's right padding is 9pt: group 167-573 (was 167-607.8), cluster 581-691, centres 599/636/673 exactly. Measured in the harness after asserting the page loaded the new CSS (the first read was the cached old bundle and reported 607.8). Not published: artifact is still v46 with the old geometry.
 - The SwiftUI MiniPlayer recipe now matches the CSS: 2pt line in `onMusicGlass` at 26%/79%, 36pt trailing hit frames 1pt apart, 9pt right padding. Observed in a spike render: 4 device rows (2pt) thick, played `#DDDDDD`, unplayed `#5D5D60` over the real material. Not asserted: the group end at 572, because the recipe's transport is sized by SF Symbol glyph, not Music's 28pt frames.
 - The SwiftUI MiniPlayer transport is now sized by Music's hit frames (28pt buttons, Play 36, 9pt padding and gaps, frames 9-157), closing the gap above. Observed in a spike render: line 166.0-572.0 from the capsule edge, Music's AX 166-572; before, the artwork started at 155 because glyph-sized controls ran 11pt short. README block regenerated; the published artifact (v50) does not carry it yet.
+- Resolved: the light-appearance row press. With the system switched to Light, a held press on a track row draws no fill (`#FFFFFF`, same as its neighbours), so `TrackList` needs no pressed state in either appearance. Known-good controls in the same pipeline: the selected row reads `#DC1229` key (token `music-select` light, exact) and `#DCDCDC` inactive (token `music-select-inactive` light is `#DCDCDD`, one unit). Captures `row-pressed-light-vd.png`, `row-selected-key-light-vd.png`, `row-selected-inactive-light-vd.png`.
 
 ### 2026-10-01
 - **The productive move this session was auditing relations, not components.** Every defect found was a gap *between* two things each of which was individually checked and individually fine, which is why nothing had a symptom. Five of them: a manifest component with no page; four measured tokens no CSS rule painted; four focusable controls with no focus ring of their own; a shelf group 17pt too tall; and the capsule-fill prose that contradicted its own correction 40 lines later.
