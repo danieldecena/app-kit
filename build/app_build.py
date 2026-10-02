@@ -2046,6 +2046,122 @@ CSS uses `scroll-snap-type: x mandatory` and arrow keys scroll by exactly one
 card pitch.
 """
 
+docs["ArtworkCard/README.md"] = r"""# ArtworkCard
+
+A square artwork with a two-line caption under it, as on Music's shelves and its
+Albums grid. Exported separately from [Shelf](../Shelf/README.md) because the
+grid is a real use: the card does not need a scrolling row around it.
+
+## The caption is 37px and does not scale
+
+Card height minus card width measured 37.0, 36.8 and 37.0pt across three window
+widths. The artwork is square, so that difference is the caption, and it is the
+one number three readings agreed on. Everything else about the card tracks the
+width the sidebar leaves over.
+
+So the card takes a `width` and derives nothing else. **Do not ship a card
+size.** A component fixed at 188x225 is correct only at the one sidebar position
+it was measured at, and the shelf owns the gap between cards rather than the card
+owning its own margin.
+
+| | |
+|---|---|
+| artwork | square, `radius-md` |
+| caption | **37px** total, constant |
+| title | `footnote` on `ink`, one line, ellipsised |
+| subtitle | `caption-2` on `ink-soft`, one line, ellipsised |
+
+## Why the subtitle is a size smaller than the title
+
+37 is a measured total, so the type has to fit inside it rather than be clipped
+to it. Two `footnote` lines are 18 + 18 = 36 and leave 1px for the gap under the
+artwork; dropping the subtitle to `caption-2` makes it 6 + 18 + 13, which is
+exactly 37.
+
+The first attempt used `footnote` for both and let flex compress each line from
+18 to 14, cutting the descenders off the subtitle. It read as correct only
+because that preview's subtitle was in caps, which have no descenders. There is
+no gap between the artwork and the caption for the same reason: a gap on top of
+a 37px caption makes the difference 45 and breaks the measured invariant.
+
+Music's own caption type was never measured, so this split is ours rather than
+Apple's.
+
+## States
+
+| State | What it does |
+|---|---|
+| focus | a 2px `music-accent` ring, offset 2px, around the **artwork** rather than the whole card |
+| press | not implemented -- Music's pressed state is unmeasured, and inventing one is the only place this component would stop tracing to a capture |
+
+The card is a `<button>`, so it is a tab stop and takes `onClick`. Hover is
+deliberately absent: the one hover captured was a TrackList row, not a card.
+
+## Artwork and alt text
+
+`art` is any image URL. The artwork renders `object-fit: cover` over
+`surface-sunk`, so a non-square or still-loading image shows the sunk fill rather
+than a stretched one. The `<img>` carries an empty `alt` on purpose: the title
+beside it is the accessible name, and repeating it would make a screen reader say
+the album twice.
+
+Use [HeroCard](../HeroCard/README.md) instead when the caption belongs *over* the
+art at 3:4.
+"""
+
+docs[
+    "ArtworkCard/preview.html"
+] = r"""<!-- @dsCard group="Navigation" height=330 subtitle="Square artwork over a constant 37px caption, in a grid and at two widths" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ArtworkCard</title>
+<style>
+  body { margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(4, 150px); gap: 20px; }
+  .pair { display: flex; gap: 20px; align-items: flex-start; margin-top: 24px; }
+  .note { font: var(--type-caption-1); color: var(--ink-soft); margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  var D = window.AppKit, h = React.createElement;
+  function art(a, b, n) {
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">' +
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+      '<stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/>' +
+      '</linearGradient></defs><rect width="200" height="200" fill="url(#g)"/>' +
+      '<text x="100" y="118" text-anchor="middle" font-family="-apple-system" ' +
+      'font-size="64" font-weight="700" fill="rgba(255,255,255,.55)">' + n + '</text></svg>');
+  }
+  var albums = [
+    ['#FF5E3A', '#FFB300', 'Blonde', 'Frank Ocean'],
+    ['#2C5364', '#0F2027', 'Astroworld', 'Travis Scott'],
+    ['#8E2DE2', '#4A00E0', 'Channel Orange', 'Frank Ocean'],
+    ['#11998E', '#38EF7D', 'Igor', 'Tyler, The Creator']
+  ];
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h('div', null,
+      h('p', { className: 'note' }, 'A grid, with no shelf around it: 150px cards, the caption still 37px'),
+      h('div', { className: 'grid' },
+        albums.map(function (a, i) {
+          return h(D.ArtworkCard, { key: i, art: art(a[0], a[1], i + 1), title: a[2],
+                                    subtitle: a[3], width: 150 });
+        })),
+      h('div', { className: 'pair' },
+        h(D.ArtworkCard, { art: art('#FA233B', '#8E0E26', 5), title: 'Nights',
+                           subtitle: 'Frank Ocean', width: 188 }),
+        h(D.ArtworkCard, { art: art('#5AC8FA', '#007AFF', 6), title: 'No subtitle, one line only',
+                           width: 188 }),
+        h(D.ArtworkCard, { art: art('#AF52DE', '#FF2D55', 7),
+                           title: 'A title long enough to ellipsise', subtitle: 'and so is this subtitle',
+                           width: 110 }))));
+</script>
+</body>
+</html>
+"""
+
 docs["HeroCard/README.md"] = r"""# HeroCard
 
 The large card at the top of Music's Home: artwork filling the whole card, with
@@ -2552,6 +2668,8 @@ for comp in (
     docs[f"{comp}/preview.html"] = ns(rd(f"components/{comp}/preview.html"))
 SWIFT_DOC = {
     "Shelf": ("Shelf", ["Shelf", "ArtworkCard"]),
+    # Shelf keeps the card's code too: you cannot build the row without it.
+    "ArtworkCard": ("ArtworkCard", ["ArtworkCard"]),
     "HeroCard": ("HeroCard", ["HeroCard"]),
     "TrackList": ("TrackList", ["TrackList"]),
     "MiniPlayer": ("MiniPlayer", ["MiniPlayer"]),
@@ -2568,6 +2686,36 @@ for comp, (_, sections) in SWIFT_DOC.items():
         "against `swift/AppKit.swift` and rendered in a real window before it ships.\n"
         "Edit the spike, not this block.\n\n"
         "```swift\n" + code + "\n```\n"
+    )
+
+# Every component the manifest advertises must have a page. The manifest, the
+# bundle function, the export map and the .d.ts block are four separate
+# replacements, each with its own assert, and a component can satisfy all four
+# and still have nothing to read: ArtworkCard did, for the whole life of the
+# Music variant. Nothing failed, because no check related the manifest to the
+# docs -- the enumerations were of units, and this is the relation between two
+# of them. The harness and the artifact gallery both build their component list
+# FROM this manifest, so the gap renders as a listed component with no card, and
+# the top-level README's "Each card below" is a promise it cannot keep.
+_manifest = json.loads(re.search(r"@ds-bundle: (\{.*?\})\s*\*/", js, re.S).group(1))
+_advertised = {c["name"] for c in _manifest["components"]}
+if len(_advertised) != len(_manifest["components"]):
+    raise SystemExit("the bundle manifest lists a component twice")
+_missing = sorted(
+    f"{n}/{f}"
+    for n in _advertised
+    for f in ("README.md", "preview.html")
+    if f"{n}/{f}" not in docs
+)
+# The other direction: a page for something the manifest no longer advertises is
+# a dead card in the gallery. Cover is written separately and is deliberately not
+# a component -- it is the artifact's cover art -- so it never enters docs.
+_orphan = sorted(k for k in docs if k.split("/")[0] not in _advertised)
+if _missing or _orphan:
+    raise SystemExit(
+        "manifest and component docs disagree:\n"
+        + "".join(f"  advertised with no page: {m}\n" for m in _missing)
+        + "".join(f"  page for an unadvertised component: {o}\n" for o in _orphan)
     )
 
 for rel, text in docs.items():
