@@ -1457,3 +1457,33 @@ The dark capture that gave `#FA2E48` was an Albums **grid**, where the click did
 not move focus out of the sidebar. So the way to get the light value is to click a
 sidebar row that is already selected, which selects nothing new and leaves focus
 where it is.
+
+### Light: focus does not change the sidebar selection, and the dark red is unverifiable
+
+Four light captures, window key in all of them (traffic-light spreads 157-194),
+give the **same** `#E0E0E0` on `#F7F7F7`:
+
+| capture | how the row was selected |
+|---|---|
+| `home-light-active.png` | earlier session |
+| `sidebar-light-key-unfocused.png` | user clicked, then left Music frontmost |
+| `songs-light-key.png` | user clicked "Songs" |
+| `sidebar-light-key-albums-clicked.png` | **agent-driven**: AX gave the row's screen frame, a synthetic click landed on it, the pointer was parked on the title bar so hover could not colour the fill |
+
+The last one is the controlled case: Albums was freshly clicked, the window was
+key, the pointer was elsewhere, and the fill is still `#E0E0E0`. So in light the
+sidebar selection does not take an accent fill, and the focused/unfocused split I
+proposed for light does not exist.
+
+**The dark `#FA2E48` reading cannot be re-checked.** It came from `zz-page-check`,
+a throwaway I deleted after measuring, so the only record of it is the number I
+wrote down. That is the "capture the observation before repairing" rule failing in
+its other direction: I deleted a file whose measurement later became load-bearing.
+A throwaway name is not a throwaway capture once something has been read off it.
+
+Until a dark capture is taken under the same controlled conditions, the sidebar's
+dark selection is **unverified**, and `SidebarList` should not be changed on it.
+
+Note for the redo: `AXPress` and setting `AXSelected` both fail on a Music sidebar
+row (no press action; `AXSelected` returns -25205, not settable). Driving it needs
+the row's `AXPosition`/`AXSize` and a synthetic `CGEvent` click at the centre.
