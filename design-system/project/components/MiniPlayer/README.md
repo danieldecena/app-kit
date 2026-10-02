@@ -150,12 +150,17 @@ struct MiniPlayer: View {
     }
 
     var body: some View {
-        HStack(spacing: 11) {
-            toggle("shuffle", "Shuffle", shuffle, onShuffle)
-            control("backward.fill", "Previous", onPrevious)
-            control(playing ? "pause.fill" : "play.fill", playing ? "Pause" : "Play", onPlayPause)
-            control("forward.fill", "Next", onNext)
-            toggle("repeat", "Repeat", repeatOn, onRepeat)
+        HStack(spacing: 9) {
+            // Hit frames, not glyphs, set the layout: 28pt buttons, Play 36,
+            // frames 9-157 from the capsule edge, then 9pt to the artwork.
+            HStack(spacing: 0) {
+                toggle("shuffle", "Shuffle", shuffle, onShuffle).frame(width: 28, height: 28)
+                control("backward.fill", "Previous", onPrevious).frame(width: 28, height: 28)
+                control(playing ? "pause.fill" : "play.fill", playing ? "Pause" : "Play", onPlayPause)
+                    .frame(width: 36, height: 36)
+                control("forward.fill", "Next", onNext).frame(width: 28, height: 28)
+                toggle("repeat", "Repeat", repeatOn, onRepeat).frame(width: 28, height: 28)
+            }
 
             ZStack(alignment: .bottom) {
                 Color.clear.frame(height: 54)   // the line belongs to the CAPSULE's edge
@@ -191,7 +196,7 @@ struct MiniPlayer: View {
                 control("speaker.wave.2.fill", "Volume", onVolume).frame(width: 36, height: 36)
             }
         }
-        .padding(.leading, 15).padding(.trailing, 9)
+        .padding(.horizontal, 9)
         .frame(width: 700, height: 54)
         .background(.regularMaterial, in: Capsule())
         .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 0.5))
