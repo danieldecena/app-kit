@@ -72,10 +72,16 @@ Two SwiftUI behaviours worth knowing before you build this natively:
 
 ## Inactive windows
 
-Pass `windowInactive` when the window is not key, and the selection switches to
-`music-sidebar-select-inactive`. macOS does this itself natively. It is not an edge
-case: a monitor app is unfocused most of the time, so this is the state most
-users see most often.
+When the window is not key, Music dims the WHOLE sidebar, not only the
+selection: the selected row switches to `music-sidebar-select-inactive`, every
+other label steps to `music-sidebar-ink-inactive`, and every symbol loses the
+accent for `music-sidebar-glyph-inactive`. It is not an edge case: a monitor
+app is unfocused most of the time, so this is the state most users see most
+often.
+
+On the web, pass `windowInactive`. In SwiftUI there is nothing to pass: the
+recipe reads `@Environment(\.appearsActive)`, because an earlier version took a
+parameter that no adopter remembered to set, so every one rendered as active.
 
 ## Keyboard
 
@@ -105,21 +111,28 @@ struct SidebarRow: Identifiable {
 struct SidebarList: View {
     let sections: [(String?, [SidebarRow])]
     @Binding var selection: String?
-    var windowInactive: Bool = false
+    /// Not a parameter: no adopter remembered to pass it, so every one rendered
+    /// as active forever. macOS already knows whether the window is key.
+    @Environment(\.appearsActive) private var appearsActive
+    private var windowInactive: Bool { !appearsActive }
 
     private func fill(_ id: String) -> Color {
         guard id == selection else { return .clear }
         return windowInactive ? Color.Kit.musicSidebarSelectInactive : Color.Kit.musicSidebarSelect
     }
+    /// Music dims EVERY label in an inactive window, not only the selected
+    /// row's (music-capture.md, Inactive sidebar ink).
     private func ink(_ id: String) -> Color {
-        id == selection && !windowInactive ? Color.Kit.onMusicGlass : Color.Kit.musicInk
+        if id == selection { return windowInactive ? Color.Kit.musicInk : Color.Kit.onMusicGlass }
+        return windowInactive ? Color.Kit.musicSidebarInkInactive : Color.Kit.musicInk
     }
     /// Music tints the SYMBOL and leaves the label in normal ink, which is why
     /// the row is built from Text and Image rather than a Label: a
-    /// .foregroundStyle on a Label would tint both.
+    /// .foregroundStyle on a Label would tint both. In an inactive window every
+    /// symbol loses the accent, not only the selected one.
     private func glyph(_ id: String) -> Color {
         if id == selection && windowInactive { return Color.Kit.musicInkSoftOnFill }
-        return Color.Kit.musicAccent
+        return windowInactive ? Color.Kit.musicSidebarGlyphInactive : Color.Kit.musicAccent
     }
 
     var body: some View {
@@ -131,6 +144,7 @@ struct SidebarList: View {
                         HStack(spacing: 8) {
                             Image(systemName: r.symbol)
                                 .foregroundStyle(glyph(r.id)).frame(width: 16)
+                                .accessibilityHidden(true)   // decorative; the label names the row
                             Text(r.label).foregroundStyle(ink(r.id))
                             Spacer(minLength: 0)
                         }

@@ -1,19 +1,10 @@
 ## Tasks
 
-- [x] Publish provenance and token corrections to the artifact -- v58
-- [x] TrackList pill height follows the row, 55pt on artwork rows -- 0fcbf9a
-- [x] Build design runbook artifact for the measure-to-publish process -- fe8bdbe
 - [x] Render the spike and run accessibility-review on the 55pt pill
-- [x] Draw the TrackList focus ring on the pill, not under it -- a92945a
-- [x] Publish the TrackList pill and focus ring to the artifact -- v61
-- [x] Add the design runbook binding to the terminal-kit register -- terminal-kit 4aaa164
-- [x] Check the TrackList focus ring in WebKit -- passes, WebKit 26.6
-- [x] Fix TrackList preview: inactive list shows no selection -- 3453e65
-- [x] Publish the TrackList preview fix and WebKit note -- v63
-- [ ] Measure Music's inactive sidebar ink in both appearances
-- [ ] Add inactive sidebar ink and glyph tokens
+- [x] Measure Music's inactive sidebar ink in both appearances -- edf3df3
+- [x] Add inactive sidebar ink and glyph tokens -- dda4658
 - [ ] SidebarList/TrackList read appearsActive, dim whole sidebar
-- [ ] Web SidebarList dims every row when inactive
+- [x] Web SidebarList dims every row when inactive -- dda4658
 - [ ] Large page title in the spike window
 - [ ] Spinner tab: re-copy, title, overflowing shelves
 - [ ] Find what moves the tab's selections after launch
@@ -22,6 +13,15 @@
 ## Completed
 
 ### 2026-10-02 — cleared from Active
+- [x] Publish provenance and token corrections to the artifact -- v58
+- [x] TrackList pill height follows the row, 55pt on artwork rows -- 0fcbf9a
+- [x] Build design runbook artifact for the measure-to-publish process -- fe8bdbe
+- [x] Draw the TrackList focus ring on the pill, not under it -- a92945a
+- [x] Publish the TrackList pill and focus ring to the artifact -- v61
+- [x] Add the design runbook binding to the terminal-kit register -- terminal-kit 4aaa164
+- [x] Check the TrackList focus ring in WebKit -- passes, WebKit 26.6
+- [x] Fix TrackList preview: inactive list shows no selection -- 3453e65
+- [x] Publish the TrackList preview fix and WebKit note -- v63
 
 - [x] Build swatch-scan tool with key-state witness and controls -- 89b8e3d
 - [x] Witness window state of every capture behind a provenance row -- d3233a0

@@ -50,8 +50,10 @@ not set. Both are departures, not readings.
 
 macOS greys the selection when the window is not key, and this caught the capture
 out: the first "selected" shot read red because Music was still key, and a later
-shot of the same state read grey because it was not. Pass `windowInactive` and
-the fill becomes `music-select-inactive` with the labels back to normal ink.
+shot of the same state read grey because it was not. When the window is not key
+the fill becomes `music-select-inactive` with the labels back to normal ink. On
+the web, pass `windowInactive`; the SwiftUI recipe reads
+`@Environment(\.appearsActive)` and needs nothing passed.
 Music's inactive label colour was not measured; normal ink is the macOS default
 and clears 4.5:1 on that fill, which `music-ink-soft` does not (3.31:1), so
 secondary cells step to `music-ink-soft-on-fill` under any fill.
@@ -125,8 +127,11 @@ struct Track: Identifiable {
 struct TrackList: View {
     let rows: [Track]
     @Binding var selection: Int?
-    var windowInactive: Bool = false
     var onPlay: (Int) -> Void = { _ in }
+    /// Not a parameter: no adopter remembered to pass it, so every one rendered
+    /// as active forever. macOS already knows whether the window is key.
+    @Environment(\.appearsActive) private var appearsActive
+    private var windowInactive: Bool { !appearsActive }
     @FocusState private var focused: Bool
 
     private func fill(_ id: Int) -> Color {

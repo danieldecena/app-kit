@@ -2530,8 +2530,10 @@ not set. Both are departures, not readings.
 
 macOS greys the selection when the window is not key, and this caught the capture
 out: the first "selected" shot read red because Music was still key, and a later
-shot of the same state read grey because it was not. Pass `windowInactive` and
-the fill becomes `music-select-inactive` with the labels back to normal ink.
+shot of the same state read grey because it was not. When the window is not key
+the fill becomes `music-select-inactive` with the labels back to normal ink. On
+the web, pass `windowInactive`; the SwiftUI recipe reads
+`@Environment(\.appearsActive)` and needs nothing passed.
 Music's inactive label colour was not measured; normal ink is the macOS default
 and clears 4.5:1 on that fill, which `music-ink-soft` does not (3.31:1), so
 secondary cells step to `music-ink-soft-on-fill` under any fill.
@@ -2853,10 +2855,16 @@ Two SwiftUI behaviours worth knowing before you build this natively:
 
 ## Inactive windows
 
-Pass `windowInactive` when the window is not key, and the selection switches to
-`music-sidebar-select-inactive`. macOS does this itself natively. It is not an edge
-case: a monitor app is unfocused most of the time, so this is the state most
-users see most often.
+When the window is not key, Music dims the WHOLE sidebar, not only the
+selection: the selected row switches to `music-sidebar-select-inactive`, every
+other label steps to `music-sidebar-ink-inactive`, and every symbol loses the
+accent for `music-sidebar-glyph-inactive`. It is not an edge case: a monitor
+app is unfocused most of the time, so this is the state most users see most
+often.
+
+On the web, pass `windowInactive`. In SwiftUI there is nothing to pass: the
+recipe reads `@Environment(\.appearsActive)`, because an earlier version took a
+parameter that no adopter remembered to set, so every one rendered as active.
 
 ## Keyboard
 
