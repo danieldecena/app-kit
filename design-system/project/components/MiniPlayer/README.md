@@ -172,24 +172,26 @@ struct MiniPlayer: View {
                 .frame(height: 54)
                 GeometryReader { g in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(Color.Kit.musicInkSoft.opacity(0.35))
-                        Capsule().fill(Color.Kit.musicInkSoft)
+                        Capsule().fill(Color.Kit.onMusicGlass.opacity(0.26))
+                        Capsule().fill(Color.Kit.onMusicGlass.opacity(0.79))
                             .frame(width: g.size.width * progress)
                     }
                 }
-                .frame(height: 1).padding(.bottom, 2)
+                .frame(height: 2).padding(.bottom, 2)
                 .accessibilityElement()
                 .accessibilityLabel("Playback position")
                 .accessibilityValue("\(Int(progress * 100)) percent")
             }
 
-            HStack(spacing: 14) {
-                control("quote.bubble", "Lyrics", onLyrics)
-                control("list.bullet", "Queue", onQueue)
-                control("speaker.wave.2.fill", "Volume", onVolume)
+            // 36pt hit frames 1pt apart: Music's now-playing group (and so the
+            // progress line) ends where these frames begin, not at their glyphs.
+            HStack(spacing: 1) {
+                control("quote.bubble", "Lyrics", onLyrics).frame(width: 36, height: 36)
+                control("list.bullet", "Queue", onQueue).frame(width: 36, height: 36)
+                control("speaker.wave.2.fill", "Volume", onVolume).frame(width: 36, height: 36)
             }
         }
-        .padding(.leading, 15).padding(.trailing, 20)
+        .padding(.leading, 15).padding(.trailing, 9)
         .frame(width: 700, height: 54)
         .background(.regularMaterial, in: Capsule())
         .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 0.5))
