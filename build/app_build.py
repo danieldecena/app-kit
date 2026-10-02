@@ -3182,7 +3182,7 @@ MUSIC_PROVENANCE = {
     "music-accent": ("M", "M", "pixel scan of the title stroke interiors: 707 px dark, ~445 px light"),
     "music-accent-ink": ("D", "D", "measured accent, lightness stepped only as far as 4.5:1 needs (hue and saturation kept)"),
     "music-select": ("M", "M", "selected-row pill scan, `row-selected-key-*-vd.png`"),
-    "music-select-inactive": ("M", "N", "light: `row-selected-inactive-light-vd.png`, window not key, 370 of 370 samples; dark: `album-selected-inactive-dark.png` was shot with the window key, so `#464646` is the fill of a selected row in a key window with an unfocused list; no app-inactive dark capture exists"),
+    "music-select-inactive": ("M", "M", "window not key in both: light `row-selected-inactive-light-vd.png`, 370 of 370 samples; dark `row-selected-inactive-dark-vd.png`, 920 of 920 samples at two heights. `album-selected-inactive-dark.png` reads the same `#464646` but was shot with the window key and an unfocused list, so it is not the evidence"),
     "music-sidebar-select": ("D", "D", "alpha back-solved from a measured pair (dark `#434346` over `#262629`, light `#E0E0E0` over `#F7F7F7`); the build recomposites it to within 2/255"),
     "music-sidebar-select-inactive": ("D", "D", "alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture"),
     "music-hover": ("M", "M", "inset-pill scan of still captures; dark measured twice"),

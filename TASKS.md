@@ -7,7 +7,7 @@
 - [x] Write results into MUSIC_PROVENANCE and tokens, rebuild, stop before publish -- fd89c70
 - [ ] Publish provenance and token corrections to the artifact
 - [ ] Decide TrackList selected-row shape, light and playlist
-- [ ] Capture dark selected row with the window not key
+- [x] Capture dark selected row with the window not key
 
 
 

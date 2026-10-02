@@ -1826,3 +1826,49 @@ Each was written into the plan from a first reading and then re-observed above.
 4. The selected-row label is `#FFFFFF` in key-window captures of both appearances: held.
 5. The light capsule is about `#F0F0F0`, not `#FFFFFF`, with a `#000000` pause glyph: held for the not-key capture, and narrowed: with the window key it reads about `#FAFAFA`, still not `#FFFFFF`.
 6. The selected row is not one shape (light full-bleed 208-963 at 55pt, dark playlist pill 249-922 at 55pt, dark album pill 1238 x 45pt): held, every extent as predicted.
+
+### Dark selected row with the window not key (2026-10-02)
+
+The capture the audit above said did not exist. `row-selected-inactive-dark-vd.png`,
+1428x800 at 1x, system in Dark, playlist "Jump rope", row 3 ("Bananas") selected.
+
+How it was taken, because Music was never activated and no click was sent. Music's
+main window was closed (AX listed no windows; the window server still held it).
+`osascript -e 'tell application "Music" to reopen'` showed it without activating
+Music, `music-park` moved it to the virtual display, and
+`tell application "Music" to reveal track 3 of playlist "Jump rope"` selected the
+row. Ghostty stayed frontmost throughout (read before and after). Captured by
+window id with `screencapture -o -x -l`. A capture of the same window taken before
+the `reveal` shows no selected row, so the selection in this one is of now and not
+a stale backing store. The window was then moved back and closed again.
+
+| Quantity | Command (`swatch-scan.py row-selected-inactive-dark-vd.png ...`) | Observed |
+|---|---|---|
+| Window state | `--lights` | `window: not key (max saturation 0.01)` |
+| Selected fill, 4px under the row top | `--hist 508:330:1250` | `[('#464646', 920)] 920` |
+| Selected fill, 4px above the row bottom | `--hist 555:330:1250` | `[('#464646', 920)] 920` |
+| Extent | `--extent 800:508` | `fill #464646  x 249-1370 (1121pt)  y 504-559 (55pt)` |
+| Ground control, row above | `--extent 800:452` | `fill #1F1F20  x 208-1414 (1206pt)  y 448-503 (55pt)` |
+| Label on the selected row | `--glyph 309:524:360:540` | `glyph #E3E3E3 63 #464646` |
+| Play button fill | `--hist 290:600:630` | `[('#303030', 29), ('#2B2B2B', 1)] 30` |
+| Play label | `--glyph 650:295:690:313` | `glyph #DFDFDF 90 #303030` |
+
+Reading it:
+
+- `music-select-inactive` dark is `#464646` with the window not key, every sample,
+  which is the token exactly. The key-window, unfocused-list reading in
+  `album-selected-inactive-dark.png` was the same grey, so Music draws one grey for
+  both states in dark; that is an observation about these two captures, not a rule.
+- The shape is an inset pill, 55pt tall, starting 41pt inside the content area's
+  left edge (249 against the ground's 208; the walk is 4px under a rounded corner)
+  and ending 44pt inside where the ground walk stops (1370 against 1414). So on a
+  dark playlist page the selection is an inset pill both key and not key, and on a
+  light playlist page it is full-bleed both key and not key: the light/dark shape
+  difference does not come from window state.
+- The label on the inactive selection is `#E3E3E3`, six units above `music-ink`
+  dark (`#DDDDDD`), which is what the CSS returns the label to. Recorded, not
+  changed.
+- The not-key Play button reads `#303030` with a `#DFDFDF` label, against
+  `music-primary-inactive` dark `#2F2F30` and the `#DFDFDF` already logged from
+  `album-transport-inactive-dark.png`. An independent corroboration of that token,
+  and the control that this capture reads known values correctly.
