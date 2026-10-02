@@ -1872,3 +1872,31 @@ Reading it:
   `music-primary-inactive` dark `#2F2F30` and the `#DFDFDF` already logged from
   `album-transport-inactive-dark.png`. An independent corroboration of that token,
   and the control that this capture reads known values correctly.
+
+## Inactive sidebar ink -- 2026-10-02
+
+Music dims the WHOLE sidebar when its window is not key, not only the selected
+row: every icon loses its red and every label steps down. App Kit dimmed only
+the selected row until this measurement.
+
+| | dark | light | how |
+|---|---|---|---|
+| sidebar ground | `#252526` | `#F2F2F3` | probe, just right of the icon column |
+| label (unselected) | `#929293` | `#727273` | most common non-ground colour, x 55-140pt, y 120-400pt (x3659 dark, x2896 light) |
+| glyph (unselected) | `#454546` | `#CFCFD0` | most common non-ground colour, x 20-47pt, y 120-400pt, red = 0 in both |
+
+Captures: `music-inactive-dark.png` (980x779pt) and `music-inactive-light.png`
+(1226x1198pt, Music relaunched under `NSRequiresAquaSystemAppearance` for
+Music alone, then reverted), Home, Ghostty frontmost. Both 2x by file size.
+The y range starts below the selected Home pill so it measures unselected rows.
+
+Probe: `build/tools/sidebar_probe.py`, proven first on the spike's own red
+icons (1267 red pixels, fires) and on its content ground (0, quiet).
+
+The glyph is very faint: `#454546` on `#252526` is about 1.6:1, and
+`#CFCFD0` on `#F2F2F3` about 1.3:1. That is Music's choice for a decorative
+symbol beside a label that carries the meaning, not a measuring error.
+
+**The spike's selfshot is not reliably inactive.** It printed
+`isKeyWindow=false` on one run and `true` on the next (2026-10-02), so a
+plain selfshot says nothing about which state it shows. Force the state.
