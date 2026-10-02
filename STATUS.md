@@ -24,6 +24,7 @@ Full list: `TASKS.md`.
 ## Decision log
 
 ### 2026-10-01
+- Verified in both appearances: the full SwiftUI spike including SidebarList renders correctly light and dark. Sidebar selection samples `#DC1229` in light and `#CC132D` in dark, both the measured `music-select`, at three points each. Until this pass every SwiftUI capture had been dark, which only half-verifies a `dyn()` token.
 - Decided: the build **typechecks** the spike, not just checks its sections exist. `swiftc -typecheck`, not `-parse`, and the difference was measured: a parse accepts `var width: CGFloat = "nope"` and exits 0 where a typecheck exits 1, so parse-only would have been a check that cannot fail for the commonest editing error. Two limits are in the code rather than hidden: it runs after the tree is written, because it needs the generated Swift, and its message says not to install that build; and without `swiftc` it prints NOT CHECKED instead of passing quietly.
 - Decided: the Music components' SwiftUI is **extracted from the spike at build time**, not written into the generator. A recipe nobody compiled is worse than no recipe, and every other component in App Kit already shipped one. The build now fails, writing nothing, if a `// MARK: -` section is missing or duplicated.
 - Observed, first time: `swift/AppKit.swift` compiles. Nothing had ever built the generated Swift, and the spike links against it, so `Color.Kit.musicAccent` and friends are now known to resolve rather than assumed to.
