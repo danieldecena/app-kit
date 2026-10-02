@@ -1,14 +1,24 @@
 #!/bin/zsh
 # Shoot a named window of an app at @2x, verified by size AND content, not by
-# exit code. Usage: music-shot.sh <app-name> <output-name>
+# exit code. Usage: music-shot.sh <app-name> <output-name> [delay-seconds]
 #   e.g. music-shot.sh Music window-home-default-dark
+#        music-shot.sh Music row-pressed-dark 5
+#
+# The delay exists for states a human has to HOLD -- a pressed row, an open
+# context menu, a drag in flight. Without it the only way to catch one is to
+# guess the timing, and a mistimed shot is indistinguishable from "there is no
+# pressed state", which is the wrong conclusion to draw from a missed capture.
 set -u
 
-if [[ $# -ne 2 ]]; then
-  print -u2 "usage: ${0:t} <app-name> <output-name>"
+if [[ $# -lt 2 || $# -gt 3 ]]; then
+  print -u2 "usage: ${0:t} <app-name> <output-name> [delay-seconds]"
   exit 64
 fi
-APP="$1"; NAME="$2"
+APP="$1"; NAME="$2"; DELAY="${3:-0}"
+if [[ ! "$DELAY" == <-> ]]; then
+  print -u2 "delay must be a whole number of seconds: $DELAY"
+  exit 64
+fi
 if [[ "$NAME" != ${~NAME//[^A-Za-z0-9._-]/} ]]; then
   # The name is interpolated into a Python literal below; keep it boring.
   print -u2 "output name must be [A-Za-z0-9._-] only: $NAME"
@@ -52,6 +62,15 @@ read -r ID W H <<< "$WINLINE"
 
 OUT="$DIR/$NAME.png"
 rm -f "$OUT"
+
+if (( DELAY > 0 )); then
+  print "window $ID found (${W}x${H}pt). Hold the state now --"
+  for (( i = DELAY; i > 0; i-- )); do
+    print -n "  $i "
+    sleep 1
+  done
+  print "shooting"
+fi
 screencapture -o -x -l "$ID" "$OUT" || { print -u2 "screencapture failed"; exit 3 }
 [[ -s "$OUT" ]] || { print -u2 "screencapture wrote nothing"; exit 3 }
 
@@ -70,7 +89,7 @@ fi
 
 # Verify the CONTENT. A fullscreen window sits on its own Space and
 # screencapture returns a uniform rectangle of the right size at exit 0.
-DISTINCT=$(uv run --quiet --with pillow python - "$OUT" <<'PY'
+DISTINCT=$(/usr/bin/python3 - "$OUT" <<'PY'
 import sys
 from collections import Counter
 from PIL import Image

@@ -5,7 +5,7 @@
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
 
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
-- [ ] [you] Capture a Music row mid-press: is there a pressed state?
+- [ ] [you] Row mid-press: music-shot.sh Music row-pressed-dark 5, hold a row
 - [ ] [you] Contextual toolbar: needs its own capture pass
 - [ ] [you] Window chrome: deferred to the adopting app
 
