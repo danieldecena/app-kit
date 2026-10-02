@@ -1,5 +1,7 @@
 ## Tasks
 
+- [x] SwiftUI recipes for the five Music components, compiled and AX-checked
+
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
 - [ ] [you] Capture a Music row mid-press: is there a pressed state?
 - [ ] [you] Capture the dark transport button, window inactive
