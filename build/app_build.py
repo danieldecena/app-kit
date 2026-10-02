@@ -5,7 +5,7 @@ Reads the live Decena files from <src>/project, writes the new files to
 <out>/project, and a SwiftUI token file to <out>/swift/AppKit.swift.
 """
 
-import json, os, re, sys
+import json, os, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 SRC = sys.argv[1]
@@ -2825,4 +2825,44 @@ for g in tok["type"]["groups"]:
             )
 lines += ["    }", "}", ""]
 w("swift/AppKit.swift", "\n".join(lines), OUT)
+
+
+def _typecheck_spike(swift_source):
+    """The READMEs say their Swift is compiled, so compile it.
+
+    -typecheck, not -parse: a parse accepts `var width: CGFloat = "nope"` and
+    exits 0, while a typecheck exits 1. Parse-only would be a check that cannot
+    fail for the class of error most likely to appear when someone edits a
+    recipe, which is the whole reason this guard exists.
+
+    Checked against the Swift this build just generated, not the copy installed
+    in the repo, so a renamed token fails here instead of after install.
+    """
+    swiftc = shutil.which("swiftc")
+    if not swiftc:
+        print(
+            "[NOT CHECKED] swiftc is absent, so the SwiftUI recipes were not "
+            "compiled on this machine. They ship unverified from this build.",
+            file=sys.stderr,
+        )
+        return
+    with tempfile.TemporaryDirectory() as tmp:
+        tokens = Path(tmp) / "AppKit.swift"
+        tokens.write_text(swift_source)
+        r = subprocess.run(
+            [swiftc, "-typecheck", str(_SPIKE_PATH), str(tokens)],
+            capture_output=True,
+            text=True,
+        )
+    if r.returncode != 0:
+        raise SystemExit(
+            "the SwiftUI spike does not typecheck, so its recipes would ship "
+            "broken.\nThe output tree WAS written -- this check needs the "
+            "generated Swift and so cannot run before it exists, unlike the "
+            "section check. Do not install this build.\n\n"
+            + (r.stderr.strip()[:2000] or "(no diagnostics)")
+        )
+
+
+_typecheck_spike("\n".join(lines))
 print("App Kit written to", OUT)
