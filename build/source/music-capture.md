@@ -1142,3 +1142,69 @@ Selection fills and chrome differ between the two.
 A filename trap: macOS writes **U+202F**, a narrow no-break space, before "PM"
 in screen-recording names. A pasted path with an ordinary space fails to open
 while `ls` on the directory shows the file. Glob for it rather than typing it.
+
+## 2026-10-01: the progress line, and five components wearing the wrong ink
+
+Both found by reading the components against the tokens rather than against a new
+capture. No capture was taken for either; the progress line was measured off a
+file already on disk.
+
+### The progress line: 2pt, and two greys
+
+Instrument: `home-reduced-transparency-dark.png`, the opaque-capsule capture,
+converted to sRGB with `sips -m` before sampling (the greys move by less than a
+unit under the conversion, checked both ways rather than assumed).
+
+| | Measured | Instrument |
+|---|---|---|
+| height | **2pt** (4 device px at @2x, rows 1963-1966) | hard step above and below; row 1960 and row 1967 are both plain capsule |
+| played | **`#D4D5D7`** | 760 px, x 1421-2180, every pixel identical |
+| unplayed | **`#6E6F71`** | 50 px, x 2181-2230, every pixel identical |
+| span | x 1421-2230 device = **405pt**, played **380pt** of it | the step between the two runs |
+| capsule there | `#3B3B3D` | matches the value the MiniPlayer README already recorded |
+
+Over that capsule the two greys are white at 0.781/0.786/0.794 and
+0.260/0.265/0.268 per channel, so they ship as `on-music-glass` at 79% and 26%.
+At those alphas the composite is within 2/255 of both measurements, and it
+inverts correctly in light, where nothing was measured.
+
+The span disagrees with the README's earlier x 165-555pt (390pt) by about 15pt.
+Not reconciled: different capture, and the colours do not depend on it.
+
+**Read the colours off the centre row, not the edge rows.** y=1963 and y=1966 give
+`#D5D5D7` / `#D5D5D8`, a unit off, because the line's own top and bottom rows are
+partially covered. Only y=1964 and y=1965 give the value exactly. The first pass
+through this reported "740 of 740" and "44 of 44" identical, which were the widths
+of the sample windows used rather than the runs -- a count of what was looked at,
+read back as a measurement of the thing. The runs are 760 and 50.
+
+Superseded: played was `ink-soft` (`#9A9A9A`), the track was
+`music-select-inactive`, and the height was 1pt.
+
+### Five components inherited the core ink
+
+`music-ink`'s own usage string says **"do not inherit ink here."** Four of the six
+Music components did anyway, in eight declarations:
+
+| Component | Was | Now |
+|---|---|---|
+| `Shelf` title, see-all, see-all hover | `ink` / `ink-soft` / `ink` | `music-ink` / `music-ink-soft` / `music-ink` |
+| `ArtworkCard` title, subtitle | `ink` / `ink-soft` | `music-ink` / `music-ink-soft` |
+| `SidebarList` section label, row label | `ink-soft` / `ink` | `music-ink-soft` / `music-ink` |
+| `MiniPlayer` progress fill | `ink-soft` | `on-music-glass` at 79% |
+
+The visible one is dark: core `ink` is `#F5F5F7` and `music-ink` is `#DDDDDD`, so
+a shelf caption was 24 units brighter than the track list beside it on the same
+ground. Verified after the change in headless Chromium: `#272727` / `#767676` in
+light and `#DDDDDD` / `#9A9A9A` in dark, read off the computed style with the
+loaded rule checked to be the new one rather than a cached sheet.
+
+### Still wearing a core token, deliberately not changed
+
+- `.dc-sidebar-avatar` fills with `accent-wash`, a **blue** wash, in a Music
+  sidebar. There is no `music-accent-wash`, and inventing one needs a measurement
+  of what Music actually puts there.
+- The four artwork placeholders (`artcard`, `herocard`, `tracklist`, `miniplayer`)
+  use `surface-sunk`. It shows only while an image loads and was never measured.
+
+Both are recorded rather than guessed at.

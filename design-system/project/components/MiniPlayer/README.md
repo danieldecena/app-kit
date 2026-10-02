@@ -12,7 +12,7 @@ bar in the window chrome, which was the open question this slice closed.
 | floats | **19pt** up from the window bottom |
 | centred on | the **content area**, not the window |
 | artwork | 34pt square |
-| progress line | 1pt, 2pt up from the inner bottom edge |
+| progress line | **2pt**, 2pt up from the inner bottom edge |
 
 The centring is the detail worth keeping. AX puts it at `x=579 w=700` in a 1588pt
 window with a 270pt sidebar: its centre lands on 929, which is the content
@@ -25,6 +25,39 @@ along its own lower edge", implying the full 700pt. Measured, the line runs
 x 165-555pt: it starts at the artwork's left edge and ends with the text group.
 So the line belongs to the now-playing group, which is why it is positioned
 inside `.dc-miniplayer-now` here rather than on the capsule.
+
+## The progress line's two greys are white at an alpha, not two tokens
+
+Measured off the same opaque capture, at @2x: the line is 4 device px, so **2pt**
+and not the 1pt first recorded. On the line's centre row the played run is
+`#D4D5D7` across 760 px (x 1421-2180) and the unplayed `#6E6F71` across 50 px
+(x 2181-2230), every pixel in each identical -- so these are fills rather than
+antialiased edges, and the step between them is hard.
+
+Over the capsule's `#3B3B3D` those solve to white at **0.781 / 0.786 / 0.794**
+per channel and **0.260 / 0.265 / 0.268**, so the line is drawn as
+`on-music-glass` at 79% and 26% rather than as two new tokens. Compositing at
+those alphas reproduces the measured greys to within 2/255, and it does the right
+thing in light, where `on-music-glass` is black and nothing has been measured.
+
+Before this the played fill was `ink-soft` (`#9A9A9A`) and the track was
+`music-select-inactive`, a ground ink and a selection red on a glass surface --
+the same borrowing called out below as the original mistake, surviving in the two
+declarations that correction did not reach.
+
+**The boundary that carries the value is not a fixed ratio.** What a sighted
+reader uses is where the played run ends, not either grey against the capsule, and
+both sides are an alpha over a *translucent* surface -- so the ratio moves with
+whatever the capsule floats over. Over the measured opaque capsule it is 3.50:1 in
+dark and 6.43:1 in light, both clear of the 3:1 a graphical object needs. Over a
+translucent capsule on bright content in dark it falls to **1.90:1**, which fails
+1.4.11, and that is the ordinary case, since Reduce Transparency is off by default
+and the capsule floats over artwork.
+
+No list of token pairs can catch that, because neither side is a token value. The
+greys are Music's own, so they are recorded rather than corrected -- the same call
+already made for `music-accent` and `music-star`. An app that must meet 1.4.11
+here should raise the unplayed alpha or back the line with an opaque strip.
 
 ## Reduce Transparency is how any of this got measured
 

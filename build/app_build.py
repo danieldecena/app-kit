@@ -662,6 +662,7 @@ CONTRAST_UNCHECKED = {
     "chart-base under 3:1": "an upper bound rather than a floor",
     "series-* 3:1 as marks": "a second, weaker claim on the same tokens",
     "music-star light under 3:1": "1.51:1 measured; Music's own mark, recorded not corrected",
+    "miniplayer progress boundary": "The pair that carries the value is played-vs-unplayed, not either against the capsule, and it is not a fixed ratio: both sides are on-music-glass at an alpha over a TRANSLUCENT surface, so it moves with whatever is behind the capsule. Over the measured opaque capsule it is 3.50:1 dark and 6.43:1 light, both clear of 3:1; over a translucent capsule on bright content in dark it falls to 1.90:1, which fails 1.4.11. Unfixable by adding a pair, because neither side is a token value. These are Music's own greys (#D4D5D7 and #6E6F71 measured), recorded rather than corrected, the same call as music-accent and music-star. An app that must meet 1.4.11 should raise the unplayed alpha or back the line with an opaque strip.",
 }
 
 
@@ -969,9 +970,9 @@ css = css_sub(
    card owns its shape; the width comes from the caller. */
 .dc-shelf { display: flex; flex-direction: column; gap: var(--space-5); }
 .dc-shelf-head { display: flex; align-items: baseline; gap: var(--space-3); }
-.dc-shelf-title { font: var(--type-title-3); color: var(--ink); }
-.dc-shelf-more { border: 0; padding: 0; background: none; color: var(--ink-soft); cursor: pointer; display: inline-flex; align-items: center; }
-.dc-shelf-head:hover .dc-shelf-more { color: var(--ink); }
+.dc-shelf-title { font: var(--type-title-3); color: var(--music-ink); }
+.dc-shelf-more { border: 0; padding: 0; background: none; color: var(--music-ink-soft); cursor: pointer; display: inline-flex; align-items: center; }
+.dc-shelf-head:hover .dc-shelf-more { color: var(--music-ink); }
 /* 20pt at wide windows, 16pt narrow -- a breakpoint, not a scale. Measured
    both; where it switches is unknown, so the wide value is the default and
    data-compact selects the narrow one. */
@@ -997,8 +998,8 @@ css = css_sub(
    invisible in a preview whose subtitle was all-caps. Music's own caption
    type was never measured, so this split is ours. */
 .dc-artcard-cap { box-sizing: border-box; height: 37px; padding-top: 6px; display: flex; flex-direction: column; justify-content: flex-start; gap: 0; overflow: hidden; }
-.dc-artcard-title { font: var(--type-footnote); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dc-artcard-sub { font: var(--type-caption-2); color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard-title { font: var(--type-footnote); color: var(--music-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dc-artcard-sub { font: var(--type-caption-2); color: var(--music-ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dc-artcard:focus-visible .dc-artcard-art { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 
 /* HeroCard: full-bleed artwork at 3:4 with the caption INSIDE the card, over
@@ -1108,8 +1109,19 @@ css = css_sub(
 /* The artist line is white too: 999 solid pixels, not a softer grey. */
 .dc-miniplayer-sub { font: var(--type-footnote); color: var(--on-music-glass); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* A 1pt hairline 2pt up from the capsule's inner bottom edge. */
-.dc-miniplayer-track { position: absolute; left: 0; right: 0; bottom: 2px; height: 1px; background: var(--music-select-inactive); border-radius: 1px; }
-.dc-miniplayer-fill { display: block; height: 100%; background: var(--ink-soft); border-radius: 1px; }
+/* The progress line, measured off home-reduced-transparency-dark.png where the
+   capsule is opaque: 4 device px at @2x, so 2px and not 1. Played #D4D5D7 and
+   unplayed #6E6F71, each a single value across its whole run (760 px and
+   50 px, every pixel identical), so these are fills and not antialiased edges.
+   Over
+   the capsule's #3B3B3D those are white at 0.786 and 0.260, which is why they
+   are expressed as on-music-glass at an alpha rather than as two new tokens:
+   the alpha composites over whatever the material is underneath and inverts to
+   black in light, where nothing has been measured. The earlier values were a
+   ground ink (ink-soft, #9A9A9A) and a selection red on a glass surface --
+   the same borrowing the comment above calls the original mistake. */
+.dc-miniplayer-track { position: absolute; left: 0; right: 0; bottom: 2px; height: 2px; background: color-mix(in srgb, var(--on-music-glass) 26%, transparent); border-radius: 1px; }
+.dc-miniplayer-fill { display: block; height: 100%; background: color-mix(in srgb, var(--on-music-glass) 79%, transparent); border-radius: 1px; }
 .dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--on-music-glass); }
 .dc-miniplayer-btn:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 3px; border-radius: 4px; }
 
@@ -1120,9 +1132,9 @@ css = css_sub(
 .dc-sidebar { background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); padding: var(--space-3) var(--space-4) 0; display: flex; flex-direction: column; min-width: 180px; height: 100%; box-sizing: border-box; }
 .dc-sidebar-scroll { flex: 1; overflow-y: auto; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4); }
 .dc-sidebar-head { display: flex; align-items: center; justify-content: space-between; height: 19px; margin: var(--space-5) 0 var(--space-2); }
-.dc-sidebar-head-label { font: 400 11px/13px var(--font-sans); color: var(--ink-soft); }
+.dc-sidebar-head-label { font: 400 11px/13px var(--font-sans); color: var(--music-ink-soft); }
 .dc-sidebar-head-action { border: 0; padding: 0; background: none; font: 400 11px/13px var(--font-sans); color: var(--music-accent-ink); cursor: pointer; }
-.dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
+.dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--music-ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
 .dc-sidebar-row:hover { background: var(--music-hover); }
 /* The only Music component that had no focus ring, and the one driven by the
    arrow keys. Matches TrackList: same colour, same inset offset. */
@@ -2403,7 +2415,7 @@ bar in the window chrome, which was the open question this slice closed.
 | floats | **19pt** up from the window bottom |
 | centred on | the **content area**, not the window |
 | artwork | 34pt square |
-| progress line | 1pt, 2pt up from the inner bottom edge |
+| progress line | **2pt**, 2pt up from the inner bottom edge |
 
 The centring is the detail worth keeping. AX puts it at `x=579 w=700` in a 1588pt
 window with a 270pt sidebar: its centre lands on 929, which is the content
@@ -2416,6 +2428,39 @@ along its own lower edge", implying the full 700pt. Measured, the line runs
 x 165-555pt: it starts at the artwork's left edge and ends with the text group.
 So the line belongs to the now-playing group, which is why it is positioned
 inside `.dc-miniplayer-now` here rather than on the capsule.
+
+## The progress line's two greys are white at an alpha, not two tokens
+
+Measured off the same opaque capture, at @2x: the line is 4 device px, so **2pt**
+and not the 1pt first recorded. On the line's centre row the played run is
+`#D4D5D7` across 760 px (x 1421-2180) and the unplayed `#6E6F71` across 50 px
+(x 2181-2230), every pixel in each identical -- so these are fills rather than
+antialiased edges, and the step between them is hard.
+
+Over the capsule's `#3B3B3D` those solve to white at **0.781 / 0.786 / 0.794**
+per channel and **0.260 / 0.265 / 0.268**, so the line is drawn as
+`on-music-glass` at 79% and 26% rather than as two new tokens. Compositing at
+those alphas reproduces the measured greys to within 2/255, and it does the right
+thing in light, where `on-music-glass` is black and nothing has been measured.
+
+Before this the played fill was `ink-soft` (`#9A9A9A`) and the track was
+`music-select-inactive`, a ground ink and a selection red on a glass surface --
+the same borrowing called out below as the original mistake, surviving in the two
+declarations that correction did not reach.
+
+**The boundary that carries the value is not a fixed ratio.** What a sighted
+reader uses is where the played run ends, not either grey against the capsule, and
+both sides are an alpha over a *translucent* surface -- so the ratio moves with
+whatever the capsule floats over. Over the measured opaque capsule it is 3.50:1 in
+dark and 6.43:1 in light, both clear of the 3:1 a graphical object needs. Over a
+translucent capsule on bright content in dark it falls to **1.90:1**, which fails
+1.4.11, and that is the ordinary case, since Reduce Transparency is off by default
+and the capsule floats over artwork.
+
+No list of token pairs can catch that, because neither side is a token value. The
+greys are Music's own, so they are recorded rather than corrected -- the same call
+already made for `music-accent` and `music-star`. An app that must meet 1.4.11
+here should raise the unplayed alpha or back the line with an opaque strip.
 
 ## Reduce Transparency is how any of this got measured
 
