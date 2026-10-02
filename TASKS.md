@@ -10,6 +10,14 @@
 - [x] Check the TrackList focus ring in WebKit -- passes, WebKit 26.6
 - [x] Fix TrackList preview: inactive list shows no selection -- 3453e65
 - [x] Publish the TrackList preview fix and WebKit note -- v63
+- [ ] Measure Music's inactive sidebar ink in both appearances
+- [ ] Add inactive sidebar ink and glyph tokens
+- [ ] SidebarList/TrackList read appearsActive, dim whole sidebar
+- [ ] Web SidebarList dims every row when inactive
+- [ ] Large page title in the spike window
+- [ ] Spinner tab: re-copy, title, overflowing shelves
+- [ ] Find what moves the tab's selections after launch
+- [ ] Publish the Music review fixes and record
 
 ## Completed
 
