@@ -766,6 +766,40 @@ def _check_contrast(tokens):
 
 _check_contrast(tok["color"]["tokens"])
 
+# ------------------------------------------------------------- SwiftUI recipes
+# The Music components' SwiftUI is EXTRACTED from the spike rather than written
+# here, because a recipe nobody compiled is worse than no recipe. The spike is
+# built with `swiftc build/source/music-components-spike.swift swift/AppKit.swift`
+# against the real generated tokens, so anything that reaches a README has been
+# through the compiler and rendered in a window.
+_SPIKE_PATH = Path(__file__).resolve().parent / "source" / "music-components-spike.swift"
+_SPIKE = _SPIKE_PATH.read_text()
+# Which sections the READMEs will need. Checked HERE, before the first w(),
+# because the guard used to raise only at doc-assembly time -- by which point
+# tokens.json and the three bundle files had already been written, leaving a
+# plausible 4-file tree behind a non-zero exit.
+_SPIKE_SECTIONS = ("ArtworkCard", "HeroCard", "Shelf", "TrackList", "MiniPlayer")
+
+
+def swift_section(name):
+    marker = f"// MARK: - {name}\n"
+    if _SPIKE.count(marker) != 1:
+        raise SystemExit(
+            f"spike section {name!r} appears {_SPIKE.count(marker)} times in {_SPIKE_PATH}"
+        )
+    rest = _SPIKE.split(marker, 1)[1]
+    cut = rest.find("\n// MARK: -")
+    body = (rest if cut < 0 else rest[:cut]).strip("\n")
+    if not body.strip():
+        raise SystemExit(f"spike section {name!r} is empty")
+    return body
+
+
+
+
+for _n in _SPIKE_SECTIONS:
+    swift_section(_n)
+
 w("tokens.json", json.dumps(tok, indent=2, ensure_ascii=False))
 
 # ------------------------------------------------------------------ bundle.css
@@ -2417,30 +2451,6 @@ for comp in (
     "BarChart",
 ):
     docs[f"{comp}/preview.html"] = ns(rd(f"components/{comp}/preview.html"))
-# ------------------------------------------------------------- SwiftUI recipes
-# The Music components' SwiftUI is EXTRACTED from the spike rather than written
-# here, because a recipe nobody compiled is worse than no recipe. The spike is
-# built with `swiftc build/source/music-components-spike.swift swift/AppKit.swift`
-# against the real generated tokens, so anything that reaches a README has been
-# through the compiler and rendered in a window.
-_SPIKE_PATH = Path(__file__).resolve().parent / "source" / "music-components-spike.swift"
-_SPIKE = _SPIKE_PATH.read_text()
-
-
-def swift_section(name):
-    marker = f"// MARK: - {name}\n"
-    if _SPIKE.count(marker) != 1:
-        raise SystemExit(
-            f"spike section {name!r} appears {_SPIKE.count(marker)} times in {_SPIKE_PATH}"
-        )
-    rest = _SPIKE.split(marker, 1)[1]
-    cut = rest.find("\n// MARK: -")
-    body = (rest if cut < 0 else rest[:cut]).strip("\n")
-    if not body.strip():
-        raise SystemExit(f"spike section {name!r} is empty")
-    return body
-
-
 SWIFT_DOC = {
     "Shelf": ("Shelf", ["Shelf", "ArtworkCard"]),
     "HeroCard": ("HeroCard", ["HeroCard"]),
