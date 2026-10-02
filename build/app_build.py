@@ -984,7 +984,17 @@ css = css_sub(
    width in the real app, and three measurements of the same window disagreed on
    it while agreeing on the gap and the ratios. So the shelf owns the gap and the
    card owns its shape; the width comes from the caller. */
-.dc-shelf { display: flex; flex-direction: column; gap: var(--space-5); }
+/* No gap between the head and the track, and no padding under the track. The
+   AX capture puts a plain artwork shelf group at 282pt including its header,
+   against 299.2 here: 12px of flex gap plus 4px of padding under the track,
+   with the remaining 1.2 down to type metrics. The header is already 58.2 tall
+   against Music's implied 57, so the header was never the problem -- the gap
+   was being counted twice, once by the header's own box and once again here.
+   Removing it leaves 16.6px between the title and the cards, which is the
+   header's own bottom whitespace. The track's padding-bottom was vestigial:
+   scrollbar-width and the ::-webkit-scrollbar rule already hide the bar, and
+   the focus ring draws outside the box on an offset regardless. */
+.dc-shelf { display: flex; flex-direction: column; gap: 0; }
 .dc-shelf-head { display: flex; align-items: baseline; gap: var(--space-3); }
 .dc-shelf-title { font: var(--type-title-3); color: var(--music-ink); }
 .dc-shelf-more { border: 0; padding: 0; background: none; color: var(--music-ink-soft); cursor: pointer; display: inline-flex; align-items: center; }
@@ -1000,7 +1010,7 @@ css = css_sub(
 /* 20pt at wide windows, 16pt narrow -- a breakpoint, not a scale. Measured
    both; where it switches is unknown, so the wide value is the default and
    data-compact selects the narrow one. */
-.dc-shelf-track { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: var(--space-2); }
+.dc-shelf-track { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .dc-shelf-track::-webkit-scrollbar { display: none; }
 .dc-shelf[data-compact="true"] .dc-shelf-track { gap: 16px; }
 /* align-self stops a card being stretched to the tallest sibling, which would

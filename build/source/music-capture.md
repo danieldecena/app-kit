@@ -1241,3 +1241,30 @@ All four are the measured token values, and the four ratios are 19.30, 12.65,
 17.40 and 9.85:1. The star reads `#FFCC00` in light against a `#000000` title,
 and carries `role="img"` with `aria-label="Favorited"` so a screen reader says
 "Favorited" rather than "black star".
+
+### The shelf group was 17pt too tall, and the gap was counted twice
+
+Compared the Shelf preview against the AX record above rather than against a new
+capture. Card geometry was already exact; the group height was not.
+
+| | Music (AX, plain artwork shelf) | preview, before | after |
+|---|---|---|---|
+| group height incl. header | **282pt** | 299.2 | **283.2** |
+| header | implied 57 | 58.2 | 58.2 |
+| track | 225 | 229 | 225 |
+| card | 188 x 225 | 188 x 225 | 188 x 225 |
+| gap / pitch | 20 / 208 | 20 / 208 | 20 / 208 |
+
+The excess was 12px of `gap` on `.dc-shelf` plus 4px of `padding-bottom` on the
+track, with the last 1.2 down to type metrics. The header was never the problem:
+at 58.2 against Music's implied 57 it already carried 16.6px of whitespace under
+the title, so the flex gap was counting the same space a second time. Removing it
+leaves exactly that 16.6px between title and cards.
+
+The track's `padding-bottom` was vestigial -- `scrollbar-width: none` and the
+`::-webkit-scrollbar` rule already hide the bar.
+
+Checked that nothing the padding might have been protecting broke, at a 900px
+viewport where the track actually overflows: it still scrolls, `scrollLeft = 208`
+lands on 208 so the pitch is intact, `scroll-snap-type` is still `x mandatory`,
+no card is clipped, and `offsetHeight == clientHeight` so no scrollbar appeared.
