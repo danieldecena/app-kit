@@ -45,67 +45,84 @@ def _sv(p):
 
 
 def key_state(im, scale):
-    """Detect traffic lights by finding three x-separated clusters of marks.
-    Traffic lights are coloured when the window is key and grey when not. A mark is
-    a pixel that differs from the box's modal colour by more than 12 on any channel.
-    Groups consecutive mark-containing columns into runs. Filters to the three largest
-    runs that are at least 1*scale columns wide (noise threshold). Returns 'key' if
-    exactly three runs exist and max saturation > 0.5, 'not key' if < 0.1, else
-    'unclear'. If not exactly three significant runs, returns unclear."""
-    box = (int(10 * scale), int(10 * scale), int(85 * scale), int(40 * scale))
-    crop = im.crop(box)
-    W, H = crop.size
-    px = list(crop.getdata())
-    modal = Counter(px).most_common(1)[0][0]
+    """Detect Music's traffic lights at fixed template positions. Traffic lights are
+    at x = 26, 48.5, 71 pt (y = 26 pt), about 12pt across. Each disc is present when
+    its mean colour differs from its adjacent gaps by >= 5 on some channel. Returns
+    'key' (all discs present, all > 0.5 saturation*value), 'not key' (all present,
+    all < 0.1), or 'unclear'. A capture from another app will read unclear."""
+    # Convert template positions from points to pixels
+    disc_x_pt = [26, 48.5, 71]
+    disc_y_pt = 26
+    disc_radius_pt = 3.5
+    gap_x_pt = [14, 37, 60, 83]
+    gap_y_pt = 26
+    gap_radius_pt = 2
 
-    # Mark pixels that differ from modal colour
-    mark = lambda p: max(abs(a - b) for a, b in zip(p, modal)) > 12
+    scale_f = float(scale)
+    disc_x = [int(x * scale_f) for x in disc_x_pt]
+    disc_y = int(disc_y_pt * scale_f)
+    disc_r = int(disc_radius_pt * scale_f)
+    gap_x = [int(x * scale_f) for x in gap_x_pt]
+    gap_y = int(gap_y_pt * scale_f)
+    gap_r = int(gap_radius_pt * scale_f)
 
-    # Count marks per column
-    col_marks = []
-    for x in range(W):
-        count = sum(1 for y in range(H) if mark(px[y * W + x]))
-        col_marks.append(count)
+    # Sample pixels within a circle
+    def sample_disc(cx, cy, r):
+        px = []
+        for x in range(max(0, cx - r), min(im.size[0], cx + r + 1)):
+            for y in range(max(0, cy - r), min(im.size[1], cy + r + 1)):
+                dx, dy = x - cx, y - cy
+                if dx * dx + dy * dy <= r * r:
+                    px.append(im.getpixel((x, y)))
+        return px
 
-    # Find columns with at least 3*scale marks
-    mark_cols = [x for x in range(W) if col_marks[x] >= 3 * scale]
+    # Compute mean colour of pixels
+    def mean_colour(px):
+        if not px:
+            return (0, 0, 0)
+        r = sum(p[0] for p in px) // len(px)
+        g = sum(p[1] for p in px) // len(px)
+        b = sum(p[2] for p in px) // len(px)
+        return (r, g, b)
 
-    if not mark_cols:
-        return "unclear (no traffic lights in the box)", max(_sv(p) for p in px)
+    # Check if two colours differ by at least 5 on some channel
+    def colour_diff(c1, c2, threshold=5):
+        return any(abs(a - b) >= threshold for a, b in zip(c1, c2))
 
-    # Group consecutive mark columns into runs
-    runs = []
-    run_start = mark_cols[0]
-    run_end = mark_cols[0]
-    for x in mark_cols[1:]:
-        if x == run_end + 1:
-            run_end = x
-        else:
-            runs.append((run_start, run_end))
-            run_start = x
-            run_end = x
-    runs.append((run_start, run_end))
+    # Sample each disc and its adjacent gaps
+    disc_values = []
+    for i, cx in enumerate(disc_x):
+        disc_px = sample_disc(cx, disc_y, disc_r)
+        if not disc_px:
+            return "unclear (no traffic lights at the expected positions)", 0.0
 
-    # Filter to three largest runs that are at least 1*scale wide (noise threshold)
-    run_widths = [(r, r[1] - r[0] + 1) for r in runs]
-    min_noise_width = int(1 * scale)
-    significant_runs = [r for r, w in run_widths if w >= min_noise_width]
+        disc_mean = mean_colour(disc_px)
 
-    # If we have more than 3 significant runs, take the 3 largest
-    if len(significant_runs) > 3:
-        significant_runs = sorted(
-            significant_runs, key=lambda r: r[1] - r[0], reverse=True
-        )[:3]
-        significant_runs.sort()  # Sort back by position
+        # Adjacent gaps (0-1 for disc 0, 1-2 for disc 1, 2-3 for disc 2)
+        gap_left_px = sample_disc(gap_x[i], gap_y, gap_r)
+        gap_right_px = sample_disc(gap_x[i + 1], gap_y, gap_r)
 
-    sat = max(_sv(p) for p in px)
-    if len(significant_runs) != 3:
-        return "unclear (no traffic lights in the box)", sat
-    if sat > 0.5:
-        return "key", sat
-    if sat < 0.1:
-        return "not key", sat
-    return "unclear (in between)", sat
+        if not gap_left_px or not gap_right_px:
+            return "unclear (no traffic lights at the expected positions)", 0.0
+
+        gap_pooled = gap_left_px + gap_right_px
+        gap_mean = mean_colour(gap_pooled)
+
+        # Check if disc is present
+        if not colour_diff(disc_mean, gap_mean):
+            return "unclear (no traffic lights at the expected positions)", 0.0
+
+        # Compute saturation*value for disc
+        sv = max(_sv(p) for p in disc_px)
+        disc_values.append(sv)
+
+    # All three discs present; determine key state from saturation values
+    max_sv = max(disc_values)
+    if all(sv > 0.5 for sv in disc_values):
+        return "key", max_sv
+    if all(sv < 0.1 for sv in disc_values):
+        return "not key", max_sv
+    return "unclear (in between)", max_sv
 
 
 def hist(im, y, x0, x1, n=3):
@@ -175,20 +192,34 @@ def selftest():
         ("mixed row is not one fill", hist(mixed, 50, 0, 200)[0][0][1] <= 100)
     )
 
-    # Test cases for key_state with wide rectangles (should be unclear)
-    wide_saturated = Image.new("RGB", (400, 200), (237, 237, 238))
-    ImageDraw.Draw(wide_saturated).rectangle((10, 10, 85, 40), fill=(255, 0, 0))
+    # Test cases for key_state that FAIL on original code (must read unclear on new)
+    saturated_rect = Image.new("RGB", (400, 200), (237, 237, 238))
+    ImageDraw.Draw(saturated_rect).rectangle((15, 15, 80, 35), fill=(255, 0, 0))
     results.append(
         (
-            "wide saturated box is unclear",
-            key_state(wide_saturated, 1)[0].startswith("unclear"),
+            "saturated rectangle reads unclear",
+            key_state(saturated_rect, 1)[0].startswith("unclear"),
         )
     )
 
-    wide_grey = Image.new("RGB", (400, 200), (237, 237, 238))
-    ImageDraw.Draw(wide_grey).rectangle((10, 10, 85, 40), fill=(150, 150, 150))
+    grey_rect = Image.new("RGB", (400, 200), (237, 237, 238))
+    ImageDraw.Draw(grey_rect).rectangle((15, 15, 80, 35), fill=(150, 150, 150))
     results.append(
-        ("wide grey box is unclear", key_state(wide_grey, 1)[0].startswith("unclear"))
+        (
+            "grey rectangle reads unclear",
+            key_state(grey_rect, 1)[0].startswith("unclear"),
+        )
+    )
+
+    grey_lines = Image.new("RGB", (400, 200), (237, 237, 238))
+    d_lines = ImageDraw.Draw(grey_lines)
+    for x in [20, 40, 60]:
+        d_lines.rectangle((x, 12, x + 1, 38), fill=(150, 150, 150))
+    results.append(
+        (
+            "three grey lines read unclear",
+            key_state(grey_lines, 1)[0].startswith("unclear"),
+        )
     )
 
     # Test cases for glyph
