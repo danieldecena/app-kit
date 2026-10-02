@@ -1268,3 +1268,8 @@ Checked that nothing the padding might have been protecting broke, at a 900px
 viewport where the track actually overflows: it still scrolls, `scrollLeft = 208`
 lands on 208 so the pitch is intact, `scroll-snap-type` is still `x mandatory`,
 no card is clipped, and `offsetHeight == clientHeight` so no scrollbar appeared.
+
+The hero variant confirms it rather than needing its own fix, since both share
+`.dc-shelf`: the hero group went 418.2 -> **402.2** against Music's 400, with the
+card at 258 x 344 (ratio 0.750, against 0.751 / 0.748 / 0.748 measured), pitch
+278 against 277.5 and the gap still 20.
