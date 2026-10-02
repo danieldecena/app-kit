@@ -1129,7 +1129,7 @@ css = css_sub(
    white on it -- measured #FFFFFF off a Reduce Transparency capture, where
    music-ink would be #DDDDDD and core ink-soft would be #9A9A9A. Borrowing a
    ground ink for a glass surface was the original mistake. */
-.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
+.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 9px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
 .dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
 .dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
@@ -1162,7 +1162,11 @@ css = css_sub(
    the same borrowing the comment above calls the original mistake. */
 .dc-miniplayer-track { position: absolute; left: 0; right: 0; bottom: 2px; height: 2px; background: color-mix(in srgb, var(--on-music-glass) 26%, transparent); border-radius: 1px; }
 .dc-miniplayer-fill { display: block; height: 100%; background: color-mix(in srgb, var(--on-music-glass) 79%, transparent); border-radius: 1px; }
-.dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--on-music-glass); }
+/* Music's trailing buttons are 36pt hit frames, 1pt apart, so the cluster is 110
+   wide however small the glyphs are. That, not the glyphs, is what stops the
+   now-playing group (and its progress line) at 572 of 700. */
+.dc-miniplayer-actions { display: flex; align-items: center; gap: 1px; flex: none; color: var(--on-music-glass); }
+.dc-miniplayer-actions > * { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
 .dc-miniplayer-btn:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 3px; border-radius: 4px; }
 
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --
@@ -2485,11 +2489,23 @@ early; the start, 166.5 against the artwork's 166.0, was right all along.
 
 The line starts at the artwork's left edge, so it belongs to the now-playing
 group rather than the capsule, which is why it is positioned inside
-`.dc-miniplayer-now` here. **What sets its right end is still unexplained**: at
-571 it matches neither the text, whose glyphs stop at 335, nor the trailing
-cluster, which runs 507-680. This component's line is `flex: 1` between the
-transport and the actions, which gives 167-607.8 -- the right start and 36.8pt
-too much length.
+`.dc-miniplayer-now` here.
+
+**What sets its right end is the trailing buttons' hit frames, not their glyphs.**
+Music's AX tree gives the "Show Now Playing" frame as exactly 406pt, **166-572**
+from the capsule's left edge, which is the line's 166.5-571.0 to within a point.
+It is `flex: 1` between two clusters and 9pt clear of each: the transport's
+frames run 9-157 (28pt buttons, Play 36) and the trailing three are 36pt frames
+1pt apart, 581-691, so the group stops where the *frames* begin. The glyphs sit
+centred at 599, 636 and 673. The earlier "507-680" was a pixel scan of glyph ink
+and the "335" a scan of text; neither is a layout edge.
+
+This component took the glyph width as the cluster's width, so the group ran on
+to 607.8 -- 36.8pt too long. `.dc-miniplayer-actions` now gives each action a
+36pt slot with a 1pt gap and the capsule's right padding is 9pt, which puts the
+cluster at 581-691 and the group at 167-573 (the 1pt is `--space-4` against
+Music's 9pt gap). Pass at most three actions to match Music; fewer lengthen the
+group, which is the same rule.
 
 ## The progress line's two greys are white at an alpha, not two tokens
 

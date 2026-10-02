@@ -32,11 +32,23 @@ early; the start, 166.5 against the artwork's 166.0, was right all along.
 
 The line starts at the artwork's left edge, so it belongs to the now-playing
 group rather than the capsule, which is why it is positioned inside
-`.dc-miniplayer-now` here. **What sets its right end is still unexplained**: at
-571 it matches neither the text, whose glyphs stop at 335, nor the trailing
-cluster, which runs 507-680. This component's line is `flex: 1` between the
-transport and the actions, which gives 167-607.8 -- the right start and 36.8pt
-too much length.
+`.dc-miniplayer-now` here.
+
+**What sets its right end is the trailing buttons' hit frames, not their glyphs.**
+Music's AX tree gives the "Show Now Playing" frame as exactly 406pt, **166-572**
+from the capsule's left edge, which is the line's 166.5-571.0 to within a point.
+It is `flex: 1` between two clusters and 9pt clear of each: the transport's
+frames run 9-157 (28pt buttons, Play 36) and the trailing three are 36pt frames
+1pt apart, 581-691, so the group stops where the *frames* begin. The glyphs sit
+centred at 599, 636 and 673. The earlier "507-680" was a pixel scan of glyph ink
+and the "335" a scan of text; neither is a layout edge.
+
+This component took the glyph width as the cluster's width, so the group ran on
+to 607.8 -- 36.8pt too long. `.dc-miniplayer-actions` now gives each action a
+36pt slot with a 1pt gap and the capsule's right padding is 9pt, which puts the
+cluster at 581-691 and the group at 167-573 (the 1pt is `--space-4` against
+Music's 9pt gap). Pass at most three actions to match Music; fewer lengthen the
+group, which is the same rule.
 
 ## The progress line's two greys are white at an alpha, not two tokens
 

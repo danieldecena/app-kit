@@ -25,6 +25,11 @@ Full list: `TASKS.md`.
 
 ## Decision log
 
+### 2026-10-02
+- Resolved: what sets Music's 571pt progress-line end. It is the "Show Now Playing" AX frame, 406pt at 166-572 from the capsule's left, bounded by the trailing buttons' **36pt hit frames** (581-691, glyph centres 599/636/673), not by their glyphs. Both earlier explanations were pixel scans of ink ("507-680", "335"), which is why neither matched. Found by dumping the AX tree with Music's window open, after four sessions of reading pixels.
+- `MiniPlayer` actions are now 36pt slots 1pt apart and the capsule's right padding is 9pt: group 167-573 (was 167-607.8), cluster 581-691, centres 599/636/673 exactly. Measured in the harness after asserting the page loaded the new CSS (the first read was the cached old bundle and reported 607.8). Not published: artifact is still v46 with the old geometry.
+- Not touched: the SwiftUI MiniPlayer recipe still lays out by glyph and fills its progress with `musicInkSoft` at 0.35, not the measured `on-music-glass` at 26%/79% the CSS and README use.
+
 ### 2026-10-01
 - **The productive move this session was auditing relations, not components.** Every defect found was a gap *between* two things each of which was individually checked and individually fine, which is why nothing had a symptom. Five of them: a manifest component with no page; four measured tokens no CSS rule painted; four focusable controls with no focus ring of their own; a shelf group 17pt too tall; and the capsule-fill prose that contradicted its own correction 40 lines later.
 - `ArtworkCard` was in the bundle manifest, bundle.js, the export map and `index.d.ts` -- four replacements with four asserts -- and had no README and no preview for the whole life of the variant. The harness and the artifact gallery both build their list from that manifest, so it rendered as a listed component with nothing behind it, and the published artifact's 58 files confirmed the gap was live, not local.

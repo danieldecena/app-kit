@@ -283,7 +283,7 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
    white on it -- measured #FFFFFF off a Reduce Transparency capture, where
    music-ink would be #DDDDDD and core ink-soft would be #9A9A9A. Borrowing a
    ground ink for a glass surface was the original mistake. */
-.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 20px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
+.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 9px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
 .dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
 .dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
@@ -316,7 +316,11 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
    the same borrowing the comment above calls the original mistake. */
 .dc-miniplayer-track { position: absolute; left: 0; right: 0; bottom: 2px; height: 2px; background: color-mix(in srgb, var(--on-music-glass) 26%, transparent); border-radius: 1px; }
 .dc-miniplayer-fill { display: block; height: 100%; background: color-mix(in srgb, var(--on-music-glass) 79%, transparent); border-radius: 1px; }
-.dc-miniplayer-actions { display: flex; align-items: center; gap: 14px; flex: none; color: var(--on-music-glass); }
+/* Music's trailing buttons are 36pt hit frames, 1pt apart, so the cluster is 110
+   wide however small the glyphs are. That, not the glyphs, is what stops the
+   now-playing group (and its progress line) at 572 of 700. */
+.dc-miniplayer-actions { display: flex; align-items: center; gap: 1px; flex: none; color: var(--on-music-glass); }
+.dc-miniplayer-actions > * { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
 .dc-miniplayer-btn:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 3px; border-radius: 4px; }
 
 /* SidebarList: a Mac source list. Geometry measured from Music for macOS --

@@ -5,7 +5,7 @@
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
 
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
-- [ ] [code] MiniPlayer line ends 36.8pt long; what sets Music's 571pt?
+- [x] MiniPlayer line ends 36.8pt long: Music's 36pt hit frames set 572
 - [ ] [you] Sidebar selection light+focused, and dark+key+unfocused
 - [ ] [code] SidebarList needs its own 3 selection states, not TrackList's 2
 - [ ] [you] Row mid-press: music-shot.sh Music row-pressed-dark 5, hold a row
