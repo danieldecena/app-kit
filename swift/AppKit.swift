@@ -153,12 +153,12 @@ public extension Color {
         public static let musicInk = dyn((0.153, 0.153, 0.153, 1.00), (0.867, 0.867, 0.867, 1.00))
         /// Secondary text. Music measures #808080 in light, which is only 3.95:1 on white; #767676 is the first grey that
         public static let musicInkSoft = dyn((0.463, 0.463, 0.463, 1.00), (0.604, 0.604, 0.604, 1.00))
-        /// The favorited star. Dark is MEASURED (#FFD700, sampled from album-detail-unfocused-dark.png, 11.74:1 on ground
-        public static let musicStar = dyn((0.722, 0.525, 0.043, 1.00), (1.000, 0.843, 0.000, 1.00))
+        /// The favorited star, both values MEASURED: #FFD700 dark (album-detail-unfocused-dark.png, 11.74:1) and #FFCC00 
+        public static let musicStar = dyn((1.000, 0.800, 0.000, 1.00), (1.000, 0.843, 0.000, 1.00))
         /// The transport button when the window is NOT key. Dark is MEASURED #2F2F30 from album-transport-inactive-dark.p
-        public static let musicPrimaryInactive = dyn((0.863, 0.863, 0.867, 1.00), (0.184, 0.184, 0.188, 1.00))
+        public static let musicPrimaryInactive = dyn((0.925, 0.925, 0.925, 1.00), (0.184, 0.184, 0.188, 1.00))
         /// Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF fr
-        public static let onMusicGlass = dyn((0.153, 0.153, 0.153, 1.00), (1.000, 1.000, 1.000, 1.00))
+        public static let onMusicGlass = dyn((0.000, 0.000, 0.000, 1.00), (1.000, 1.000, 1.000, 1.00))
         /// Secondary text on music-hover or music-select-inactive. music-ink-soft reaches only 3.31:1 on the inactive sel
         public static let musicInkSoftOnFill = dyn((0.373, 0.373, 0.373, 1.00), (0.706, 0.706, 0.706, 1.00))
     }

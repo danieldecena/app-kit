@@ -2,7 +2,6 @@
 
 - [ ] Capsule fill: two Reduce-Transparency reads disagree (#151515 vs #3B3B3D)
 
-- [ ] [you] One LIGHT album pass: settles music-star, on-music-glass and music-primary-inactive
 
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
 

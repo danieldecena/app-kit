@@ -366,21 +366,21 @@ colors += [
     ),
     T(
         "music-star",
-        "#B8860B",
+        "#FFCC00",
         "#FFD700",
-        "The favorited star. Dark is MEASURED (#FFD700, sampled from album-detail-unfocused-dark.png, 11.74:1 on ground-window). Light is NOT measured: the same gold is 1.40:1 on white, far under the 3:1 a glyph needs, so light is stepped to the first gold that clears it. NOT the accent -- the star is gold, which is why the accent was taken from title strokes instead.",
+        "The favorited star, both values MEASURED: #FFD700 dark (album-detail-unfocused-dark.png, 11.74:1) and #FFCC00 light (album-light-inactive.png, the Favorite Songs rows). NOT the accent -- the star is gold, which is why the accent was taken from title strokes instead. The light value is only 1.51:1 on white, under the 3:1 a graphical object needs, so it is listed in CONTRAST_UNCHECKED rather than gated: this is Music's own mark and the variant records it rather than correcting it, the same call already made for music-accent. An app that must meet 1.4.11 for this mark should darken it; Music does not.",
     ),
     T(
         "music-primary-inactive",
-        "#DCDCDD",
+        "#ECECEC",
         "#2F2F30",
-        "The transport button when the window is NOT key. Dark is MEASURED #2F2F30 from album-transport-inactive-dark.png; light is not measured and borrows music-select-inactive, the variant's other inactive fill. The button INVERTS rather than dims -- active is a light pill with a dark label, inactive is a dark pill with a light one. Its label is music-ink: measured #DFDFDF against music-ink's #DDDDDD, two units apart, which is a near-match not worth a second token. NOTE it is only 1.23:1 against ground-window, so the control's own boundary is near-invisible; that is Music's behaviour, not a target to copy.",
+        "The transport button when the window is NOT key. Dark is MEASURED #2F2F30 from album-transport-inactive-dark.png; light is MEASURED #ECECEC from album-light-inactive.png. The button INVERTS rather than dims -- active is a light pill with a dark label, inactive is a dark pill with a light one. Its label is music-ink: measured #DFDFDF against music-ink's #DDDDDD, two units apart, which is a near-match not worth a second token. NOTE it is only 1.23:1 against ground-window, so the control's own boundary is near-invisible; that is Music's behaviour, not a target to copy.",
     ),
     T(
         "on-music-glass",
-        "#272727",
+        "#000000",
         "#FFFFFF",
-        "Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF from a Reduce Transparency capture -- every glyph, the title AND the artist line, all pure white, where music-ink would be #DDDDDD. Light is NOT measured and inherits music-ink's light value, so the departure is dark-only. Gated against ground-window as a conservative stand-in, because the capsule fill itself is only measured in dark.",
+        "Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF from a Reduce Transparency capture -- every glyph, the title AND the artist line, all pure white, where music-ink would be #DDDDDD. Light is MEASURED #000000 on a #FFFFFF capsule, so Music uses pure black and pure white on this surface in both appearances -- symmetric, and in neither case the ground ink. Gated against ground-window as a conservative stand-in, because the capsule fill itself is only measured in dark.",
     ),
     T(
         "music-ink-soft-on-fill",
@@ -635,8 +635,6 @@ CONTRAST_PAIRS = (
         ("music-ink-soft-on-fill", "music-select-inactive", 4.5),
         ("music-ink", "music-hover", 4.5),
         ("music-ink", "music-select-inactive", 4.5),
-        # A star is a graphical object, so 3:1 is the bar, not 4.5.
-        ("music-star", "ground-window", 3.0),
         # ground-window stands in for the capsule, whose fill is measured in dark
         # only (#151515, darker than the ground, so the real ratio is higher).
         ("on-music-glass", "ground-window", 4.5),
@@ -659,6 +657,7 @@ CONTRAST_UNCHECKED = {
     "ink-faint under 3:1": "rgba, and an upper bound rather than a floor",
     "chart-base under 3:1": "an upper bound rather than a floor",
     "series-* 3:1 as marks": "a second, weaker claim on the same tokens",
+    "music-star light under 3:1": "1.51:1 measured; Music's own mark, recorded not corrected",
 }
 
 

@@ -1030,15 +1030,34 @@ Both were named before anything verified them, and both were wrong.
 This is the same failure the hero-gutter retraction records. The rule earned
 there held again: **a filename is not an observation.**
 
-## The variant is dark-measured and light-derived
+## The light pass -- all three settled, 2026-10-01
 
-Three tokens now carry a measured dark value and a derived light one:
-`music-star`, `on-music-glass`, `music-primary-inactive`. Each says so in its
-own usage string, but the pattern is worth naming once: **every light value
-added since the original capture pass is a derivation.**
+`album-light-inactive.png`: the Favorite Songs playlist, light, window
+inactive, stars in every row. One capture closed all three derivations, and
+**every derived value was wrong.**
 
-One light-mode capture pass over an album page -- favorited track visible,
-window active, then inactive -- would settle all three at once.
+| Token | Was derived | **Measured** | |
+|---|---|---|---|
+| `music-star` light | `#B8860B` | **`#FFCC00`** | system yellow, not a dark gold |
+| `music-primary-inactive` light | `#DCDCDD` | **`#ECECEC`** | |
+| `on-music-glass` light | `#272727` | **`#000000`** | |
+
+Each derivation was reasoned and each was off. The star is the worst: it was
+stepped to `#B8860B` *specifically* to clear 3:1, and Music uses a value at
+**1.51:1**. Deriving a light value from a dark measurement plus a contrast
+floor produced a colour Apple would not recognise.
+
+**`on-music-glass` is pure black and pure white.** `#000000` on a `#FFFFFF`
+capsule in light, `#FFFFFF` on `#151515` in dark. Symmetric, and in neither
+appearance is it the ground ink -- which is the whole reason the token exists.
+
+### The star now fails the gate, deliberately
+
+`#FFCC00` on white is 1.51:1, under the 3:1 a graphical object needs. The pair
+moved from `CONTRAST_PAIRS` into `CONTRAST_UNCHECKED` with its reason, which is
+the same call already made for `music-accent`: the variant records Music's own
+mark rather than correcting it. An app that must meet 1.4.11 here should darken
+it. Music does not.
 
 ## Not measured, and why
 
