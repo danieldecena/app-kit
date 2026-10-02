@@ -1,6 +1,6 @@
 ## Tasks
 
-- [ ] Build swatch-scan tool with key-state witness and controls
+- [x] Build swatch-scan tool with key-state witness and controls -- 89b8e3d
 - [ ] Witness window state of every capture behind a provenance row
 - [ ] Sample inactive fill, labels, Play label, capsule from witnessed captures
 - [ ] Measure selected-row shape by appearance and page type
