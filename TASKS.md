@@ -6,7 +6,8 @@
 
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
 - [ ] [code] MiniPlayer line ends 36.8pt long; what sets Music's 571pt?
-- [ ] [you] Sidebar inactive selection: reshoot over a different desktop
+- [ ] [you] Sidebar selection light+focused, and dark+key+unfocused
+- [ ] [code] SidebarList needs its own 3 selection states, not TrackList's 2
 - [ ] [you] Row mid-press: music-shot.sh Music row-pressed-dark 5, hold a row
 - [ ] [you] Contextual toolbar: needs its own capture pass
 - [ ] [you] Window chrome: deferred to the adopting app

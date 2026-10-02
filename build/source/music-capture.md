@@ -1344,3 +1344,43 @@ the 2pt height do not depend on it.
 the transport and the actions, which gives 167 - 607.8 against Music's
 166.5 - 571.0: the start is right to half a point, the length is not. Not changed,
 because reproducing 571 means knowing what sets it.
+
+### The sidebar selection has THREE states, and SidebarList ships two
+
+`music-select` and `music-select-inactive` were measured on **track rows**, where
+they are right. `SidebarList` reuses them, and neither matches what Music draws in
+the sidebar. Three captures, each sampled after an sRGB conversion, each fill
+uniform across 114 sampled pixels:
+
+| Capture | window | list focus | sidebar bg | row fill | label |
+|---|---|---|---|---|---|
+| `zz` Albums, dark (2026-10-02) | **key** | **focused** | `#141414` | **`#FA2E48`** | `#FFFFFF` |
+| `home-light-active.png` | **key** | *not* focused | `#F7F7F7` | **`#E0E0E0`** | `#000000` |
+| `home-inactive-dark-sidebar.png` | not key | - | `#101010` | **`#1F1F1F`** | - |
+
+The middle row is the state the component has no name for. It is the one this
+project already learned about from the other side: *a key window is not a focused
+list* -- the spike's first run sampled a grey selection and concluded `.tint` did
+not reach it, when nothing had put focus in the `List`. The same three-way
+distinction shows up here as three different fills.
+
+Two things follow:
+
+- **The focused fill is `#FA2E48`, which is exactly `music-accent` dark**, not
+  `music-select`'s `#CC132D`. It is flat, not a composite: a translucent accent
+  over a `#141414` material would read darker than the token, and it reads the
+  token exactly.
+- **White on it is 3.78:1**, under AA for a 13px semibold label. Music's own mark
+  again, the same tension `music-accent` and `music-star` already carry.
+
+**Not changed, and the light value is why.** Switching `SidebarList` to
+`music-accent` sets both appearances, and the only light capture shows the
+*unfocused* state, so the light focused fill is unmeasured. Deriving it is the
+exact move that produced three wrong values on 2026-10-01.
+
+**The two captures that close it**, both on a page whose sidebar row is selected
+*and* clicked so the list holds focus:
+
+1. **light, list focused** -- gives the light counterpart of `#FA2E48`.
+2. **dark, window key, list NOT focused** -- gives the dark counterpart of
+   `#E0E0E0` and confirms the middle state is real rather than a light-mode quirk.
