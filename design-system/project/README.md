@@ -149,5 +149,27 @@ is 1.81:1. An adopting app has whatever artwork it has, so the card backs its
 own text: 10.0:1 at the title and 6.5:1 at the eyebrow over a pure white image,
 the worst case.
 
+### SwiftUI
+
+Every component here carries a SwiftUI recipe, and those recipes are
+**extracted from a spike at build time** rather than written into the docs. The
+spike compiles against `swift/AppKit.swift` itself and is rendered in a real
+window before anything ships, so a recipe that stopped compiling fails the
+build instead of reaching a reader. On a machine without `swiftc` the build
+says NOT CHECKED rather than passing quietly.
+
+Three things the spike settled that a browser could not:
+
+- **`.tint()` does not reach a sidebar selection.** With the list focused the
+  row fills `#007AFF`, the system accent, against a tint set to `#CC132D`. Music's
+  red needs an explicit row background, which `SidebarList`'s recipe shows.
+- **A key window is not a focused list.** The same row fills `#434346` when the
+  window is key but focus is elsewhere, which is neither the accent nor the
+  tint. Establish which state you are in before reading a colour off a screen.
+- **`.listStyle(.sidebar)` gives the real vibrancy for free**, within 2 units of
+  Music's own sidebar, and setting any background defeats it. CSS `glass` is a
+  `backdrop-filter` that samples the page; the real thing samples the desktop
+  behind the window.
+
 The full measurement record, including what was measured, how, and what was
 retracted, is `build/source/music-capture.md` in the repo.
