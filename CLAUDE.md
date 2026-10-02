@@ -95,7 +95,9 @@ re-resolves against pypi and fails with no network; the system python has it.
 `README.md` holds the rule and `artifacts.json` holds the URL. Publish with the
 recorded URL; omitting it mints a second artifact and the existing link goes
 stale. The index (`design-system.json`) goes last, re-read right before, with
-`lastChange` set. Current artifact version is 34.
+`lastChange` set. Which publish the repo last made is recorded there too, in
+`lastChange.note` -- read that rather than a version number written here,
+which goes stale on the next publish and did (it said 34 at v38).
 
 **`index.d.ts` needs an explicit `contentType`.** `.ts` is not a served extension,
 and the refusal publishes *nothing at all* rather than skipping that one file:
