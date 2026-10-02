@@ -86,3 +86,65 @@ Measured column frames for the seven-column playlist, window-relative:
 | cloud / download | 1429.0 | 16.0 |
 | Time | 1445.0 | 58.0 |
 | "..." menu | 1503.0 | 85.0 |
+
+## SwiftUI
+
+Lifted from `build/source/music-components-spike.swift`, which is compiled
+against `swift/AppKit.swift` and rendered in a real window before it ships.
+Edit the spike, not this block.
+
+```swift
+struct Track: Identifiable {
+    let id: Int
+    let starred: Bool
+    let art: Color
+    let song: String
+    let artist: String
+    let time: String
+}
+
+/// Music's song table. The highlight is a rounded inset PILL, not a row fill.
+struct TrackList: View {
+    let rows: [Track]
+    @Binding var selection: Int?
+    var windowInactive: Bool = false
+
+    private func fill(_ id: Int) -> Color {
+        guard id == selection else { return .clear }
+        return windowInactive ? Color.Kit.musicSelectInactive : Color.Kit.musicSelect
+    }
+    private func ink(_ id: Int, soft: Bool) -> Color {
+        if id == selection && !windowInactive { return Color.Kit.onMusicSelect }
+        if id == selection && windowInactive { return soft ? Color.Kit.musicInkSoftOnFill : Color.Kit.musicInk }
+        return soft ? Color.Kit.musicInkSoft : Color.Kit.musicInk
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(rows) { r in
+                HStack(spacing: 12) {
+                    Text(r.starred ? "\u{2605}" : " ")
+                        .foregroundStyle(Color.Kit.warn).frame(width: 16)
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .fill(r.art).frame(width: 40, height: 40)
+                    Text(r.song).foregroundStyle(ink(r.id, soft: false))
+                    Spacer()
+                    Text(r.artist).foregroundStyle(ink(r.id, soft: true))
+                        .frame(width: 160, alignment: .leading)
+                    Text(r.time).foregroundStyle(ink(r.id, soft: true))
+                        .monospacedDigit().frame(width: 48, alignment: .trailing)
+                }
+                .font(.subheadline)
+                .padding(.horizontal, 12)
+                // 45pt pill inside a 56pt row: 5.5pt above and below.
+                .frame(height: 45)
+                .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(fill(r.id)))
+                .padding(.horizontal, 40)   // the measured inset
+                .frame(height: 56)
+                .contentShape(Rectangle())
+                .onTapGesture { selection = r.id }
+            }
+        }
+    }
+}
+```

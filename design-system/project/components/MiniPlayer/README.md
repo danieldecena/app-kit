@@ -43,3 +43,66 @@ separated by fill colour.
 The defaults are text characters so the component renders with no asset
 dependency. Pass real SF Symbols (`playGlyph`, `nextGlyph`, and the rest) in an
 app that has them.
+
+## SwiftUI
+
+Lifted from `build/source/music-components-spike.swift`, which is compiled
+against `swift/AppKit.swift` and rendered in a real window before it ships.
+Edit the spike, not this block.
+
+```swift
+/// The floating transport capsule: 700x54, stadium radius, real material.
+struct MiniPlayer: View {
+    let art: Color
+    let title: String
+    let subtitle: String
+    var progress: Double = 0.54
+    var playing: Bool = true
+    var shuffle: Bool = false
+
+    var body: some View {
+        HStack(spacing: 11) {
+            Image(systemName: "shuffle")
+                .foregroundStyle(shuffle ? Color.Kit.musicAccent : Color.Kit.musicInk)
+            Image(systemName: "backward.fill").foregroundStyle(Color.Kit.musicInk)
+            Image(systemName: playing ? "pause.fill" : "play.fill").foregroundStyle(Color.Kit.musicInk)
+            Image(systemName: "forward.fill").foregroundStyle(Color.Kit.musicInk)
+            Image(systemName: "repeat").foregroundStyle(Color.Kit.musicInk)
+
+            ZStack(alignment: .bottom) {
+                Color.clear.frame(height: 54)   // the line belongs to the CAPSULE's edge
+                HStack(spacing: 8) {
+                    RoundedRectangle(cornerRadius: 3, style: .continuous)
+                        .fill(art).frame(width: 34, height: 34)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(title).font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.Kit.musicInk)
+                        Text(subtitle).font(.footnote).foregroundStyle(Color.Kit.musicInkSoft)
+                    }
+                    Spacer()
+                }
+                .frame(height: 54)
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(Color.Kit.musicInkSoft.opacity(0.35))
+                        Capsule().fill(Color.Kit.musicInkSoft)
+                            .frame(width: g.size.width * progress)
+                    }
+                }
+                .frame(height: 1).padding(.bottom, 2)
+            }
+
+            HStack(spacing: 14) {
+                Image(systemName: "quote.bubble").foregroundStyle(Color.Kit.musicInk)
+                Image(systemName: "list.bullet").foregroundStyle(Color.Kit.musicInk)
+                Image(systemName: "speaker.wave.2.fill").foregroundStyle(Color.Kit.musicInk)
+            }
+        }
+        .padding(.leading, 15).padding(.trailing, 20)
+        .frame(width: 700, height: 54)
+        .background(.regularMaterial, in: Capsule())
+        .overlay(Capsule().strokeBorder(.white.opacity(0.12), lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.18), radius: 12, y: 4)
+    }
+}
+```

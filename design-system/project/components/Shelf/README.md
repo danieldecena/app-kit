@@ -40,3 +40,69 @@ Music's shelf snaps to a card boundary: a measured scroll landed 878.9px against
 a 219.5px pitch, four cards, within 0.1%, after an ease-out of about 0.73s. The
 CSS uses `scroll-snap-type: x mandatory` and arrow keys scroll by exactly one
 card pitch.
+
+## SwiftUI
+
+Lifted from `build/source/music-components-spike.swift`, which is compiled
+against `swift/AppKit.swift` and rendered in a real window before it ships.
+Edit the spike, not this block.
+
+```swift
+/// A horizontally scrolling row. The shelf owns the GAP; the card owns its size.
+struct Shelf<Content: View>: View {
+    let title: String
+    var compact: Bool = false
+    /// Leading inset of the content column: 40pt, the same line TrackList's
+    /// pill starts on, measured from the Music window.
+    var inset: CGFloat = 40
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 6) {
+                Text(title).font(.title3.bold()).foregroundStyle(Color.Kit.musicInk)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.Kit.musicInkSoft)
+            }
+            .padding(.leading, inset)
+            ScrollView(.horizontal, showsIndicators: false) {
+                // 20pt wide, 16pt once the window narrows. A breakpoint, not a scale.
+                HStack(alignment: .top, spacing: compact ? 16 : 20) { content }
+                    .scrollTargetLayout()
+            }
+            .scrollTargetBehavior(.viewAligned)       // the snap Music has
+            // The cards rest 40pt in, level with TrackList's pill, but scroll
+            // all the way under the edge -- which contentMargins gives and a
+            // plain .padding does not.
+            .contentMargins(.horizontal, inset, for: .scrollContent)
+        }
+    }
+}
+
+/// Square artwork over a caption block of CONSTANT height. Card height minus
+/// card width measured 37pt at every width, so the caption does not scale.
+struct ArtworkCard: View {
+    let art: Color
+    let title: String
+    let subtitle: String
+    var width: CGFloat = 188
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(art)
+                .frame(width: width, height: width)   // square
+            VStack(alignment: .leading, spacing: 0) {
+                Text(title).font(.footnote).foregroundStyle(Color.Kit.musicInk)
+                    .lineLimit(1)
+                Text(subtitle).font(.caption2).foregroundStyle(Color.Kit.musicInkSoft)
+                    .lineLimit(1)
+            }
+            .padding(.top, 6)
+            .frame(height: 37, alignment: .top)       // constant, not derived
+        }
+        .frame(width: width)
+    }
+}
+```

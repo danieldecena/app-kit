@@ -6,6 +6,7 @@ Reads the live Decena files from <src>/project, writes the new files to
 """
 
 import json, os, re, sys
+from pathlib import Path
 
 SRC = sys.argv[1]
 OUT = sys.argv[2]
@@ -2416,6 +2417,49 @@ for comp in (
     "BarChart",
 ):
     docs[f"{comp}/preview.html"] = ns(rd(f"components/{comp}/preview.html"))
+# ------------------------------------------------------------- SwiftUI recipes
+# The Music components' SwiftUI is EXTRACTED from the spike rather than written
+# here, because a recipe nobody compiled is worse than no recipe. The spike is
+# built with `swiftc build/source/music-components-spike.swift swift/AppKit.swift`
+# against the real generated tokens, so anything that reaches a README has been
+# through the compiler and rendered in a window.
+_SPIKE_PATH = Path(__file__).resolve().parent / "source" / "music-components-spike.swift"
+_SPIKE = _SPIKE_PATH.read_text()
+
+
+def swift_section(name):
+    marker = f"// MARK: - {name}\n"
+    if _SPIKE.count(marker) != 1:
+        raise SystemExit(
+            f"spike section {name!r} appears {_SPIKE.count(marker)} times in {_SPIKE_PATH}"
+        )
+    rest = _SPIKE.split(marker, 1)[1]
+    cut = rest.find("\n// MARK: -")
+    body = (rest if cut < 0 else rest[:cut]).strip("\n")
+    if not body.strip():
+        raise SystemExit(f"spike section {name!r} is empty")
+    return body
+
+
+SWIFT_DOC = {
+    "Shelf": ("Shelf", ["Shelf", "ArtworkCard"]),
+    "HeroCard": ("HeroCard", ["HeroCard"]),
+    "TrackList": ("TrackList", ["TrackList"]),
+    "MiniPlayer": ("MiniPlayer", ["MiniPlayer"]),
+}
+for comp, (_, sections) in SWIFT_DOC.items():
+    key = f"{comp}/README.md"
+    if key not in docs:
+        raise SystemExit(f"no README to attach SwiftUI to: {key}")
+    code = "\n\n".join(swift_section(n) for n in sections)
+    docs[key] = docs[key].rstrip("\n") + (
+        "\n\n## SwiftUI\n\n"
+        "Lifted from `build/source/music-components-spike.swift`, which is compiled\n"
+        "against `swift/AppKit.swift` and rendered in a real window before it ships.\n"
+        "Edit the spike, not this block.\n\n"
+        "```swift\n" + code + "\n```\n"
+    )
+
 for rel, text in docs.items():
     assert (
         "clay" not in text.lower()
