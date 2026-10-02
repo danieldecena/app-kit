@@ -15,9 +15,9 @@
 
 ## Next Up
 
-- `Shelf`'s arrow-key `nudge` takes its pitch from `firstElementChild` alone, so a shelf mixing card widths scrolls by the wrong amount for every later card and `scroll-snap` then re-settles on a neighbour. The CSS explicitly anticipates mixed widths, so this is reachable. Actionable without Daniel.
-- Two capture tasks need Daniel's hands, because driving Music is policy-blocked for the agent: a row with the mouse held down (does a pressed state exist?), and the dark transport button with the window inactive (for `music-primary-inactive`).
-- Contextual toolbar and window chrome are deliberately deferred, not dropped. Music's are per-page, so both need their own capture pass before either is a component.
+- **Nothing here is actionable without Daniel.** All five open items need Music driven by hand, which is policy-blocked for the agent, and each was attempted first: the `.tint` question was answered from a spike instead, and the Shelf pitch was investigated and closed as not-a-bug.
+- Three captures would each unblock a value: a row mid-press (is there a pressed state?), the dark transport button with the window inactive (`music-primary-inactive`), and a **light** album page with a favorited track (`music-star` light is currently derived, not measured).
+- Contextual toolbar and window chrome stay deferred. Music's are per-page, so both need their own capture pass before either can be a component.
 
 Full list: `TASKS.md`.
 
