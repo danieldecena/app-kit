@@ -283,8 +283,12 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
    white on it -- measured #FFFFFF off a Reduce Transparency capture, where
    music-ink would be #DDDDDD and core ink-soft would be #9A9A9A. Borrowing a
    ground ink for a glass surface was the original mistake. */
-.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 9px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
-.dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
+.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: 9px; padding: 0 9px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
+.dc-miniplayer-transport { display: flex; align-items: center; flex: none; }
+/* Music's transport is 28pt hit frames with Play at 36 (frames 9-157 from the
+   capsule's edge), so the group starts at 166 whatever glyphs are passed. */
+.dc-miniplayer-transport > .dc-miniplayer-btn { width: 28px; height: 28px; }
+.dc-miniplayer-transport > .dc-miniplayer-btn[data-primary] { width: 36px; height: 36px; }
 .dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
 .dc-miniplayer-btn[aria-pressed="true"] { color: var(--music-accent); }

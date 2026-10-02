@@ -1198,8 +1198,12 @@ css = css_sub(
    white on it -- measured #FFFFFF off a Reduce Transparency capture, where
    music-ink would be #DDDDDD and core ink-soft would be #9A9A9A. Borrowing a
    ground ink for a glass surface was the original mistake. */
-.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: var(--space-4); padding: 0 9px 0 15px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
-.dc-miniplayer-transport { display: flex; align-items: center; gap: 11px; flex: none; }
+.dc-miniplayer { position: relative; box-sizing: border-box; width: var(--miniplayer-w, 700px); height: 54px; border-radius: 27px; display: flex; align-items: center; gap: 9px; padding: 0 9px; background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); color: var(--on-music-glass); }
+.dc-miniplayer-transport { display: flex; align-items: center; flex: none; }
+/* Music's transport is 28pt hit frames with Play at 36 (frames 9-157 from the
+   capsule's edge), so the group starts at 166 whatever glyphs are passed. */
+.dc-miniplayer-transport > .dc-miniplayer-btn { width: 28px; height: 28px; }
+.dc-miniplayer-transport > .dc-miniplayer-btn[data-primary] { width: 36px; height: 36px; }
 .dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
 .dc-miniplayer-btn[aria-pressed="true"] { color: var(--music-accent); }
@@ -1585,7 +1589,7 @@ js = js.replace(
       h("div", { className: "dc-miniplayer-transport" },
         btn("sh", "Shuffle", p.shuffleGlyph || "⇄", p.onShuffle, { "aria-pressed": p.shuffle ? "true" : "false" }),
         btn("pv", "Previous", p.prevGlyph || "⏮", p.onPrev),
-        btn("pp", p.playing ? "Pause" : "Play", p.playing ? (p.pauseGlyph || "⏸") : (p.playGlyph || "▶"), p.onPlayPause),
+        btn("pp", p.playing ? "Pause" : "Play", p.playing ? (p.pauseGlyph || "⏸") : (p.playGlyph || "▶"), p.onPlayPause, { "data-primary": "true" }),
         btn("nx", "Next", p.nextGlyph || "⏭", p.onNext),
         btn("rp", "Repeat", p.repeatGlyph || "↻", p.onRepeat, { "aria-pressed": p.repeat ? "true" : "false" })),
       h("div", { className: "dc-miniplayer-now" },
@@ -2574,11 +2578,13 @@ centred at 599, 636 and 673. The earlier "507-680" was a pixel scan of glyph ink
 and the "335" a scan of text; neither is a layout edge.
 
 This component took the glyph width as the cluster's width, so the group ran on
-to 607.8 -- 36.8pt too long. `.dc-miniplayer-actions` now gives each action a
-36pt slot with a 1pt gap and the capsule's right padding is 9pt, which puts the
-cluster at 581-691 and the group at 167-573 (the 1pt is `--space-4` against
-Music's 9pt gap). Pass at most three actions to match Music; fewer lengthen the
-group, which is the same rule.
+to 607.8 -- 36.8pt too long, and the transport on the left was sized the same
+way, so the group's start moved with the glyphs passed. Both clusters are now
+hit frames: the transport is 28pt buttons with Play at 36 (frames 9-157), the
+actions are 36pt slots 1pt apart (581-691), the capsule's padding and gaps are
+9pt, and the group runs 166-572 whatever glyphs are passed (measured in the
+harness, including with deliberately wide glyphs). Pass at most three actions to
+match Music; fewer lengthen the group, which is the same rule.
 
 ## The progress line's two greys are white at an alpha, not two tokens
 

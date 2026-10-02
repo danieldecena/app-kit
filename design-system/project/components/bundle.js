@@ -214,7 +214,7 @@
       h("div", { className: "dc-miniplayer-transport" },
         btn("sh", "Shuffle", p.shuffleGlyph || "⇄", p.onShuffle, { "aria-pressed": p.shuffle ? "true" : "false" }),
         btn("pv", "Previous", p.prevGlyph || "⏮", p.onPrev),
-        btn("pp", p.playing ? "Pause" : "Play", p.playing ? (p.pauseGlyph || "⏸") : (p.playGlyph || "▶"), p.onPlayPause),
+        btn("pp", p.playing ? "Pause" : "Play", p.playing ? (p.pauseGlyph || "⏸") : (p.playGlyph || "▶"), p.onPlayPause, { "data-primary": "true" }),
         btn("nx", "Next", p.nextGlyph || "⏭", p.onNext),
         btn("rp", "Repeat", p.repeatGlyph || "↻", p.onRepeat, { "aria-pressed": p.repeat ? "true" : "false" })),
       h("div", { className: "dc-miniplayer-now" },

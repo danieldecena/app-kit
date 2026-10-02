@@ -44,11 +44,13 @@ centred at 599, 636 and 673. The earlier "507-680" was a pixel scan of glyph ink
 and the "335" a scan of text; neither is a layout edge.
 
 This component took the glyph width as the cluster's width, so the group ran on
-to 607.8 -- 36.8pt too long. `.dc-miniplayer-actions` now gives each action a
-36pt slot with a 1pt gap and the capsule's right padding is 9pt, which puts the
-cluster at 581-691 and the group at 167-573 (the 1pt is `--space-4` against
-Music's 9pt gap). Pass at most three actions to match Music; fewer lengthen the
-group, which is the same rule.
+to 607.8 -- 36.8pt too long, and the transport on the left was sized the same
+way, so the group's start moved with the glyphs passed. Both clusters are now
+hit frames: the transport is 28pt buttons with Play at 36 (frames 9-157), the
+actions are 36pt slots 1pt apart (581-691), the capsule's padding and gaps are
+9pt, and the group runs 166-572 whatever glyphs are passed (measured in the
+harness, including with deliberately wide glyphs). Pass at most three actions to
+match Music; fewer lengthen the group, which is the same rule.
 
 ## The progress line's two greys are white at an alpha, not two tokens
 
