@@ -12,7 +12,7 @@
 - [x] Contextual toolbar: decided not a component, per-page content
 - [x] Window chrome: decided, belongs to the adopting app
 - [x] Measure Music's shelf and song-row trailing edges, fix spike if they differ -- 4a1c9a8
-- [ ] MiniPlayer README: record colour-only toggle and pointer-sized frames
+- [x] MiniPlayer README: record colour-only toggle and pointer-sized frames -- 3a73285
 
 ## Completed
 
