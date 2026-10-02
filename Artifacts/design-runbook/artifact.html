@@ -1,0 +1,571 @@
+<title>App Kit Design Runbook</title>
+<style>
+/* Layout: a sticky stage rail beside one reading column; each stage is a checklist panel,
+   its commands, then what proves it done and what has gone wrong before. Artifact Kit tokens. */
+:root {
+  --bk-bg: #F2F2F7; --bk-surface: #FFFFFF; --bk-sunk: #E5E5EA;
+  --bk-ink: #1D1D1F; --bk-soft: #636366; --bk-edge: #86868B; --bk-hair: #D1D1D6;
+  --os: #007AFF; --os-text: #0068DA; --os-on: #FFFFFF;
+  --bk-accent-wash: rgba(0, 122, 255, 0.07);
+  --bk-ok: #207936; --bk-warn: #C73300; --bk-warn-wash: #FCECD3;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", "Helvetica Neue", system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", "Helvetica Neue", system-ui, sans-serif;
+  --font-round: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bk-bg: #000000; --bk-surface: #1C1C1E; --bk-sunk: #2C2C2E;
+    --bk-ink: #F5F5F7; --bk-soft: #98989D; --bk-edge: #7C7C80; --bk-hair: #38383A;
+    --os: #0A84FF; --os-text: #409CFF; --os-on: #FFFFFF;
+    --bk-accent-wash: rgba(10, 132, 255, 0.10);
+    --bk-ok: #30DB5B; --bk-warn: #FFB340; --bk-warn-wash: #513914;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bk-bg: #000000; --bk-surface: #1C1C1E; --bk-sunk: #2C2C2E;
+  --bk-ink: #F5F5F7; --bk-soft: #98989D; --bk-edge: #7C7C80; --bk-hair: #38383A;
+  --os: #0A84FF; --os-text: #409CFF; --os-on: #FFFFFF;
+  --bk-accent-wash: rgba(10, 132, 255, 0.10);
+  --bk-ok: #30DB5B; --bk-warn: #FFB340; --bk-warn-wash: #513914;
+  color-scheme: dark;
+}
+
+body { background: var(--bk-bg); color: var(--bk-ink); font: 400 14px/22px var(--font-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 64px; display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 40px; align-items: start; }
+a { color: var(--os-text); }
+:focus-visible { outline: 2px solid var(--os-text); outline-offset: 2px; border-radius: 4px; }
+code { font: 400 13px/18px var(--font-mono); }
+p code, li code, dd code, td code { background: var(--bk-sunk); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+
+/* Rail */
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); display: flex; flex-direction: column; gap: 12px; }
+.rail-title { font: 600 11px/14px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--bk-soft); }
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.rail li a { display: flex; align-items: baseline; gap: 8px; padding: 5px 8px; border-radius: var(--radius-sm); color: var(--bk-ink); text-decoration: none; font-size: 13px; line-height: 18px; }
+.rail li a:hover { background: var(--bk-accent-wash); }
+.rail .n { font: 600 12px/18px var(--font-round); color: var(--bk-soft); min-width: 14px; font-variant-numeric: tabular-nums; }
+.rail .count { margin-left: auto; font: 400 12px/18px var(--font-mono); color: var(--bk-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rail .count[data-full="true"] { color: var(--bk-ok); }
+.rail-foot { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--bk-hair); }
+.total { font-size: 13px; line-height: 18px; color: var(--bk-soft); }
+.total b { color: var(--bk-ink); font-family: var(--font-round); font-variant-numeric: tabular-nums; }
+button { font: 400 13px/18px var(--font-body); color: var(--bk-ink); background: var(--bk-surface); border: 1px solid var(--bk-edge); border-radius: var(--radius-sm); padding: 4px 10px; cursor: pointer; }
+button:hover { border-color: var(--os-text); color: var(--os-text); }
+#reset { align-self: flex-start; }
+
+/* Column */
+main { display: flex; flex-direction: column; gap: 40px; min-width: 0; }
+.eyebrow { font: 600 11px/14px var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--bk-soft); margin: 0 0 8px; }
+h1 { font: 700 34px/41px var(--font-display); margin: 0 0 12px; text-wrap: balance; letter-spacing: -0.01em; }
+.lede { font-size: 15px; line-height: 22px; color: var(--bk-soft); margin: 0; max-width: 65ch; }
+h2 { font: 700 22px/28px var(--font-display); margin: 0; text-wrap: balance; }
+h3 { font: 600 11px/14px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--bk-soft); margin: 0 0 6px; }
+.goal { margin: 4px 0 0; color: var(--bk-soft); max-width: 65ch; }
+
+.panel { background: var(--bk-surface); border-radius: var(--radius-lg); overflow: hidden; }
+.rules { list-style: none; margin: 0; padding: 0; }
+.rules li { padding: 12px 16px; border-top: 1px solid var(--bk-hair); display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; }
+.rules li:first-child { border-top: 0; }
+.rules .n { font: 700 15px/22px var(--font-round); color: var(--bk-soft); }
+.rules b { font-weight: 600; }
+.example { margin: 0; color: var(--bk-soft); font-size: 13px; line-height: 18px; max-width: 70ch; }
+.example b { color: var(--bk-ink); font-weight: 600; }
+
+.stage { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 16px); }
+.stage-head { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: start; }
+.stage-head .num { font: 700 22px/28px var(--font-round); color: var(--bk-soft); font-variant-numeric: tabular-nums; }
+.checks { list-style: none; margin: 0; padding: 0; }
+.checks li { border-top: 1px solid var(--bk-hair); }
+.checks li:first-child { border-top: 0; }
+.checks label { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 12px; padding: 11px 16px; cursor: pointer; align-items: start; }
+.checks label:hover { background: var(--bk-accent-wash); }
+.checks input { width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--os); }
+.checks input:checked + span { color: var(--bk-soft); }
+
+.cmd { position: relative; background: var(--bk-sunk); border-radius: var(--radius-md); }
+.cmd pre { margin: 0; padding: 12px 14px; padding-right: 72px; overflow-x: auto; font: 400 13px/20px var(--font-mono); white-space: pre; }
+.cmd pre .c { color: var(--bk-soft); }
+.cmd button { position: absolute; top: 8px; right: 8px; font-size: 12px; padding: 2px 8px; }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 0; }
+.notes > div { min-width: 0; }
+.notes dt { font: 600 11px/14px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+.notes dd { margin: 0; }
+.done dt { color: var(--bk-ok); }
+.trap { background: var(--bk-warn-wash); border-radius: var(--radius-md); padding: 10px 14px; }
+.trap dt { color: var(--bk-warn); }
+.skills { margin: 0; font-size: 13px; line-height: 18px; color: var(--bk-soft); }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 18px; }
+th, td { text-align: left; padding: 9px 16px; border-top: 1px solid var(--bk-hair); vertical-align: top; }
+thead th { border-top: 0; font: 600 11px/14px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--bk-soft); }
+td:first-child { font-weight: 600; min-width: 9em; }
+td { min-width: 11em; }
+.stage h3 { margin: 10px 0 -6px; }
+footer { color: var(--bk-soft); font-size: 13px; line-height: 18px; border-top: 1px solid var(--bk-hair); padding-top: 16px; max-width: 70ch; }
+
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-inline: 16px; padding-block: 20px 48px; }
+  .rail { position: static; }
+  .rail ol { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+  .rail li a { background: var(--bk-surface); padding: 4px 8px; }
+  h1 { font-size: 28px; line-height: 34px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+  <nav class="rail" aria-label="Stages">
+    <div class="rail-title">Stages</div>
+    <ol>
+      <li><a href="#s1"><span class="n">1</span>Scope<span class="count" data-for="s1"></span></a></li>
+      <li><a href="#s2"><span class="n">2</span>Capture<span class="count" data-for="s2"></span></a></li>
+      <li><a href="#s3"><span class="n">3</span>Witness<span class="count" data-for="s3"></span></a></li>
+      <li><a href="#s4"><span class="n">4</span>Measure<span class="count" data-for="s4"></span></a></li>
+      <li><a href="#s5"><span class="n">5</span>Provenance<span class="count" data-for="s5"></span></a></li>
+      <li><a href="#s6"><span class="n">6</span>Tokens and gates<span class="count" data-for="s6"></span></a></li>
+      <li><a href="#s7"><span class="n">7</span>Components<span class="count" data-for="s7"></span></a></li>
+      <li><a href="#s8"><span class="n">8</span>Verify<span class="count" data-for="s8"></span></a></li>
+      <li><a href="#s9"><span class="n">9</span>Publish<span class="count" data-for="s9"></span></a></li>
+      <li><a href="#s10"><span class="n">10</span>Log<span class="count" data-for="s10"></span></a></li>
+    </ol>
+    <div class="rail-title">Reference</div>
+    <ol>
+      <li><a href="#toolbox"><span class="n">A</span>Tools on this Mac</a></li>
+      <li><a href="#sources"><span class="n">B</span>Where to look</a></li>
+    </ol>
+    <div class="rail-foot">
+      <div class="total" id="total" aria-live="polite">Checks are saved in this browser only.</div>
+      <button type="button" id="reset">Start a new run</button>
+    </div>
+  </nav>
+
+  <main>
+    <header>
+      <p class="eyebrow">App Kit runbook</p>
+      <h1>From a reference app to a published design structure</h1>
+      <p class="lede">How the Music variant of App Kit was built, written as steps to follow the next time a set of tokens and components is taken from a real app. The order matters: each stage produces the evidence the next one depends on.</p>
+    </header>
+
+    <section aria-labelledby="rules-h">
+      <h3 id="rules-h">Rules of evidence</h3>
+      <div class="panel">
+        <ol class="rules">
+          <li><span class="n">1</span><span><b>A value needs an instrument.</b> A hex with no capture, command and sample count behind it is a note, and the table says so.</span></li>
+          <li><span class="n">2</span><span><b>A file name is not an instrument.</b> The state a capture shows is read from the capture, never from what it was called.</span></li>
+          <li><span class="n">3</span><span><b>Every check gets two inputs.</b> One it must fail on and one it must pass on. A check that has only ever blocked has not been seen to work.</span></li>
+          <li><span class="n">4</span><span><b>An exit code is not the effect.</b> After a build, a publish or a mutation, look at the thing that should have changed.</span></li>
+          <li><span class="n">5</span><span><b>Measured and decided are different tokens.</b> When a measured colour fails contrast, keep it and add a stepped one beside it.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <p class="example"><b>Worked example.</b> Music variant, 2 October 2026: 17 colour tokens in two appearances make 34 cells. 25 are measured, 9 are derived, and none is left without an instrument. Six were unsupported that morning; this run closed them from 12 captures and changed two values by one step each.</p>
+
+    <section class="stage" id="s1">
+      <div class="stage-head"><span class="num">1</span><div><h2>Scope the source</h2><p class="goal">Name the one place values come from and the states you need from it.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c1-1"><span>Pick a single value source. For a Mac app that is the native app, not its web player.</span></label></li>
+        <li><label><input type="checkbox" id="c1-2"><span>Write the state matrix: appearance (light, dark) by window state (key, not key) by element state (rest, hover, selected, pressed, focused).</span></label></li>
+        <li><label><input type="checkbox" id="c1-3"><span>List the page types the element appears on. A playlist row and an album row are not the same row.</span></label></li>
+        <li><label><input type="checkbox" id="c1-4"><span>Write down what is out of scope and why, so it reads as a decision later.</span></label></li>
+      </ul></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>Every cell of the matrix is marked needed or not needed, and the out-of-scope list has a reason per item.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd>A scrape of music.apple.com gave <code>#D60017</code> for the accent. The Mac app measures <code>#FA233B</code>.</dd></div>
+      </dl>
+      <p class="skills">Skill: <code>apple-docs</code> before reasoning about any Apple framework symbol.</p>
+    </section>
+
+    <section class="stage" id="s2">
+      <div class="stage-head"><span class="num">2</span><div><h2>Capture</h2><p class="goal">Get one still per needed cell without disturbing the screen you are working on.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c2-1"><span>Confirm the app's window exists and is on screen. A closed or minimized window still has an id, and clicks sent to it land on whatever is under the pointer.</span></label></li>
+        <li><label><input type="checkbox" id="c2-2"><span>Move the window to the virtual display before driving it, and note where it was.</span></label></li>
+        <li><label><input type="checkbox" id="c2-3"><span>Prefer a script over a click. <code>reopen</code> and <code>reveal</code> set up a selected row without activating the app.</span></label></li>
+        <li><label><input type="checkbox" id="c2-4"><span>Take a capture before the action and one after, by window id.</span></label></li>
+        <li><label><input type="checkbox" id="c2-5"><span>Put the window back and return it to the state you found it in.</span></label></li>
+      </ul></div>
+      <div class="cmd"><pre id="k2"><span class="c"># where the virtual display is</span>
+~/bin/vdisplay.sh status
+<span class="c"># show the window without activating, then move it off screen (AX, no activation)</span>
+osascript -e 'tell application "Music" to reopen'
+music-park -228 -1340
+<span class="c"># select a row by script, then shoot the window by id</span>
+osascript -e 'tell application "Music" to reveal track 3 of playlist "Jump rope"'
+screencapture -o -x -l &lt;window-id&gt; row-selected-inactive-dark-vd.png</pre><button type="button" class="copy" data-copy="k2">Copy</button></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>Each needed cell has a PNG on disk, and the before capture shows the state absent, which proves the after capture is of now.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd>Focus returns to the terminal about a second after the app is activated. A key-window capture has to be taken inside that second, and a not-key capture after it.</dd></div>
+      </dl>
+    </section>
+
+    <section class="stage" id="s3">
+      <div class="stage-head"><span class="num">3</span><div><h2>Witness the state</h2><p class="goal">Read what each capture actually shows before any colour from it is trusted.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c3-1"><span>Run the scan tool's self-test. It must pass on drawn key, not-key and blank shots.</span></label></li>
+        <li><label><input type="checkbox" id="c3-2"><span>Read every capture's traffic lights: <code>key</code>, <code>not key</code> or <code>unclear</code>.</span></label></li>
+        <li><label><input type="checkbox" id="c3-3"><span>Treat <code>unclear</code> as unusable for a state claim. It never means not key.</span></label></li>
+        <li><label><input type="checkbox" id="c3-4"><span>Open each capture and record appearance and page type from the pixels.</span></label></li>
+        <li><label><input type="checkbox" id="c3-5"><span>Write the table into the capture log: file, appearance, window state, saturation.</span></label></li>
+      </ul></div>
+      <div class="cmd"><pre id="k3">/usr/bin/python3 build/source/swatch-scan.py --selftest
+/usr/bin/python3 build/source/swatch-scan.py &lt;capture.png&gt; --lights</pre><button type="button" class="copy" data-copy="k3">Copy</button></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>Every capture a token leans on has a witnessed state in the log.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd><code>album-selected-inactive-dark.png</code> was shot with the window key. Its grey was a key window with an unfocused list, and it stood in as the inactive value for weeks.</dd></div>
+      </dl>
+    </section>
+
+    <section class="stage" id="s4">
+      <div class="stage-head"><span class="num">4</span><div><h2>Measure</h2><p class="goal">Turn captures into numbers, each with the command that produced it.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c4-1"><span>Convert to sRGB first. A capture carries the display's profile, and a saturated colour read raw is the wrong number. The scan tool does this.</span></label></li>
+        <li><label><input type="checkbox" id="c4-2"><span>Fills: histogram a text-free band and record the count, for example 920 of 920. Sample a second height.</span></label></li>
+        <li><label><input type="checkbox" id="c4-3"><span>Labels and glyphs: read the solid interior, and check the reported background is the fill you expected.</span></label></li>
+        <li><label><input type="checkbox" id="c4-4"><span>Shapes: walk the extent from a seed above any text, then walk the ground beside it as the control.</span></label></li>
+        <li><label><input type="checkbox" id="c4-5"><span>Frames and hit targets: take them from the Accessibility tree, not from ink.</span></label></li>
+        <li><label><input type="checkbox" id="c4-6"><span>Read one already-known value from the same capture. If it is off, so is everything else in that shot.</span></label></li>
+        <li><label><input type="checkbox" id="c4-7"><span>Record a translucent surface as a range with its window state, never as one hex.</span></label></li>
+      </ul></div>
+      <div class="cmd"><pre id="k4"><span class="c"># coordinates are image pixels; scale is 2 above 1800px wide, else 1</span>
+swatch-scan.py &lt;png&gt; --hist Y:X0:X1        <span class="c"># fill: top colours and sample count</span>
+swatch-scan.py &lt;png&gt; --glyph X0:Y0:X1:Y1   <span class="c"># label: interior, count, background</span>
+swatch-scan.py &lt;png&gt; --extent X:Y          <span class="c"># shape: fill, x range, y range in pt</span></pre><button type="button" class="copy" data-copy="k4">Copy</button></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>Every number in the log sits beside its capture, command, window state and sample count, and one line says whether each prediction held.</dd></div>
+        <div class="trap"><dt>Traps</dt><dd>A run reported as 740 of 740 was the width of the sample window. A seed on a text line gave a 222pt extent for a 758pt ground. Four sessions of pixel scans could not explain a 572pt line end that the Accessibility tree gave at once.</dd></div>
+      </dl>
+    </section>
+
+    <section class="stage" id="s5">
+      <div class="stage-head"><span class="num">5</span><div><h2>Record provenance</h2><p class="goal">Say, per token and per appearance, how the value is known.</p></div></div>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Class</th><th>Means</th><th>What closes it</th></tr></thead>
+        <tbody>
+          <tr><td>Measured</td><td>Sampled from a still capture whose state was witnessed.</td><td>Nothing. Name the capture, the state and the count.</td></tr>
+          <tr><td>Derived</td><td>Computed from measured values, for example an alpha solved from a fill over a backdrop, or a grey stepped to clear 4.5:1.</td><td>Nothing. State the rule and let the build recompute it.</td></tr>
+          <tr><td>No instrument</td><td>The log states a value and names no capture or method.</td><td>Stages 2 to 4 for that cell.</td></tr>
+          <tr><td>Not observed</td><td>Assumed, usually from the other appearance.</td><td>Stages 2 to 4 for that cell.</td></tr>
+        </tbody>
+      </table></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c5-1"><span>Give every token a row: light class, dark class, evidence.</span></label></li>
+        <li><label><input type="checkbox" id="c5-2"><span>Keep the row in the generator so the build fails when a token has none.</span></label></li>
+        <li><label><input type="checkbox" id="c5-3"><span>Render the table into the system's README, so a reader sees the basis beside the value.</span></label></li>
+        <li><label><input type="checkbox" id="c5-4"><span>Count the weak cells. That count is the work list for the next capture session.</span></label></li>
+      </ul></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>A search of the rebuilt README for the two weak class names returns the count you expect, and returns a non-zero count on the previous commit.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd>A README that says every value was measured, written before anyone checked. The table replaced that sentence.</dd></div>
+      </dl>
+    </section>
+
+    <section class="stage" id="s6">
+      <div class="stage-head"><span class="num">6</span><div><h2>Tokens and gates</h2><p class="goal">Write the values once, in the generator, behind checks that can fail.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c6-1"><span>Add or change the token as <code>T(name, light, dark, usage)</code> in <code>build/app_build.py</code>. The usage string says where it is used and how it is known.</span></label></li>
+        <li><label><input type="checkbox" id="c6-2"><span>Name it with the variant prefix, and <code>on-&lt;fill&gt;</code> for ink on a fill.</span></label></li>
+        <li><label><input type="checkbox" id="c6-3"><span>Add each text pair to the contrast gate with its floor. A deliberate miss goes in the unchecked list with its reason.</span></label></li>
+        <li><label><input type="checkbox" id="c6-4"><span>Put the token on the right side of the orientation check. Contrast cannot see a light and dark swap.</span></label></li>
+        <li><label><input type="checkbox" id="c6-5"><span>Make sure some rule paints it. A measured token nothing references is a second kind of gap.</span></label></li>
+        <li><label><input type="checkbox" id="c6-6"><span>Prove any new gate on a mutated copy: the mutation is asserted present, the failure names the gate, and the clean copy passes.</span></label></li>
+      </ul></div>
+      <div class="cmd"><pre id="k6"><span class="c"># the copy resolves its sources relative to itself, so give it the same layout</span>
+mkdir -p $S/mut/build &amp;&amp; cp build/app_build.py $S/mut/build/
+ln -sfn "$PWD/build/source" $S/mut/build/source
+<span class="c"># edit the copy, grep that the edit is there, then expect exit 1 with the gate's own message</span>
+/opt/homebrew/bin/python3 $S/mut/build/app_build.py $S/src $S/mut-out</pre><button type="button" class="copy" data-copy="k6">Copy</button></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>The real build passes, each mutant fails with the message of the gate it targets, and the unmutated copy in the same layout passes.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd>A mutant that exits 1 with <code>FileNotFoundError</code> has not tested anything. It looks exactly like a gate firing until you read the last line.</dd></div>
+      </dl>
+      <p class="skills">Skills: <code>design:design-system</code> (extend) before adding a token, <code>design:accessibility-review</code> for any colour.</p>
+    </section>
+
+    <section class="stage" id="s7">
+      <div class="stage-head"><span class="num">7</span><div><h2>Components and build</h2><p class="goal">Generate the tree; never edit what the generator writes.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c7-1"><span>Author the component wholly in the generator: CSS, the bundle function, manifest and export entries, types, a README, a preview whose first line is the <code>@dsCard</code> comment. Copy Toolbar end to end.</span></label></li>
+        <li><label><input type="checkbox" id="c7-2"><span>Give it the states its neighbours have: hover, selected, window inactive, and its own focus ring.</span></label></li>
+        <li><label><input type="checkbox" id="c7-3"><span>Write the SwiftUI recipe in the spike under its <code>// MARK: -</code> section. The build extracts it and typechecks it.</span></label></li>
+        <li><label><input type="checkbox" id="c7-4"><span>Build to a scratch directory, diff against the tree, and copy only what the diff names.</span></label></li>
+        <li><label><input type="checkbox" id="c7-5"><span>Diff again. The only difference left is <code>design-system.json</code>, which is not generated.</span></label></li>
+      </ul></div>
+      <div class="cmd"><pre id="k7">S=&lt;scratch dir&gt;
+mkdir -p $S/src &amp;&amp; ln -sfn "$PWD/build/source/decena-apps-2026-09-24" $S/src/project
+/opt/homebrew/bin/python3 build/app_build.py $S/src $S/out
+diff -rq $S/out/project design-system/project
+diff -q $S/out/swift/AppKit.swift swift/AppKit.swift</pre><button type="button" class="copy" data-copy="k7">Copy</button></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>The build exits 0 with no NOT CHECKED line, and the second diff shows one file.</dd></div>
+        <div class="trap"><dt>Traps</dt><dd>A new file under <code>build/</code> needs <code>git add -f</code> or it stages nothing and says nothing. A changed value also lives in prose: the Play label moved to black and a CSS comment still said near-black.</dd></div>
+      </dl>
+    </section>
+
+    <section class="stage" id="s8">
+      <div class="stage-head"><span class="num">8</span><div><h2>Verify</h2><p class="goal">Run the composed thing, and have someone other than the author check it.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c8-1"><span>Sweep every preview in one pass: the page exists, carries <code>@dsCard</code>, and renders children. Include a name that must 404.</span></label></li>
+        <li><label><input type="checkbox" id="c8-2"><span>Check both appearances, one theme per call, with the bundle cache-busted and the loaded build asserted.</span></label></li>
+        <li><label><input type="checkbox" id="c8-3"><span>Drive the combined states by hand: hover over a selected row, focus inside an inactive window.</span></label></li>
+        <li><label><input type="checkbox" id="c8-4"><span>Render the SwiftUI spike in a real window, light and dark.</span></label></li>
+        <li><label><input type="checkbox" id="c8-5"><span>Hand the change to the verifier with named claims: the rebuild reproduces the tree, each gate fires, the measured values reproduce.</span></label></li>
+        <li><label><input type="checkbox" id="c8-6"><span>Hand the diff and the plan to the plan reviewer in a fresh context.</span></label></li>
+      </ul></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>Both reviews are back, every gap is either fixed in a new commit or recorded as left, and no finding rests on a reviewer's word alone.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd>A list of pairs cannot see the cascade between them. A hover rule tied the selected rule on specificity and painted 1.27:1 while all 33 pairs passed.</dd></div>
+      </dl>
+      <p class="skills">Skills: <code>design:design-critique</code> on a side-by-side screenshot, <code>design:accessibility-review</code> for hover and hit targets.</p>
+    </section>
+
+    <section class="stage" id="s9">
+      <div class="stage-head"><span class="num">9</span><div><h2>Publish</h2><p class="goal">Send only what changed, to the recorded address, and read it back.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c9-1"><span>Get the owner's go-ahead for this publish. An earlier yes does not carry over.</span></label></li>
+        <li><label><input type="checkbox" id="c9-2"><span>Take the URL from <code>artifacts.json</code>. Publishing without it creates a second artifact and strands the old link.</span></label></li>
+        <li><label><input type="checkbox" id="c9-3"><span>Read the artifact by URL, then hash its live files against the last publish commit. A mismatch means someone edited it live.</span></label></li>
+        <li><label><input type="checkbox" id="c9-4"><span>Send the changed content files in one call.</span></label></li>
+        <li><label><input type="checkbox" id="c9-5"><span>Re-read the index, set <code>lastChange</code>, and send it last, on its own.</span></label></li>
+        <li><label><input type="checkbox" id="c9-6"><span>Read every sent file back and compare hashes with the tree.</span></label></li>
+      </ul></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>Each sent file's hash on the artifact equals its hash in the tree, and the version numbers are written in the status log.</dd></div>
+        <div class="trap"><dt>Traps</dt><dd>Reading files by path does not count as viewing the artifact; the publish is refused until the artifact itself is read. <code>index.d.ts</code> needs an explicit <code>text/plain</code> type, and its refusal publishes nothing at all.</dd></div>
+      </dl>
+    </section>
+
+    <section class="stage" id="s10">
+      <div class="stage-head"><span class="num">10</span><div><h2>Log and hand off</h2><p class="goal">Leave the next session able to start without this one.</p></div></div>
+      <div class="panel"><ul class="checks">
+        <li><label><input type="checkbox" id="c10-1"><span>Add a dated decision entry to <code>STATUS.md</code>: what is now measured, what is still weak and why, which values moved and by how much.</span></label></li>
+        <li><label><input type="checkbox" id="c10-2"><span>Record each control that misfired and what the real result was.</span></label></li>
+        <li><label><input type="checkbox" id="c10-3"><span>Supersede a stale sentence with a new entry that points at it. Do not rewrite the old one.</span></label></li>
+        <li><label><input type="checkbox" id="c10-4"><span>Keep <code>TASKS.md</code> to titles under 60 characters, with the commit beside each finished one.</span></label></li>
+        <li><label><input type="checkbox" id="c10-5"><span>State what is waiting on the owner as a question with a recommendation.</span></label></li>
+        <li><label><input type="checkbox" id="c10-6"><span>Commit with an explicit path list, push, and compare the remote head with the local one.</span></label></li>
+      </ul></div>
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>The working tree is clean, the remote matches, and the Next Up section names at most three things.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd>A background agent can outlive the session that started it and keep committing. Check for one before editing the files it owns, and re-run its numbers before closing its tasks.</dd></div>
+      </dl>
+    </section>
+
+    <section class="stage" id="toolbox">
+      <div class="stage-head"><span class="num">A</span><div><h2>Working on design from this Mac</h2><p class="goal">What is installed, what each thing is for, and which surface to trust for which judgement. Checked against the machine on 2 October 2026.</p></div></div>
+
+      <h3>Measure the real app</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Job</th><th>Tool</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Still of one window</td><td><code>screencapture -o -x -l &lt;id&gt;</code>, or <code>build/source/music-shot.sh &lt;App&gt; &lt;name&gt; [delay]</code></td><td>The script finds the window id, then checks the PNG is exactly 2x the window and not blank. The delay is for states a hand has to hold.</td></tr>
+          <tr><td>Work off screen</td><td>BetterDisplay virtual display through <code>~/bin/vdisplay.sh</code></td><td><code>music-park.swift</code> moves a window there by Accessibility, with no activation. <code>music-drive.swift</code> clicks, captures, then restores the cursor and the frontmost app. Captures there are 1x.</td></tr>
+          <tr><td>State, fills, labels, shapes</td><td><code>build/source/swatch-scan.py</code></td><td>Needs Pillow, so run it with <code>/usr/bin/python3</code>. Converts to sRGB through <code>sips</code> first.</td></tr>
+          <tr><td>Frames and hit targets</td><td><code>build/source/ax-dump.swift &lt;App&gt; [depth]</code>, Accessibility Inspector</td><td>Frames come back in points. Music has no <code>AXWindows</code>; the dump enters through <code>AXMainWindow</code>.</td></tr>
+          <tr><td>Hover and press states</td><td><code>build/source/state-diff.py</code> on a screen recording</td><td>Finds each moment a small region changed, so the before and after can be cropped.</td></tr>
+          <tr><td>Motion</td><td><code>build/source/motion-track.py</code></td><td>Takes time from the recording's presentation timestamps, never from frame index.</td></tr>
+        </tbody>
+      </table></div></div>
+
+      <h3>Build, preview and render</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Job</th><th>Tool</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Generate the system</td><td><code>build/app_build.py</code> with <code>/opt/homebrew/bin/python3</code></td><td>Writes tokens, READMEs, the bundle and <code>swift/AppKit.swift</code>, then typechecks the SwiftUI spike.</td></tr>
+          <tr><td>Component previews</td><td><code>build/preview/index.html</code> on port 8111</td><td><code>.claude/launch.json</code> defines the server as <code>app-kit-previews</code>. Open <code>?c=&lt;Component&gt;</code>.</td></tr>
+          <tr><td>Browser checks</td><td>Playwright plugin</td><td>Headless Chromium and WebKit, light and dark. Console errors and computed styles come from the same session.</td></tr>
+          <tr><td>SwiftUI render</td><td><code>swiftc</code> on the spike, then <code>--selfshot</code></td><td>Add <code>--light</code> for the light appearance. Xcode and Icon Composer are installed.</td></tr>
+          <tr><td>Design files</td><td>Figma plugin, Canva app</td><td>Figma is reached through the plugin; there is no Figma desktop app here. The SF Symbols app is not installed either.</td></tr>
+        </tbody>
+      </table></div></div>
+
+      <h3>Skills, plugins and reviewers</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>When</th><th>Call</th><th>What it is for</th></tr></thead>
+        <tbody>
+          <tr><td>Before a new token or component</td><td><code>design:design-system</code> (extend)</td><td>Naming and state parity with what already exists.</td></tr>
+          <tr><td>Any colour, text over artwork, hover or hit target</td><td><code>design:accessibility-review</code></td><td>It found a 1.90:1 progress bar that the pair gate could not see.</td></tr>
+          <tr><td>A finished screen</td><td><code>design:design-critique</code></td><td>Hierarchy and spacing, on a side-by-side screenshot.</td></tr>
+          <tr><td>A chart, meter or stat tile</td><td><code>dataviz</code></td><td>Read it before the first line of chart code.</td></tr>
+          <tr><td>Labels and messages</td><td><code>design:ux-copy</code>, the <code>copy-editor</code> agent</td><td>Verb-first buttons, sentence case, real units.</td></tr>
+          <tr><td>Handing a design to a build</td><td><code>design:design-handoff</code></td><td>A spec the builder can follow without the designer.</td></tr>
+          <tr><td>Design and code in both directions</td><td><code>figma:figma-use</code>, <code>figma:figma-generate-library</code>, <code>figma:figma-swiftui</code>, <code>figma:figma-design-to-code</code></td><td>Load <code>figma-use</code> before any write to a Figma file.</td></tr>
+          <tr><td>A web page or artifact</td><td><code>artifact-design</code>, on Artifact Kit</td><td>Same palette as App Kit, for the browser.</td></tr>
+          <tr><td>After a UI change</td><td><code>frontend-reviewer</code> agent</td><td>Structure, states, accessibility, responsive behaviour.</td></tr>
+          <tr><td>Before calling it done</td><td><code>verifier</code>, <code>plan-reviewer</code> agents</td><td>One proves the behaviour, the other checks the diff against the plan.</td></tr>
+        </tbody>
+      </table></div></div>
+
+      <h3>Which surface to trust</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Judging</th><th>Trust</th><th>Why not the other</th></tr></thead>
+        <tbody>
+          <tr><td>Colour, spacing, radius, state, layout</td><td>The preview harness</td><td>It loads the real bundle and tokens.</td></tr>
+          <tr><td>Type</td><td>The published artifact</td><td>The harness guesses font stacks; <code>tokens.json</code> names families and carries none.</td></tr>
+          <tr><td>Glass and vibrancy</td><td>A real SwiftUI window</td><td>CSS <code>glass</code> samples the page. The real material samples the desktop behind the window.</td></tr>
+          <tr><td>Sizes and hit frames</td><td>The Accessibility tree</td><td>A pixel scan measures ink, and controls are larger than their glyphs.</td></tr>
+          <tr><td>Local previews</td><td>Headless Chromium and WebKit</td><td>Fast, scriptable, both engines.</td></tr>
+          <tr><td>Signed-in or public web pages</td><td>Safari</td><td>It carries the real sessions. Headless Chromium is blocked by many sites.</td></tr>
+        </tbody>
+      </table></div></div>
+
+      <h3>Practices that have paid for themselves</h3>
+      <div class="panel">
+        <ol class="rules">
+          <li><span class="n">1</span><span><b>Edit the generator.</b> Anything under <code>design-system/project/</code> or <code>swift/</code> is rewritten by the next build.</span></li>
+          <li><span class="n">2</span><span><b>Drive other apps on the virtual display.</b> Save and restore the cursor, the frontmost app, and the window's position and open state.</span></li>
+          <li><span class="n">3</span><span><b>One appearance per read.</b> Set <code>data-theme</code> in one call and read computed styles in the next, or the background comes back from the previous theme.</span></li>
+          <li><span class="n">4</span><span><b>Bust the bundle cache.</b> Add <code>?v=&lt;epoch&gt;</code> and have the page say which build it loaded before measuring.</span></li>
+          <li><span class="n">5</span><span><b>Look at the pixels.</b> A render check that only asserts the output is not empty passes a broken image.</span></li>
+          <li><span class="n">6</span><span><b>Ship ratios and gaps, not sizes.</b> Card sizes follow a sidebar the user can resize; gaps and aspect ratios hold.</span></li>
+          <li><span class="n">7</span><span><b>Colour never carries a state alone.</b> Pair it with a word or a glyph, and use no emoji.</span></li>
+          <li><span class="n">8</span><span><b>Keep reads out of the main session.</b> Send a long log or a diff to a subagent, then check its specific numbers yourself.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="stage" id="sources">
+      <div class="stage-head"><span class="num">B</span><div><h2>Where to look, and what to trust first</h2><p class="goal">Each source below was opened and checked on 2 October 2026. Every one has a limit, and the limit is the reason the runbook measures.</p></div></div>
+
+      <div class="panel">
+        <ol class="rules">
+          <li><span class="n">1</span><span><b>For a value, the running app.</b> No document gives the pixel. Apple's guidelines say not to hard-code system colours, and the design kits are redraws.</span></li>
+          <li><span class="n">2</span><span><b>For intent, the dated primary source.</b> Use the page that carries a version or an update date, and write that date beside the claim.</span></li>
+          <li><span class="n">3</span><span><b>For behaviour, the documentation tool, never memory.</b> <code>apple-docs</code> for Apple frameworks, <code>context7</code> for libraries, <code>claude-docs</code> for Claude Code.</span></li>
+          <li><span class="n">4</span><span><b>A draft is not a requirement.</b> Check the status line of a specification before citing it.</span></li>
+        </ol>
+      </div>
+
+      <h3>Apple platform conventions</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Source</th><th>Authority for</th><th>What it cannot tell you</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://developer.apple.com/design/human-interface-guidelines/">Human Interface Guidelines</a></td><td>Platform conventions and component intent. The Materials page covers Liquid Glass on macOS (updated June and September 2025); Color was updated December 2025.</td><td>Pixel values. It describes intent and tells you not to hard-code system colours.</td></tr>
+          <tr><td><a href="https://developer.apple.com/design/resources/">Apple Design Resources</a></td><td>Official Figma and Sketch kits, now listed for macOS 27, with SF Symbols 27 and Icon Composer.</td><td>What an app really draws. The kits are redraws, not measurements.</td></tr>
+          <tr><td><a href="https://developer.apple.com/documentation/appkit/ui-element-colors">UI element colors</a> (AppKit)</td><td>The semantic colour names that adapt to appearance.</td><td>Resolved RGB. It gives names only.</td></tr>
+          <tr><td><a href="https://developer.apple.com/documentation/swiftui/material">Material</a> (SwiftUI)</td><td>The blur and vibrancy materials and their thickness levels.</td><td>Liquid Glass, which is a separate API, and how any material looks over your desktop.</td></tr>
+        </tbody>
+      </table></div></div>
+      <p class="skills">Trust first: the guidelines, by their dated update table. Reach them through the <code>apple-docs</code> tool before reasoning about a symbol.</p>
+
+      <h3>Accessibility and contrast</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Source</th><th>Authority for</th><th>What it cannot tell you</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://www.w3.org/TR/WCAG22/">WCAG 2.2</a></td><td>The current W3C Recommendation, dated 12 December 2024. Its normative text is what a contrast floor is measured against.</td><td>Whether a design reads well. It sets floors.</td></tr>
+          <tr><td><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">Understanding 1.4.3</a></td><td>Text contrast: 4.5:1, and 3:1 for large text.</td><td>It is informative, not normative.</td></tr>
+          <tr><td><a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html">Understanding 1.4.11</a></td><td>Controls and graphics: 3:1.</td><td>It is informative, not normative.</td></tr>
+          <tr><td><a href="https://developer.apple.com/design/human-interface-guidelines/accessibility">HIG Accessibility</a></td><td>Apple's own table: 4.5:1 up to 17pt, 3:1 at 18pt or bold.</td><td>Anything beyond what WCAG already requires.</td></tr>
+          <tr><td><a href="https://www.w3.org/TR/wcag-3.0/">WCAG 3.0</a></td><td>Nothing yet. It is a Working Draft dated 10 September 2026, and its text-contrast method is undecided.</td><td>Do not cite it, or any contrast method tied to it, as a requirement.</td></tr>
+        </tbody>
+      </table></div></div>
+      <p class="skills">Trust first: the WCAG 2.2 normative text. The build's contrast gate computes that ratio, and <code>design:accessibility-review</code> covers what a list of pairs cannot.</p>
+
+      <h3>Token format and naming</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Source</th><th>Authority for</th><th>What it cannot tell you</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://www.designtokens.org/tr/2025.10/format/">Design Tokens Format Module 2025.10</a></td><td>The stable interchange format, a Final Community Group Report of 28 October 2025.</td><td>It is not a W3C Standard. The drafts address says not to treat it as authoritative.</td></tr>
+          <tr><td><a href="https://nathanacurtis.substack.com/p/naming-tokens-in-design-systems-9e86c7444676">Naming Tokens in Design Systems</a>, Nathan Curtis, 2020</td><td>Naming levels: namespace, object, base, modifier.</td><td>A tier model. It covers naming only.</td></tr>
+          <tr><td>The Design System artifact's own instructions</td><td>The shape the published page reads: each family is a list of name, value and usage.</td><td>It cannot read the name-to-value map of the format above, so convert before writing <code>tokens.json</code>.</td></tr>
+        </tbody>
+      </table></div></div>
+      <p class="skills">Trust first: for interchange, the 2025.10 address. For this system, the artifact's list shape, because that is what renders.</p>
+
+      <h3>Process and governance</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Source</th><th>Authority for</th><th>What it cannot tell you</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://design-system.service.gov.uk/community/contribution-criteria/">GOV.UK Design System contribution criteria</a></td><td>Concrete, published criteria for what may enter a system.</td><td>They are tuned to government services.</td></tr>
+          <tr><td><a href="https://www.nngroup.com/articles/design-systems-101/">Design Systems 101</a>, Nielsen Norman Group</td><td>Definitions, governance, and the choice to adopt, adapt or build. Reviewed August 2026.</td><td>Depth. It is an introduction.</td></tr>
+          <tr><td><a href="https://atomicdesign.bradfrost.com/">Atomic Design</a>, Brad Frost</td><td>A way to think about hierarchy and team workflow.</td><td>A governance process. It is a mental model.</td></tr>
+        </tbody>
+      </table></div></div>
+      <p class="skills">Trust first: GOV.UK's criteria, because they are specific and maintained. The other two are framing.</p>
+
+      <h3>Colour measurement on a Mac</h3>
+      <div class="panel"><div class="tbl"><table>
+        <thead><tr><th>Source</th><th>Authority for</th><th>What it cannot tell you</th></tr></thead>
+        <tbody>
+          <tr><td>The profile in your own capture: <code>sips -g space -g profile &lt;file&gt;</code></td><td>What the numbers in that file mean. Captures here carry <code>Display P3</code> from the built-in display and <code>Virtual 16:9</code> from the virtual one.</td><td>The sRGB value. Convert first with <code>sips -m</code>.</td></tr>
+          <tr><td><a href="https://developer.apple.com/library/archive/technotes/tn2313/_index.html">TN2313, Best Practices for Color Management</a></td><td>Why RGB values mean something only when tagged with a profile.</td><td>It is archived, dated 2014, and does not mention screenshots.</td></tr>
+          <tr><td><code>man sips</code>, <code>man screencapture</code></td><td>The flags: <code>--matchTo</code>, <code>--getProperty</code>, capture by window id.</td><td>Colour behaviour. <code>screencapture</code> has no profile option and calls itself poorly documented.</td></tr>
+        </tbody>
+      </table></div></div>
+      <p class="skills">Trust first: the embedded profile. No Apple page that was opened states that a screenshot depends on the display profile, so that claim rests on these captures, not on a document.</p>
+
+      <dl class="notes">
+        <div class="trap"><dt>Not verified</dt><dd>Apple's Accessibility Inspector page, Material Design's token tiering, and any contrast method proposed for WCAG 3 were not confirmed in this check. Look before relying on them.</dd></div>
+      </dl>
+    </section>
+
+    <footer>Source: <code>Artifacts/design-runbook/artifact.html</code> in <code>~/developer/app-kit</code>. The full measurement record is <code>build/source/music-capture.md</code>, and the build's own rules are in the repo's <code>CLAUDE.md</code>. Commands here are App Kit's; for another system, swap the paths and keep the order.</footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  var KEY = 'appkit-design-runbook-v1';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  var boxes = [].slice.call(document.querySelectorAll('.checks input[type="checkbox"]'));
+  var counts = [].slice.call(document.querySelectorAll('.count[data-for]'));
+  var total = document.getElementById('total');
+  var reset = document.getElementById('reset');
+
+  function tally() {
+    var done = 0;
+    counts.forEach(function (c) {
+      var inStage = [].slice.call(document.querySelectorAll('#' + c.getAttribute('data-for') + ' .checks input'));
+      var n = inStage.filter(function (b) { return b.checked; }).length;
+      done += n;
+      c.textContent = n + '/' + inStage.length;
+      c.setAttribute('data-full', String(n === inStage.length));
+    });
+    total.innerHTML = '<b>' + done + '</b> of <b>' + boxes.length + '</b> checks done. Saved in this browser only.';
+  }
+
+  boxes.forEach(function (b) {
+    if (state[b.id]) b.checked = true;
+    b.addEventListener('change', function () { state[b.id] = b.checked; save(); tally(); });
+  });
+  tally();
+
+  var armed = null;
+  reset.addEventListener('click', function () {
+    if (armed) {
+      clearTimeout(armed); armed = null;
+      state = {}; save();
+      boxes.forEach(function (b) { b.checked = false; });
+      reset.textContent = 'Start a new run';
+      tally();
+      return;
+    }
+    reset.textContent = 'Clear every check?';
+    armed = setTimeout(function () { armed = null; reset.textContent = 'Start a new run'; }, 4000);
+  });
+
+  [].slice.call(document.querySelectorAll('.copy')).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = document.getElementById(btn.getAttribute('data-copy'));
+      var text = pre.textContent;
+      function flash(msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = 'Copy'; }, 1500); }
+      function select() {
+        var r = document.createRange(); r.selectNodeContents(pre);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        flash('Selected');
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash('Copied'); }, select);
+      } else { select(); }
+    });
+  });
+})();
+</script>
