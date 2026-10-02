@@ -1,18 +1,19 @@
 ## Tasks
 
+- [ ] Publish provenance and token corrections to the artifact
+- [ ] Decide TrackList selected-row shape, light and playlist
+
+## Completed
+
+### 2026-10-02 — cleared from Active
+
 - [x] Build swatch-scan tool with key-state witness and controls -- 89b8e3d
 - [x] Witness window state of every capture behind a provenance row -- d3233a0
 - [x] Sample inactive fill, labels, Play label, capsule from witnessed captures -- 38cf667
 - [x] Measure selected-row shape by appearance and page type -- a8e1d32
 - [x] Write results into MUSIC_PROVENANCE and tokens, rebuild, stop before publish -- fd89c70
-- [ ] Publish provenance and token corrections to the artifact
-- [ ] Decide TrackList selected-row shape, light and playlist
 - [x] Capture dark selected row with the window not key -- 0c654fb
-
-
-
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
-
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
 - [x] MiniPlayer line ends 36.8pt long: Music's 36pt hit frames set 572
 - [x] Sidebar selection: neutral in every state, red was the track row's
@@ -22,8 +23,6 @@
 - [x] Window chrome: decided, belongs to the adopting app
 - [x] Measure Music's shelf and song-row trailing edges, fix spike if they differ -- 4a1c9a8
 - [x] MiniPlayer README: record colour-only toggle and pointer-sized frames -- 3a73285
-
-## Completed
 
 ### 2026-10-01 — cleared from Active
 
