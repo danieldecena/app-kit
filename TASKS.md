@@ -1,5 +1,11 @@
 ## Tasks
 
+- [ ] Build swatch-scan tool with key-state witness and controls
+- [ ] Witness window state of every capture behind a provenance row
+- [ ] Sample inactive fill, labels, Play label, capsule from witnessed captures
+- [ ] Measure selected-row shape by appearance and page type
+- [ ] Write results into MUSIC_PROVENANCE and tokens, rebuild, stop before publish
+
 
 
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
