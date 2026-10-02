@@ -400,6 +400,18 @@ colors += [
         "#B4B4B4",
         "Secondary text on music-hover or music-select-inactive. music-ink-soft reaches only 3.31:1 on the inactive selection fill and 3.99:1 on hover in light, so it is stepped here, the same split App Kit already makes between accent and accent-ink.",
     ),
+    T(
+        "music-sidebar-ink-inactive",
+        "#6E6E6F",
+        "#929293",
+        "Unselected sidebar labels while the window is not key. Music steps every label down, not only the selected row's (music-capture.md, Inactive sidebar ink, 2026-10-02). Dark is MEASURED #929293, 4.93:1 on the measured sidebar ground #252526. Light is measured #727273, which is only 4.30:1 on #F2F2F3; #6E6E6F is the first grey that clears 4.5 (4.55:1), the same departure music-ink-soft makes. A background window's rows are still clickable, so the disabled-control contrast exemption does not apply. Read window focus from the environment, never from a parameter.",
+    ),
+    T(
+        "music-sidebar-glyph-inactive",
+        "#CFCFD0",
+        "#454546",
+        "Unselected sidebar symbols while the window is not key. MEASURED in both appearances: Music drops the accent from every icon, zero red pixels in the icon column. Decorative -- the label beside it carries the meaning and the symbol is hidden from assistive tech -- so WCAG 1.4.11 does not apply; it is gated only against vanishing into the ground (1.60:1 dark, 1.39:1 light, as Music ships).",
+    ),
 ]
 
 tok["name"] = "App Kit"
@@ -768,6 +780,7 @@ def _check_contrast(tokens):
     LIGHTER_IN_LIGHT = (
         "ground",
         "surface",
+        "music-sidebar-glyph-inactive",
         "ground-window",
         "music-hover",
         "music-select-inactive",
@@ -780,6 +793,7 @@ def _check_contrast(tokens):
         "music-ink",
         "music-ink-soft",
         "music-ink-soft-on-fill",
+        "music-sidebar-ink-inactive",
         "music-star",
         "on-music-glass",
         "music-primary",
@@ -902,6 +916,41 @@ if _sidebar_select_failures(_probe(_good), _row):
 _f = _sidebar_select_failures(_sv, _SIDEBAR_SELECT)
 if _f:
     raise SystemExit("sidebar selection check failed:\n" + "\n".join(_f))
+
+# The inactive sidebar inks are solid and sit on the SIDEBAR's ground, which is
+# not ground-window (#252526 against #1F1F20 dark, #F2F2F3 against #FFFFFF
+# light), so gating them against ground-window would score them on a surface
+# they never appear on. The label holds the text floor; the decorative glyph
+# holds only what Music ships, which keeps it from vanishing into the ground.
+_SIDEBAR_INACTIVE = (
+    # token, theme, measured sidebar ground, floor
+    ("music-sidebar-ink-inactive", "dark", "#252526", 4.5),
+    ("music-sidebar-ink-inactive", "light", "#F2F2F3", 4.5),
+    ("music-sidebar-glyph-inactive", "dark", "#252526", 1.55),
+    ("music-sidebar-glyph-inactive", "light", "#F2F2F3", 1.35),
+)
+
+
+def _sidebar_inactive_failures(value_of, rows):
+    out = []
+    for name, theme, ground, floor in rows:
+        ratio = contrast(value_of(name, theme), ground, name, "sidebar ground")
+        if ratio < floor:
+            out.append(
+                f"  {name} ({theme}) is {ratio:.2f}:1 on {ground}, below {floor}:1"
+            )
+    return out
+
+
+# Both halves: Music's own light label (4.30:1) must fail, the shipped one pass.
+_ri = [_SIDEBAR_INACTIVE[1]]
+if not _sidebar_inactive_failures(lambda *_: "#727273", _ri):
+    raise SystemExit("sidebar-inactive check accepted Music's 4.30:1 light label")
+if _sidebar_inactive_failures(lambda *_: "#6E6E6F", _ri):
+    raise SystemExit("sidebar-inactive check rejected a 4.55:1 light label")
+_f = _sidebar_inactive_failures(_sv, _SIDEBAR_INACTIVE)
+if _f:
+    raise SystemExit("inactive sidebar check failed:\n" + "\n".join(_f))
 
 # ------------------------------------------------------------- SwiftUI recipes
 # The Music components' SwiftUI is EXTRACTED from the spike rather than written
@@ -1287,7 +1336,13 @@ css = css_sub(
 .dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select); color: var(--on-music-glass); font-weight: 600; }
 /* Inactive selection. Set data-window="inactive" on the sidebar when the window
    is not key; macOS does this itself and a monitor app is in this state most of
-   the time, so it is not an edge case. */
+   the time, so it is not an edge case. Music dims EVERY row, not only the
+   selected one: unselected labels step down and every icon loses the accent
+   (music-capture.md, Inactive sidebar ink). The two rules below are one class
+   less specific than the selected-row rules after them, so the selection still
+   wins whatever the order. */
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row { color: var(--music-sidebar-ink-inactive); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row .dc-sidebar-icon { color: var(--music-sidebar-glyph-inactive); }
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select-inactive); color: var(--music-ink); }
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--music-ink-soft-on-fill); }
 .dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
@@ -3246,6 +3301,16 @@ MUSIC_PROVENANCE = {
         "D",
         "D",
         "alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture",
+    ),
+    "music-sidebar-ink-inactive": (
+        "D",
+        "M",
+        "sidebar_probe.py over music-inactive-{dark,light}.png, unselected rows; light measured #727273 (4.30:1) and stepped to the first 4.5 grey",
+    ),
+    "music-sidebar-glyph-inactive": (
+        "M",
+        "M",
+        "sidebar_probe.py over music-inactive-{dark,light}.png, icon column, zero red pixels in both",
     ),
     "music-hover": ("M", "M", "inset-pill scan of still captures; dark measured twice"),
     "music-primary": (

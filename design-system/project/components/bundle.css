@@ -360,7 +360,13 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select); color: var(--on-music-glass); font-weight: 600; }
 /* Inactive selection. Set data-window="inactive" on the sidebar when the window
    is not key; macOS does this itself and a monitor app is in this state most of
-   the time, so it is not an edge case. */
+   the time, so it is not an edge case. Music dims EVERY row, not only the
+   selected one: unselected labels step down and every icon loses the accent
+   (music-capture.md, Inactive sidebar ink). The two rules below are one class
+   less specific than the selected-row rules after them, so the selection still
+   wins whatever the order. */
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row { color: var(--music-sidebar-ink-inactive); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row .dc-sidebar-icon { color: var(--music-sidebar-glyph-inactive); }
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select-inactive); color: var(--music-ink); }
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--music-ink-soft-on-fill); }
 .dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
