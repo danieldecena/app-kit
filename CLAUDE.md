@@ -95,6 +95,18 @@ Two things that cost a session each when measuring in the harness:
   reload the page per appearance. This cost a real false alarm on the `music`
   Button variant, which was correct the whole time.
 
+**Sweep the whole gallery in one pass, rather than one preview at a time.** From
+any harness page, `fetch` the bundle, read the component list out of its
+`@ds-bundle` manifest, and for each name fetch `<name>/preview.html` and mount it
+in a same-origin iframe with React, `bundle.css` and `bundle.js` injected ahead
+of it. Then assert three things per component: the file exists, its first line
+carries `@dsCard`, and `#root` has children. That catches a component the
+manifest advertises with no page, and one whose preview throws and renders empty,
+which looking at a few previews by hand does not. Give the control cases a run
+too -- a name that does not exist must come back 404 and an empty `#root` must
+read as 0 children -- because a sweep that cannot fail is not a sweep. All 20
+(the 19 in the manifest plus Cover) passed on 2026-10-01.
+
 Use `/usr/bin/python3` for anything needing pillow. `uv run --with pillow`
 re-resolves against pypi and fails with no network; the system python has it.
 
