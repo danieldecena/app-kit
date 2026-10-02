@@ -9,8 +9,8 @@
 - [x] Sidebar selection: neutral in every state, red was the track row's
 - [x] SidebarList takes its own two neutral selection tokens, CSS and SwiftUI
 - [x] Row mid-press: no visual of its own (dark); selection fires on mouse-up
-- [ ] [you] Contextual toolbar: needs its own capture pass
-- [ ] [you] Window chrome: deferred to the adopting app
+- [x] Contextual toolbar: decided not a component, per-page content
+- [x] Window chrome: decided, belongs to the adopting app
 
 ## Completed
 
