@@ -1893,8 +1893,9 @@ The y range starts below the selected Home pill so it measures unselected rows.
 Probe: `build/tools/sidebar_probe.py`, proven first on the spike's own red
 icons (1267 red pixels, fires) and on its content ground (0, quiet).
 
-The glyph is very faint: `#454546` on `#252526` is about 1.6:1, and
-`#CFCFD0` on `#F2F2F3` about 1.3:1. That is Music's choice for a decorative
+The glyph is very faint: `#454546` on `#252526` is 1.60:1, and `#CFCFD0` on
+`#F2F2F3` 1.39:1. The light LABEL is 4.30:1 on its ground, under the 4.5
+text floor; dark is 4.93:1. That is Music's choice for a decorative
 symbol beside a label that carries the meaning, not a measuring error.
 
 **The spike's selfshot is not reliably inactive.** It printed
