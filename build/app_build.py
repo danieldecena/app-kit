@@ -718,10 +718,19 @@ def _check_contrast(tokens):
         raise ValueError("the contrast gate rejected 4.54:1 against a 4.5 floor")
 
     failures = failures_for(val, CONTRAST_PAIRS)
-    # Contrast is blind to a light/dark swap: invert a whole theme pair and the
-    # ratios are unchanged. T() takes (name, light, dark), and the Music tokens
-    # were first written dark-first from a notes table, which the gate passed.
-    # These assert which side of mid-grey each token belongs on.
+    # Contrast is blind to a WHOLE-SET inversion, and this check is the only
+    # thing that catches it. Demonstrated 2026-10-01 rather than assumed:
+    # inverting all 14 oriented tokens together makes the build exit 1 with ten
+    # orientation failures and ZERO contrast failures. Invert both sides of
+    # every pair and each ratio is arithmetically unchanged, so the gate sees a
+    # perfectly healthy palette rendering backwards.
+    #
+    # Note the mutation that matters. Swapping ONE token is caught by contrast
+    # for all 14 of them, so a single-token test proves nothing about this
+    # check and briefly suggested it was redundant. The real bug, and the one
+    # that happened, was all eleven Music tokens written dark-first at once.
+    # T() takes (name, light, dark). These assert which side of mid-grey each
+    # token belongs on.
     # music-primary is the transport button, which is DARK on a light page and
     # light on a dark one -- it inverts against the ground, unlike a surface.
     LIGHTER_IN_LIGHT = (
@@ -780,7 +789,18 @@ def _check_contrast(tokens):
             )
 
     if failures:
-        raise SystemExit("contrast gate failed:\n" + "\n".join(failures))
+        # Name which guard actually failed. The header said "contrast gate"
+        # for every failure, including runs where no contrast pair failed at
+        # all and every line came from the orientation check -- which points a
+        # reader at the wrong guard.
+        kinds = []
+        if any("below the claimed" in f for f in failures):
+            kinds.append("contrast")
+        if any("wrong way round" in f for f in failures):
+            kinds.append("orientation")
+        if any("near-equal" in f for f in failures):
+            kinds.append("near-equality")
+        raise SystemExit(" and ".join(kinds or ["colour"]) + " check failed:\n" + "\n".join(failures))
 
 
 _check_contrast(tok["color"]["tokens"])
