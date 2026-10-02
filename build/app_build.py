@@ -380,7 +380,7 @@ colors += [
         "on-music-glass",
         "#000000",
         "#FFFFFF",
-        "Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF from a Reduce Transparency capture -- every glyph, the title AND the artist line, all pure white, where music-ink would be #DDDDDD. Light is MEASURED #000000 on a #FFFFFF capsule, so Music uses pure black and pure white on this surface in both appearances -- symmetric, and in neither case the ground ink. Gated against ground-window as a conservative stand-in, because the capsule fill itself is only measured in dark.",
+        "Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF on the opaque capsule (#3A3A3D), 11.34:1 -- every glyph, the title AND the artist line, all pure white, where music-ink would be #DDDDDD. Light is MEASURED #000000 on a #FFFFFF capsule, so Music uses pure black and pure white on this surface in both appearances -- symmetric, and in neither case the ground ink. Gated against ground-window as a conservative stand-in, because the capsule fill itself is only measured in dark.",
     ),
     T(
         "music-ink-soft-on-fill",

@@ -983,17 +983,48 @@ is dark-only.
 the bar for a graphical object. Recorded, not copied -- the same fidelity-
 versus-accessibility split already made for `music-accent` / `music-accent-ink`.
 
-### Unresolved: two Reduce Transparency readings of the same fill disagree
+### RESOLVED: only one of the two was actually opaque
 
-This capture gives the capsule `#151515` over the Home ground `#1E1E20`. The
-earlier entry in this file gives `#3B3B3D`, also with Reduce Transparency on,
-over the Concerts card `#1C1C1E`.
+Both captures were measured the same way and both looked constant, so the
+disagreement read as a contradiction in the method. It was not.
 
-If Reduce Transparency made the capsule fully opaque, one fill would not depend
-on what is behind it. Either it only *reduces* translucency rather than removing
-it -- which would undercut the method note above -- or one of the two readings
-sampled something other than the capsule. **Not resolved here, and neither value
-is being overwritten.** Settle it by capturing both surfaces in one session.
+| Capture | fill | backing | bleed-through |
+|---|---|---|---|
+| `home-reduced-transparency-dark` | **`#3A3A3D`** | `#1C1C1E` | none, crisp edge |
+| `home-miniplayer-translucent-dark` | `#151516` | `#1E1E20` | **page text visible through it** |
+
+The backings are two units apart, so a translucent capsule could not read
+`#3A3A3D` over one and `#151516` over the other. Looking at the crops settles
+it: the second shows "Apple Music Hip-Hop" and "Travis Scott" **through** the
+capsule's lower band. It was never opaque.
+
+**`#3A3A3D` is the capsule fill.** `#151515` is withdrawn, and the file that
+produced it is renamed `home-miniplayer-translucent-dark.png` so the name says
+what it is.
+
+#### The trap: the setting was on and the effect was not
+
+`defaults read com.apple.universalaccess reduceTransparency` returned `1` when
+that capture was taken, and it was still translucent -- Music had not
+re-rendered the material. Reading the setting is not observing the effect.
+
+**Test the effect, not the switch.** An opaque capsule has no content visible
+through it and holds one fill across backings that differ. A single row sampled
+over uniform dark content looks constant either way, which is exactly how this
+one passed.
+
+#### Figures corrected
+
+Measured against `#151515` and restated against `#3A3A3D`:
+
+| | against `#151515` | against **`#3A3A3D`** |
+|---|---|---|
+| white ink | 18.26:1 | **11.34:1** |
+| OFF toggle `#4F4F4F` | 2.23:1 | **1.38:1** |
+
+`on-music-glass` is unaffected as a value -- white is still the measured ink and
+still clears every bar. The OFF toggle misses 3:1 either way, by more than
+recorded.
 
 ## Transport button, window INACTIVE -- 2026-10-01
 

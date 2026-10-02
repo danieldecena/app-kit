@@ -15,15 +15,17 @@
 
 ## Next Up
 
-- **Nothing here is actionable without Daniel.** All five open items need Music driven by hand, which is policy-blocked for the agent, and each was attempted first: the `.tint` question was answered from a spike instead, and the Shelf pitch was investigated and closed as not-a-bug.
-- Three captures would each unblock a value: a row mid-press (is there a pressed state?), the dark transport button with the window inactive (`music-primary-inactive`), and a **light** album page with a favorited track (`music-star` light is currently derived, not measured).
-- Contextual toolbar and window chrome stay deferred. Music's are per-page, so both need their own capture pass before either can be a component.
+- The colour set is now **measured end to end**: every `music-*` token has both appearances read off a capture, and the three that were derived were replaced on 2026-10-01 (all three derivations turned out wrong).
+- Nothing left is actionable without Daniel, and each was attempted first: a Music row **mid-press** (is there a pressed state?), the **contextual toolbar**, and **window chrome**. All need Music driven by hand, which is policy-blocked for the agent.
+- Contextual toolbar and window chrome stay deferred on purpose: Music's are per-page, so each needs its own capture pass before it can be a component.
 
 Full list: `TASKS.md`.
 
 ## Decision log
 
 ### 2026-10-01
+- Resolved: the two Reduce-Transparency capsule readings. They were not a contradiction in the method -- only one capture was actually opaque. `#3A3A3D` is the capsule fill; `#151515` is withdrawn and its file renamed `home-miniplayer-translucent-dark.png`, because page text is visible through the capsule in it. The trap worth keeping: `defaults read ... reduceTransparency` returned 1 at the time, and Music had not re-rendered the material. Reading the setting is not observing the effect, and a single row sampled over uniform dark content looks constant whether or not the capsule is opaque.
+- Corrected as a consequence: white ink on the capsule is 11.34:1, not the 18.26:1 recorded against the translucent fill, and Music's OFF toggle misses 3:1 by more than recorded (1.38:1, not 2.23:1). `on-music-glass` is unaffected as a value.
 - Ran `design:design-system` (extend) on the variant, which this repo's CLAUDE.md requires before adding a token and which I had skipped while adding `music-star` and six components. Scored 86/100 on 13 tokens and 6 components. Two findings fixed on the spot: `SidebarList` was the only Music component with no focus ring, and the one driven by arrow keys; and Shelf and HeroCard documented no states at all although the CSS carries `data-compact` and `:focus-visible`.
 - **Decided: two naming findings are correct and deferred, because they break a published contract.** `ground-window` is the only variant token without the `music-` prefix, so it reads as a core token and should be `music-ground`; and `music-ink-soft-on-fill` is a fourth pattern for "ink on a fill" where the core convention is `on-<fill>` (`on-accent`), so the system would have picked `on-music-fill`. Both are live at artifact v34 and referenced in `swift/AppKit.swift`, so renaming is a migration with a deprecation window, not an edit. Do them together when the variant next takes a breaking change.
 - Left unmeasured rather than invented: whether Music's hero and artwork cards have a hover state. Every other card-like surface in App Kit does, so the variant is the odd one out, but no capture shows Music's behaviour and a guessed hover would be the only unmeasured visual in the set. HeroCard's README says so where a reader will hit it.
