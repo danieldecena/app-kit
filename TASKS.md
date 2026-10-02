@@ -2,13 +2,12 @@
 
 - [ ] Capsule fill: two Reduce-Transparency reads disagree (#151515 vs #3B3B3D)
 
-- [ ] [you] Capture a LIGHT album page with a favorited track, to measure music-star light
+- [ ] [you] One LIGHT album pass: settles music-star, on-music-glass and music-primary-inactive
 
 - [x] SwiftUI recipes for the five Music components, compiled and AX-checked
 
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
 - [ ] [you] Capture a Music row mid-press: is there a pressed state?
-- [ ] [you] Capture the dark transport button, window inactive
 - [ ] [you] Contextual toolbar: needs its own capture pass
 - [ ] [you] Window chrome: deferred to the adopting app
 

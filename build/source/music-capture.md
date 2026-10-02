@@ -995,6 +995,51 @@ it -- which would undercut the method note above -- or one of the two readings
 sampled something other than the capsule. **Not resolved here, and neither value
 is being overwritten.** Settle it by capturing both surfaces in one session.
 
+## Transport button, window INACTIVE -- 2026-10-01
+
+`album-transport-inactive-dark.png`, an album page, dark, `Music active=false`
+asserted before the shutter rather than assumed from the filename.
+
+| | Active (recorded earlier) | Inactive (measured here) |
+|---|---|---|
+| pill fill | `#F3F3F3` | **`#2F2F30`** |
+| label | `#0E0E0E` | **`#DFDFDF`** |
+
+**It inverts; it does not dim.** Light pill with a dark label becomes a dark
+pill with a light one. Shipped as `music-primary-inactive`, with the label left
+on `music-ink` -- `#DFDFDF` against `music-ink`'s `#DDDDDD` is two units, a
+near-match not worth a second token.
+
+**The inactive button is 1.23:1 against the page.** Its own boundary is very
+nearly invisible. The window being inactive does not disable it -- clicking
+activates the window and plays -- so this is an enabled control with no
+perceivable edge, which is Music's behaviour and is recorded rather than
+enforced. The pill-vs-ground pair is deliberately NOT in the contrast gate; the
+label-on-pill pair is, at 4.5.
+
+### Two captures mislabelled in one session
+
+Both were named before anything verified them, and both were wrong.
+
+- One was named `album-transport-inactive-dark` while `Music active=true`. The
+  helper now reports activity, so this was caught at the shutter.
+- The other was named the same and turned out to be **Home, in light mode,
+  active** -- wrong on all three counts. Renamed `home-light-active.png`, which
+  is a state the set did not otherwise have.
+
+This is the same failure the hero-gutter retraction records. The rule earned
+there held again: **a filename is not an observation.**
+
+## The variant is dark-measured and light-derived
+
+Three tokens now carry a measured dark value and a derived light one:
+`music-star`, `on-music-glass`, `music-primary-inactive`. Each says so in its
+own usage string, but the pattern is worth naming once: **every light value
+added since the original capture pass is a derivation.**
+
+One light-mode capture pass over an album page -- favorited track visible,
+window active, then inactive -- would settle all three at once.
+
 ## Not measured, and why
 
 - ~~The accent.~~ **Measured, see the table above.** Taken from large-title stroke

@@ -371,6 +371,12 @@ colors += [
         "The favorited star. Dark is MEASURED (#FFD700, sampled from album-detail-unfocused-dark.png, 11.74:1 on ground-window). Light is NOT measured: the same gold is 1.40:1 on white, far under the 3:1 a glyph needs, so light is stepped to the first gold that clears it. NOT the accent -- the star is gold, which is why the accent was taken from title strokes instead.",
     ),
     T(
+        "music-primary-inactive",
+        "#DCDCDD",
+        "#2F2F30",
+        "The transport button when the window is NOT key. Dark is MEASURED #2F2F30 from album-transport-inactive-dark.png; light is not measured and borrows music-select-inactive, the variant's other inactive fill. The button INVERTS rather than dims -- active is a light pill with a dark label, inactive is a dark pill with a light one. Its label is music-ink: measured #DFDFDF against music-ink's #DDDDDD, two units apart, which is a near-match not worth a second token. NOTE it is only 1.23:1 against ground-window, so the control's own boundary is near-invisible; that is Music's behaviour, not a target to copy.",
+    ),
+    T(
         "on-music-glass",
         "#272727",
         "#FFFFFF",
@@ -634,6 +640,10 @@ CONTRAST_PAIRS = (
         # ground-window stands in for the capsule, whose fill is measured in dark
         # only (#151515, darker than the ground, so the real ratio is higher).
         ("on-music-glass", "ground-window", 4.5),
+        # The label on the inactive transport button. The BUTTON vs the page is
+        # deliberately not gated: Music draws it at 1.23:1 and that is recorded
+        # as a departure rather than enforced as a floor.
+        ("music-ink", "music-primary-inactive", 4.5),
     ]
     + [
         (f"hl-{c}-on", f"hl-{c}-fill", 4.5)
@@ -739,6 +749,7 @@ def _check_contrast(tokens):
         "ground-window",
         "music-hover",
         "music-select-inactive",
+        "music-primary-inactive",
         "on-music-primary",
     )
     DARKER_IN_LIGHT = (
