@@ -143,6 +143,14 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-shelf-title { font: var(--type-title-3); color: var(--music-ink); }
 .dc-shelf-more { border: 0; padding: 0; background: none; color: var(--music-ink-soft); cursor: pointer; display: inline-flex; align-items: center; }
 .dc-shelf-head:hover .dc-shelf-more { color: var(--music-ink); }
+/* Both of these are real tab stops -- the see-all is a button and the track
+   carries tabIndex 0 so the arrow keys scroll by one card pitch -- and neither
+   had a focus rule, so each fell back to Chromium's own 1px blue ring. Nine
+   other focusable things in this system draw 2px of accent, so the default was
+   thinner and the wrong colour, and it varies by browser while the rest does
+   not. A visible ring was never missing; the system's ring was. */
+.dc-shelf-more:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; border-radius: 4px; }
+.dc-shelf-track:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; border-radius: var(--radius-md); }
 /* 20pt at wide windows, 16pt narrow -- a breakpoint, not a scale. Measured
    both; where it switches is unknown, so the wide value is the default and
    data-compact selects the narrow one. */
@@ -310,6 +318,7 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-sidebar-head { display: flex; align-items: center; justify-content: space-between; height: 19px; margin: var(--space-5) 0 var(--space-2); }
 .dc-sidebar-head-label { font: var(--type-caption-2); color: var(--music-ink-soft); }
 .dc-sidebar-head-action { border: 0; padding: 0; background: none; font: var(--type-caption-2); color: var(--music-accent-ink); cursor: pointer; }
+.dc-sidebar-head-action:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; border-radius: 4px; }
 .dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--music-ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
 .dc-sidebar-row:hover { background: var(--music-hover); }
 /* The only Music component that had no focus ring, and the one driven by the
@@ -340,6 +349,7 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-search input { flex: 1; min-width: 0; border: 0; padding: 0; background: none; outline: none; font: var(--type-subhead); color: var(--ink); }
 .dc-search input::placeholder { color: var(--ink-soft); }
 .dc-search-clear { display: inline-flex; border: 0; padding: 0; background: none; color: var(--ink-soft); cursor: pointer; }
+.dc-search-clear:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .dc-toolbar-notice { margin: var(--space-3) 0 0; padding: var(--space-3) var(--space-5); border-radius: var(--radius-sm); background: var(--surface); font: var(--type-footnote); color: var(--ink-soft); }
 .dc-toolbar-notice-bad { color: var(--bad); }
 

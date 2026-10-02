@@ -989,6 +989,14 @@ css = css_sub(
 .dc-shelf-title { font: var(--type-title-3); color: var(--music-ink); }
 .dc-shelf-more { border: 0; padding: 0; background: none; color: var(--music-ink-soft); cursor: pointer; display: inline-flex; align-items: center; }
 .dc-shelf-head:hover .dc-shelf-more { color: var(--music-ink); }
+/* Both of these are real tab stops -- the see-all is a button and the track
+   carries tabIndex 0 so the arrow keys scroll by one card pitch -- and neither
+   had a focus rule, so each fell back to Chromium's own 1px blue ring. Nine
+   other focusable things in this system draw 2px of accent, so the default was
+   thinner and the wrong colour, and it varies by browser while the rest does
+   not. A visible ring was never missing; the system's ring was. */
+.dc-shelf-more:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; border-radius: 4px; }
+.dc-shelf-track:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; border-radius: var(--radius-md); }
 /* 20pt at wide windows, 16pt narrow -- a breakpoint, not a scale. Measured
    both; where it switches is unknown, so the wide value is the default and
    data-compact selects the narrow one. */
@@ -1156,6 +1164,7 @@ css = css_sub(
 .dc-sidebar-head { display: flex; align-items: center; justify-content: space-between; height: 19px; margin: var(--space-5) 0 var(--space-2); }
 .dc-sidebar-head-label { font: 400 11px/13px var(--font-sans); color: var(--music-ink-soft); }
 .dc-sidebar-head-action { border: 0; padding: 0; background: none; font: 400 11px/13px var(--font-sans); color: var(--music-accent-ink); cursor: pointer; }
+.dc-sidebar-head-action:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; border-radius: 4px; }
 .dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--music-ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
 .dc-sidebar-row:hover { background: var(--music-hover); }
 /* The only Music component that had no focus ring, and the one driven by the
@@ -1186,6 +1195,7 @@ css = css_sub(
 .dc-search input { flex: 1; min-width: 0; border: 0; padding: 0; background: none; outline: none; font: 400 15px/20px var(--font-sans); color: var(--ink); }
 .dc-search input::placeholder { color: var(--ink-soft); }
 .dc-search-clear { display: inline-flex; border: 0; padding: 0; background: none; color: var(--ink-soft); cursor: pointer; }
+.dc-search-clear:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .dc-toolbar-notice { margin: var(--space-3) 0 0; padding: var(--space-3) var(--space-5); border-radius: var(--radius-sm); background: var(--surface); font: 400 13px/18px var(--font-sans); color: var(--ink-soft); }
 .dc-toolbar-notice-bad { color: var(--bad); }
 
@@ -2074,7 +2084,8 @@ measured, so this split is ours.
 |---|---|
 | `compact` | `data-compact="true"` on the shelf; the gap goes 20px to 16px |
 | head hover | hovering the title row brings the see-all chevron from `ink-soft` to `ink` |
-| track focus | the scroll track is a tab stop, so the arrow keys work without a trackpad |
+| track focus | the scroll track is a tab stop, so the arrow keys work without a trackpad; the ring is `music-accent`, 2px at 2px offset, like every other focusable thing here |
+| head focus | the see-all button takes the same ring. Both relied on the browser's own 1px blue until 2026-10-01 -- a ring was always visible, it just was not this system's |
 
 The cards are the caller's, so the shelf has no selected or disabled state of
 its own.
@@ -2760,6 +2771,37 @@ for comp, (_, sections) in SWIFT_DOC.items():
         "against `swift/AppKit.swift` and rendered in a real window before it ships.\n"
         "Edit the spike, not this block.\n\n"
         "```swift\n" + code + "\n```\n"
+    )
+
+# Every focusable control must draw THIS system's focus ring. Four did not --
+# the shelf's see-all and scroll track, the sidebar's section action and the
+# search field's clear button -- and because a tabbable element gets a ring from
+# the browser anyway, nothing looked broken: Chromium drew its own 1px blue
+# where the other nine draw 2px of accent. The failure mode of a missing focus
+# style is not an invisible focus, it is a focus that silently stops matching
+# the design system and varies by browser. So the relation to check is
+# focusable-class -> has a :focus-visible rule, which no amount of looking at
+# one component can tell you.
+_focusable = set(re.findall(r'h\(\s*"button"[^)]*?className:\s*(?:cx\()?"(dc-[a-z-]+)', js))
+_focusable |= set(re.findall(r'className:\s*"(dc-[a-z-]+)"[^}]*tabIndex:\s*0', js))
+_focusable |= set(re.findall(r'tabIndex:\s*0[^}]*className:\s*"(dc-[a-z-]+)"', js))
+if len(_focusable) < 8:
+    raise SystemExit(
+        f"the focusable-class scan found only {len(_focusable)}; the bundle's shape "
+        "changed and the pattern no longer matches, so this check would pass "
+        "vacuously"
+    )
+_ringed = {
+    sel
+    for rule in re.findall(r"([^\n{]*:focus-visible[^\n{]*)\{", css)
+    for sel in re.findall(r"\.(dc-[a-z-]+)", rule)
+}
+_unringed = sorted(c for c in _focusable if c not in _ringed)
+if _unringed:
+    raise SystemExit(
+        "focusable controls with no :focus-visible rule of their own, so the "
+        "browser's default ring stands in for the system's:\n"
+        + "".join(f"  {c}\n" for c in _unringed)
     )
 
 # Every music-* token must be painted by something, or say why not. The variant

@@ -40,7 +40,8 @@ measured, so this split is ours.
 |---|---|
 | `compact` | `data-compact="true"` on the shelf; the gap goes 20px to 16px |
 | head hover | hovering the title row brings the see-all chevron from `ink-soft` to `ink` |
-| track focus | the scroll track is a tab stop, so the arrow keys work without a trackpad |
+| track focus | the scroll track is a tab stop, so the arrow keys work without a trackpad; the ring is `music-accent`, 2px at 2px offset, like every other focusable thing here |
+| head focus | the see-all button takes the same ring. Both relied on the browser's own 1px blue until 2026-10-01 -- a ring was always visible, it just was not this system's |
 
 The cards are the caller's, so the shelf has no selected or disabled state of
 its own.
