@@ -97,6 +97,21 @@ One trap inside that: the capsule floats over the Concerts card, so a naive
 non-ground scan returns the card's 1231pt width instead. The two had to be
 separated by fill colour.
 
+## Known borrowings
+
+Two things are Music's, recorded rather than corrected, the same call made for
+`music-accent` and `music-star`:
+
+- **A toggle's on-state is colour only.** Shuffle and Repeat go accent-red when
+  on and stay white when off, with no second cue, which falls short of 1.4.1 for
+  a colour-blind sighted user. The component exposes the state to assistive
+  technology (`aria-pressed`; `accessibilityValue` in the SwiftUI recipe). An app
+  that must meet 1.4.1 visually should add a dot or underline under an on toggle.
+- **The hit frames are pointer-sized.** Transport buttons are 28pt (Play 36) and
+  the trailing actions 36pt, as in Music. That is adequate for a pointer and
+  short of 44pt for touch; an iPadOS adopter should enlarge the frames and accept
+  that the group's 166-572 span then changes.
+
 ## Glyphs
 
 The defaults are text characters so the component renders with no asset

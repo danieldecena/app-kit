@@ -863,14 +863,20 @@ def _sidebar_select_failures(value_of, rows):
         if (r, g, b) != (ink, ink, ink):
             out.append(f"  {name} ({theme}) is built from {(r, g, b)}, expected {ink}s")
         bg = [int(backdrop[i : i + 2], 16) for i in (1, 3, 5)]
-        comp = "#%02X%02X%02X" % tuple(round(c * al + k * (1 - al)) for c, k in zip((r, g, b), bg))
+        comp = "#%02X%02X%02X" % tuple(
+            round(c * al + k * (1 - al)) for c, k in zip((r, g, b), bg)
+        )
         want = [int(fill[i : i + 2], 16) for i in (1, 3, 5)]
         got = [int(comp[i : i + 2], 16) for i in (1, 3, 5)]
         if any(abs(x - y) > 2 for x, y in zip(got, want)):
-            out.append(f"  {name} ({theme}) composites to {comp} over {backdrop}, measured {fill}")
+            out.append(
+                f"  {name} ({theme}) composites to {comp} over {backdrop}, measured {fill}"
+            )
         ratio = contrast(value_of(label, theme), comp)
         if ratio < floor:
-            out.append(f"  {label} on {name} ({theme}) is {ratio:.2f}:1, below {floor}:1")
+            out.append(
+                f"  {label} on {name} ({theme}) is {ratio:.2f}:1, below {floor}:1"
+            )
     return out
 
 
@@ -1938,8 +1944,8 @@ docs[
     h('div',{className:'dc-row'},h(D.Button,{variant:'filled'},'Import 42 clips'),h(D.Button,{variant:'gray'},'Cancel'),h(D.Button,{variant:'plain'},'Show all'),h(D.Button,{variant:'destructive'},'Delete'),
       h('span',{style:{display:'inline-flex',padding:10,borderRadius:22,background:'linear-gradient(120deg,#5AC8FA,#AF52DE 60%,#FF2D55)'}},h(D.Button,{variant:'glass'},'Play'))),
     h('div',{className:'dc-row',style:{alignItems:'center'}},
-      h(D.Button,{variant:'music'},'\u25B6 Play'),
-      h(D.Button,{variant:'music','data-window-inactive':'true'},'\u25B6 Play'),
+      h(D.Button,{variant:'music'},'\u25b6 Play'),
+      h(D.Button,{variant:'music','data-window-inactive':'true'},'\u25b6 Play'),
       h('span',{style:{font:'var(--type-caption-1)',color:'var(--music-ink-soft)'}},'music: key window, then not key -- it inverts rather than dimming'))));
 </script>
 </body>
@@ -2631,6 +2637,21 @@ One trap inside that: the capsule floats over the Concerts card, so a naive
 non-ground scan returns the card's 1231pt width instead. The two had to be
 separated by fill colour.
 
+## Known borrowings
+
+Two things are Music's, recorded rather than corrected, the same call made for
+`music-accent` and `music-star`:
+
+- **A toggle's on-state is colour only.** Shuffle and Repeat go accent-red when
+  on and stay white when off, with no second cue, which falls short of 1.4.1 for
+  a colour-blind sighted user. The component exposes the state to assistive
+  technology (`aria-pressed`; `accessibilityValue` in the SwiftUI recipe). An app
+  that must meet 1.4.1 visually should add a dot or underline under an on toggle.
+- **The hit frames are pointer-sized.** Transport buttons are 28pt (Play 36) and
+  the trailing actions 36pt, as in Music. That is adequate for a pointer and
+  short of 44pt for touch; an iPadOS adopter should enlarge the frames and accept
+  that the group's 166-572 span then changes.
+
 ## Glyphs
 
 The defaults are text characters so the component renders with no asset
@@ -2916,7 +2937,9 @@ for comp, (_, sections) in SWIFT_DOC.items():
 # the design system and varies by browser. So the relation to check is
 # focusable-class -> has a :focus-visible rule, which no amount of looking at
 # one component can tell you.
-_focusable = set(re.findall(r'h\(\s*"button"[^)]*?className:\s*(?:cx\()?"(dc-[a-z-]+)', js))
+_focusable = set(
+    re.findall(r'h\(\s*"button"[^)]*?className:\s*(?:cx\()?"(dc-[a-z-]+)', js)
+)
 _focusable |= set(re.findall(r'className:\s*"(dc-[a-z-]+)"[^}]*tabIndex:\s*0', js))
 _focusable |= set(re.findall(r'tabIndex:\s*0[^}]*className:\s*"(dc-[a-z-]+)"', js))
 if len(_focusable) < 8:
