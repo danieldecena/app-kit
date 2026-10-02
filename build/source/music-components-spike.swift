@@ -427,6 +427,18 @@ struct SpikeView: View {
         ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
+                    // Music's Home title: 34pt bold, 23.5pt cap height measured
+                    // from the H stem, ink starting 36pt in from the sidebar
+                    // edge with the shelf heading at 34.5 (music-capture.md,
+                    // Page title). Not a component until a second adopter.
+                    Text("Home")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(Color.Kit.musicInk)
+                        .padding(.leading, 34)
+                        // The stack's 28pt gap leaves 39pt from the title's
+                        // baseline to the shelf heading; Music leaves 34.
+                        .padding(.bottom, -5)
+                        .accessibilityAddTraits(.isHeader)
                     Shelf(title: "Top Picks for You") {
                         HeroCard(art: grad(Color(red: 1, green: 0.37, blue: 0.23), Color(red: 1, green: 0.70, blue: 0.0)),
                                  eyebrow: "Made for You", title: "Daniel Decena's Station")

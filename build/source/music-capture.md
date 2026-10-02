@@ -1901,3 +1901,23 @@ symbol beside a label that carries the meaning, not a measuring error.
 **The spike's selfshot is not reliably inactive.** It printed
 `isKeyWindow=false` on one run and `true` on the next (2026-10-02), so a
 plain selfshot says nothing about which state it shows. Force the state.
+
+## Page title -- 2026-10-02
+
+Music opens Home with a large bold title above the first shelf. Measured from
+`music-inactive-dark.png` (980pt window, sidebar edge at x 208pt):
+
+| | Music | spike after the change | how |
+|---|---|---|---|
+| cap height | 23.5pt | 23.5pt | H stem, near-white pixels, y 59.0-82.5 |
+| point size | 34pt bold | 34pt bold | cap / 0.705 = 33.3; 34 reproduces the cap exactly |
+| ink inset from content edge | 36.0pt | 36.0pt | first ink column; the frame sits at Shelf's 34pt inset |
+| title ink vs shelf heading ink | +1.5pt | +1.5pt | both measured at the left stem |
+| title baseline to shelf heading cap top | 34.0pt | 34.0pt (39.0 before a -5pt bottom padding) | row scan |
+| ink | `#DDDDDD` | `music-ink` `#DDDDDD` | |
+
+Added to the spike window only, not as a component, until a second adopter
+needs it. `design:design-critique` on the side-by-side
+(`title-side-by-side.png`): the title matches; no change recommended. It also
+noted, outside this scope, that Music draws NO chevron after "Top Picks for
+You" while App Kit's Shelf always draws one -- filed as a follow-up.

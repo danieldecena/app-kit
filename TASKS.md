@@ -3,12 +3,13 @@
 - [x] Render the spike and run accessibility-review on the 55pt pill
 - [x] Measure Music's inactive sidebar ink in both appearances -- edf3df3
 - [x] Add inactive sidebar ink and glyph tokens -- dda4658
-- [ ] SidebarList/TrackList read appearsActive, dim whole sidebar
+- [x] SidebarList/TrackList read appearsActive, dim whole sidebar -- 1a53795
 - [x] Web SidebarList dims every row when inactive -- dda4658
-- [ ] Large page title in the spike window
+- [x] Large page title in the spike window -- (this commit)
 - [ ] Spinner tab: re-copy, title, overflowing shelves
 - [ ] Find what moves the tab's selections after launch
 - [ ] Publish the Music review fixes and record
+- [ ] Shelf draws the chevron only when it has a See All
 
 ## Completed
 
