@@ -1273,3 +1273,33 @@ The hero variant confirms it rather than needing its own fix, since both share
 `.dc-shelf`: the hero group went 418.2 -> **402.2** against Music's 400, with the
 card at 258 x 344 (ratio 0.750, against 0.751 / 0.748 / 0.748 measured), pitch
 278 against 277.5 and the gap still 20.
+
+### The sidebar's inactive selection is not the track row's
+
+From `home-inactive-dark-sidebar.png` (window 1588x1007pt, traffic lights
+`#393939` so the window is **not** key), converted to sRGB before sampling:
+
+| | measured | uniformity |
+|---|---|---|
+| sidebar background | **`#101010`** | 114/114 sampled pixels |
+| selected row (Home) | **`#1F1F1F`** | 114/114 |
+| row height | 66px @2x = **33pt** | matches the recorded 32pt |
+
+`music-select-inactive` is `#464646`, and the table above records where that came
+from: a **track row**, on the opaque content ground. `SidebarList` reuses the
+same token, but the sidebar is vibrant material rather than the content ground.
+On this backdrop Music draws its sidebar selection **15 units** above the sidebar,
+where the component draws **54**.
+
+That is the same shape as the MiniPlayer's ink error -- a value measured on one
+surface, reused on another whose material composites. It is not yet fixed, and
+deliberately so: one capture cannot tell a translucent fill from a different flat
+value, which is exactly the mistake the capsule episode cost a session to undo.
+
+**The capture that settles it:** the same inactive sidebar over a visibly
+different desktop. If the selection tracks the backdrop it is translucent and
+needs an alpha, not a hex; if it holds at `#1F1F1F` it is a flat value and
+`SidebarList` simply needs its own token.
+
+Found while looking for something else: this file was shot as `row-pressed-dark`
+and turned out to be Home, which has no track rows at all. Renamed to what it is.

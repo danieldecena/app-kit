@@ -6,6 +6,7 @@
 
 - [x] Shelf arrow-key pitch: not a bug, mandatory snap corrects it
 - [ ] [code] Progress-line span: 405pt measured vs 390pt in the README
+- [ ] [you] Sidebar inactive selection: reshoot over a different desktop
 - [ ] [you] Row mid-press: music-shot.sh Music row-pressed-dark 5, hold a row
 - [ ] [you] Contextual toolbar: needs its own capture pass
 - [ ] [you] Window chrome: deferred to the adopting app
