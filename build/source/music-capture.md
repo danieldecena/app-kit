@@ -1552,3 +1552,43 @@ to the rows around it (`row-pressed-light-vd.png`). Controls: the selected row i
 `#DC1229` with the window key (`row-selected-key-light-vd.png`, `music-select`
 light exactly) and `#DCDCDC` with it inactive (`row-selected-inactive-light-vd.png`,
 `music-select-inactive` light is `#DCDCDD`). No pressed state in either appearance.
+
+### Playlist row pill vs shelf card trailing edges (2026-10-02, light)
+
+Question from the spike critique: the spike's selected-row pill ends 9pt past the
+shelf cards (pill 300.0-1123.0, hero cards 300.0-1114.0). Does Music do that?
+
+Window 980 x 779pt parked on the virtual display, content scroll area
+**x 208-963** on both pages (a Home shelf scroll area and a playlist track row are
+both 755pt wide). Edges are window-relative points, AX from `ax-dump.swift Music 14`
+and confirmed by a 1x pixel scan of a `screencapture -l` window shot.
+
+| Element | Left | Right | How |
+|---|---|---|---|
+| playlist hover pill | **248** | **923** | pixel scan at y=458: `#F0F0F0` from x=248 to 922, white at 923. Pill is not an AX element; the row (`AXRow x=208 w=755`) is full-bleed |
+| playlist header / Suggested Songs group | 248 | 923 | AX, same edges as the pill |
+| Top Picks (hero) cards, last complete card | 242 | **928** | AX `x=710 w=218`; pixel scan y=200 ends at 928, next card starts at 944 |
+| Recently Played cards, last complete card | 242 | **928** | AX `x=768.5 w=159.5`; pixel scan y=600 ends at 928, next starts at 944 |
+
+Both card widths (218 and 160) end their last complete card at the same x=928, so
+the shelf's trailing edge is a rule (content right minus 35, with a 19pt peek of
+the next card), not a coincidence of one card size. The shelf viewport itself runs
+to the content edge (963); only the card positions are inset.
+
+**Known-good control:** the dump gives the track table's leading cell as
+`AXCell x=208 w=40`, the artwork column starting at 248, and the pixel scan puts
+the pill's left edge at 248: a 40pt leading inset, the figure recorded above. A
+frame that clips is the known-bad case: the Top Picks scroll group reports
+`x=242 w=1622` and the last card `x=1646 w=218`, so `x + w` of a clipped card is
+1864, not a shelf edge. The numbers above are complete cards only.
+
+**Verdict: neither of the spike's two cases.** Music's pill is *inside* the
+shelf cards on both sides, not past them: leading 248 vs 242 (pill 6pt in),
+trailing 923 vs 928 (pill 5pt in). The spike has the pill flush with the shelves
+on the leading side and 9pt past them on the trailing side. The mismatch the
+critique saw is real, but its direction is wrong against Music, and the shelf
+inset (34 / 35) differs from the page inset (40 / 40) by about 5-6pt, which is a
+different fix from "make the trailing edges equal". The spike was not changed;
+the choice between insetting the pill or widening the shelves is open.
+Limit: one window width (980pt). Whether the 35pt trailing inset holds at the
+1588pt width the other captures used was not measured.
