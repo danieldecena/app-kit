@@ -338,12 +338,16 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 /* The only Music component that had no focus ring, and the one driven by the
    arrow keys. Matches TrackList: same colour, same inset offset. */
 .dc-sidebar-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -2px; }
-.dc-sidebar-row[aria-current="true"] { background: var(--music-select); color: var(--on-music-select); font-weight: 600; }
-.dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--on-music-select); }
+/* The sidebar selection is NEUTRAL, not Music's red. music-select was measured on
+   track rows, where it is right; in the sidebar Music draws a translucent grey
+   in both appearances and whether or not the list has focus (see the tokens'
+   usage notes). The label goes pure on-music-glass and the glyph keeps its
+   accent tint, both read off the pixels. */
+.dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select); color: var(--on-music-glass); font-weight: 600; }
 /* Inactive selection. Set data-window="inactive" on the sidebar when the window
    is not key; macOS does this itself and a monitor app is in this state most of
    the time, so it is not an edge case. */
-.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--music-ink); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select-inactive); color: var(--music-ink); }
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--music-ink-soft-on-fill); }
 .dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
 .dc-sidebar-thumb { flex: none; width: 16px; height: 16px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); }

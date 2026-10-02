@@ -1487,3 +1487,50 @@ dark selection is **unverified**, and `SidebarList` should not be changed on it.
 Note for the redo: `AXPress` and setting `AXSelected` both fail on a Music sidebar
 row (no press action; `AXSelected` returns -25205, not settable). Driving it needs
 the row's `AXPosition`/`AXSize` and a synthetic `CGEvent` click at the centre.
+
+### The sidebar selection is neutral, and it is an alpha (2026-10-02)
+
+Closes the dark question left open above. Dark, window key, agent-driven click,
+pointer parked off the row, capture taken inside the key window (see the method
+note below): the sidebar selection is a **translucent grey**, not red.
+
+| capture | state | fill over backdrop | alpha of white / black |
+|---|---|---|---|
+| `sidebar-dark-key-albums-clicked.png`, `sidebar-dark-key-vd.png` | dark, key | `#434346` over `#262629` | white **13.4%** |
+| `home-inactive-dark-sidebar.png` | dark, not key | `#1F1F1F` over `#101010` | white **6.3%** |
+| a not-key capture on a second backdrop | dark, not key | `#333333` over `#252525` | white **6.4%** |
+| `sidebar-light-key-albums-clicked.png` | light, key | `#E0E0E0` over `#F7F7F7` | black **9.3%** |
+| `album-light-inactive-sidebar.png` | light, not key | `#E9E9EA` over `#F4F4F5` | black **4.5%** |
+
+The 6.3% reproduced across two different backdrops, which is what says it is a
+fixed alpha and not a fixed grey. The colour conversion was checked first against
+a value already on record: the known `#101010` / `#1F1F1F` pair came back exactly.
+
+The red never appears. `sidebar-dark-mousedown-vd.png` holds the button down on
+a different row while capturing, and that row draws no fill at all; Tab and
+Shift-Tab (delivered, since the selection moved) changed nothing. The recorded
+`#FA2E48` came from a capture that no longer exists and is **not used**:
+`SidebarList` had been painting `music-select`, which is the *track* row's red,
+and it now ships `music-sidebar-select` and `music-sidebar-select-inactive`.
+Label on the selected row is `#FFFFFF` (dark), weight 600; the glyph keeps its
+accent (`#FF5874` dark, `#EE1B33` light, vibrancy-tinted) on the selected row.
+
+**Method, because the previous session's note was right about the symptom and
+wrong about the cause.** "Key-window captures keep failing" was not a focus
+theory. Three separate things, each found by observation:
+
+1. Music's window was **minimized**, so `onscreen` was false and every click
+   landed on whatever was under the pointer. `osascript -e 'tell application "Music" to reopen'`
+   restores it; the AppleScript `miniaturized` property errors with -10001.
+2. Something returns focus to the terminal about a second after Music is
+   activated, so a capture taken after `music-shot.sh`'s window lookup (a
+   `swift` compile) is not key. Capture inside that second, by window id,
+   with `screencapture -l`.
+3. A click helper that does not say whether it landed is a check that cannot
+   fail. The tell was that the same row was selected before and after.
+
+To keep this off the user's screen, the window is parked on the BetterDisplay
+virtual display (set `AXPosition` on the main window to the display's origin
+plus an offset) and the driver saves and restores the cursor and the frontmost
+app around each action. It is 1x there, not 2x.
+The two helpers are `music-park.swift` and `music-drive.swift` beside this file.

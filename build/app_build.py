@@ -323,6 +323,18 @@ colors += [
         "Selected row fill when another app is frontmost. The normal state for a monitor app, so do not treat it as an edge case.",
     ),
     T(
+        "music-sidebar-select",
+        "rgba(0, 0, 0, 0.093)",
+        "rgba(255, 255, 255, 0.134)",
+        "SIDEBAR selection while the window is key. NEUTRAL, not music-select: Music's sidebar never draws the red, key or not, focused or not. An alpha because it lands on different greys over different backdrops. Measured: dark #434346 over #262629, light #E0E0E0 over #F7F7F7. Label is on-music-glass (pure white or black, 9.9:1 and 15.9:1), glyph keeps its accent.",
+    ),
+    T(
+        "music-sidebar-select-inactive",
+        "rgba(0, 0, 0, 0.045)",
+        "rgba(255, 255, 255, 0.063)",
+        "SIDEBAR selection while another app is frontmost. Measured: dark #333333 over #252525 and #1F1F1F over #101010 (both 6.3%), light #E9E9EA over #F4F4F5. Label returns to music-ink (9.3:1 dark, 12.3:1 light).",
+    ),
+    T(
         "music-hover",
         "#F0F0F0",
         "#2C2C2D",
@@ -822,6 +834,63 @@ def _check_contrast(tokens):
 
 _check_contrast(tok["color"]["tokens"])
 
+
+# The sidebar selection tokens are rgba, so the solid-pair gate above cannot see
+# them and left them listed nowhere. This composites each over the backdrop it
+# was MEASURED on and asserts the two claims the usage strings make: which ink
+# the alpha is built from (an inverted pair keeps every ratio and flips the
+# look, the same blind spot as the orientation check) and the label ratio.
+_SIDEBAR_SELECT = (
+    # token, theme, measured backdrop, measured fill, label token, floor
+    ("music-sidebar-select", "dark", "#262629", "#434346", "on-music-glass", 9.5),
+    ("music-sidebar-select", "light", "#F7F7F7", "#E0E0E0", "on-music-glass", 15.0),
+    ("music-sidebar-select-inactive", "dark", "#252525", "#333333", "music-ink", 9.0),
+    ("music-sidebar-select-inactive", "light", "#F4F4F5", "#E9E9EA", "music-ink", 12.0),
+)
+
+
+def _sidebar_select_failures(value_of, rows):
+    out = []
+    for name, theme, backdrop, fill, label, floor in rows:
+        m = re.fullmatch(
+            r"rgba\(\s*(\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\s*\)", value_of(name, theme)
+        )
+        if not m:
+            out.append(f"  {name} ({theme}) is not rgba(): {value_of(name, theme)!r}")
+            continue
+        r, g, b, al = int(m[1]), int(m[2]), int(m[3]), float(m[4])
+        ink = 255 if theme == "dark" else 0
+        if (r, g, b) != (ink, ink, ink):
+            out.append(f"  {name} ({theme}) is built from {(r, g, b)}, expected {ink}s")
+        bg = [int(backdrop[i : i + 2], 16) for i in (1, 3, 5)]
+        comp = "#%02X%02X%02X" % tuple(round(c * al + k * (1 - al)) for c, k in zip((r, g, b), bg))
+        want = [int(fill[i : i + 2], 16) for i in (1, 3, 5)]
+        got = [int(comp[i : i + 2], 16) for i in (1, 3, 5)]
+        if any(abs(x - y) > 2 for x, y in zip(got, want)):
+            out.append(f"  {name} ({theme}) composites to {comp} over {backdrop}, measured {fill}")
+        ratio = contrast(value_of(label, theme), comp)
+        if ratio < floor:
+            out.append(f"  {label} on {name} ({theme}) is {ratio:.2f}:1, below {floor}:1")
+    return out
+
+
+_by_name = {t["name"]: t["value"] for t in tok["color"]["tokens"]}
+_sv = lambda n, th: _by_name[n][th]  # noqa: E731
+# Both halves, as the contrast gate does: a bad input must fail, a good one pass.
+_bad = {("music-sidebar-select", "dark"): "rgba(0, 0, 0, 0.134)"}
+_good = {("music-sidebar-select", "dark"): "rgba(255, 255, 255, 0.134)"}
+_probe = lambda d: (  # noqa: E731
+    lambda n, th: d.get((n, th)) or ("#FFFFFF" if n == "on-music-glass" else _sv(n, th))
+)
+_row = [_SIDEBAR_SELECT[0]]
+if not _sidebar_select_failures(_probe(_bad), _row):
+    raise SystemExit("sidebar-select check accepted a dark token built from black")
+if _sidebar_select_failures(_probe(_good), _row):
+    raise SystemExit("sidebar-select check rejected a correct dark token")
+_f = _sidebar_select_failures(_sv, _SIDEBAR_SELECT)
+if _f:
+    raise SystemExit("sidebar selection check failed:\n" + "\n".join(_f))
+
 # ------------------------------------------------------------- SwiftUI recipes
 # The Music components' SwiftUI is EXTRACTED from the spike rather than written
 # here, because a recipe nobody compiled is worse than no recipe. The spike is
@@ -1184,12 +1253,16 @@ css = css_sub(
 /* The only Music component that had no focus ring, and the one driven by the
    arrow keys. Matches TrackList: same colour, same inset offset. */
 .dc-sidebar-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -2px; }
-.dc-sidebar-row[aria-current="true"] { background: var(--music-select); color: var(--on-music-select); font-weight: 600; }
-.dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--on-music-select); }
+/* The sidebar selection is NEUTRAL, not Music's red. music-select was measured on
+   track rows, where it is right; in the sidebar Music draws a translucent grey
+   in both appearances and whether or not the list has focus (see the tokens'
+   usage notes). The label goes pure on-music-glass and the glyph keeps its
+   accent tint, both read off the pixels. */
+.dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select); color: var(--on-music-glass); font-weight: 600; }
 /* Inactive selection. Set data-window="inactive" on the sidebar when the window
    is not key; macOS does this itself and a monitor app is in this state most of
    the time, so it is not an edge case. */
-.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-select-inactive); color: var(--music-ink); }
+.dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] { background: var(--music-sidebar-select-inactive); color: var(--music-ink); }
 .dc-sidebar[data-window="inactive"] .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--music-ink-soft-on-fill); }
 .dc-sidebar-icon { flex: none; display: inline-flex; width: 16px; color: var(--music-accent); }
 .dc-sidebar-thumb { flex: none; width: 16px; height: 16px; border-radius: var(--radius-sm); object-fit: cover; background: var(--surface-sunk); }
@@ -2608,10 +2681,26 @@ Only the first two numbers are measured. The sidebar's selection fill, its
 radius, its hover, the 16px glyph and thumbnail, the 600 weight on the selected
 row, the 50px footer and the 24px avatar are all the component's own: the
 capture records the sidebar's row rhythm and its inactive behaviour, not a
-selection frame. The fills reuse `music-select` and `music-hover`, which were
-measured on **track rows**, on the reasoning that macOS draws one selection
-colour per window rather than one per list. That is a reasonable inference and
-it is not an observation.
+selection frame. The hover reuses `music-hover`, measured on track rows.
+
+**The selection is neutral, not red.** An earlier version reused `music-select`
+on the reasoning that macOS draws one selection colour per window, and that
+inference was wrong: `music-select` is the *track row's* red, and the sidebar
+never draws it. Observed in Music, key window, in both appearances, with the
+click driven by the agent and the pointer parked off the row: the fill is a
+translucent grey, `music-sidebar-select` (white at 13.4% in dark, black at 9.3%
+in light), and `music-sidebar-select-inactive` (6.3% and 4.5%) when another app
+is frontmost. Pressing and focus change nothing, and the glyph keeps its accent
+tint on the selected row. The label goes to pure `on-music-glass` at weight 600.
+The alphas are alphas because the same fill lands on different greys over
+different backdrops, and the 6.3% reproduced across two (`#101010` to
+`#1F1F1F`, `#252525` to `#333333`). The build composites each over the backdrop
+it was measured on and fails if the result or the label ratio drifts.
+
+A red sidebar reading, `#FA2E48` in dark with the list focused, was recorded
+earlier from a capture that no longer exists. It could not be reproduced here by
+clicking, by holding the mouse down, or by moving keyboard focus, so it is not
+used.
 
 The sidebar's **width is not a token**. It is a user-resizable split, so ship a
 default and a minimum and let the person drag it. Card and shelf sizes elsewhere
@@ -2632,10 +2721,11 @@ the rows instead.
 
 Two SwiftUI behaviours worth knowing before you build this natively:
 
-- Sidebar selection draws the **system accent**, not your colour, and `.tint()`
-  on the `List` does not change it. Measured: with the list focused the selected
-  row fills `#007AFF`, the system accent, while `.tint(Color.Kit.musicSelect)`
-  was set to `#CC132D`. Matching Music's red needs an explicit row background.
+- A *focused* SwiftUI sidebar draws the **system accent** on the selected row,
+  and `.tint()` on the `List` does not change it. Measured: with the list focused
+  the row fills `#007AFF` while `.tint` was set to `#CC132D`. Music never draws
+  an accent there, so matching it needs an explicit row background, which the
+  recipe supplies.
 - **A key window is not a focused list**, and the difference is visible. The same
   row fills `#434346` when the window is key but focus is elsewhere -- a neutral
   grey that is neither the accent nor the tint. An earlier reading of this spike
@@ -2648,7 +2738,7 @@ Two SwiftUI behaviours worth knowing before you build this natively:
 ## Inactive windows
 
 Pass `windowInactive` when the window is not key, and the selection switches to
-`music-select-inactive`. macOS does this itself natively. It is not an edge
+`music-sidebar-select-inactive`. macOS does this itself natively. It is not an edge
 case: a monitor app is unfocused most of the time, so this is the state most
 users see most often.
 

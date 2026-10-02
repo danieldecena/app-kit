@@ -220,11 +220,14 @@ struct TrackList: View {
 
 // MARK: - SidebarList
 
-/// A Mac source list with Music's RED selection, which is the part
-/// `.listStyle(.sidebar)` will not give you: sidebar selection draws the system
-/// accent and `.tint()` does not override it (measured: #007AFF against a tint
-/// of #CC132D). So the rows draw their own background and the List supplies
-/// only the vibrancy.
+/// A Mac source list with Music's NEUTRAL selection: a translucent grey, not the
+/// red. A focused `.listStyle(.sidebar)` draws the system accent instead
+/// (measured: #007AFF, and `.tint()` does not override it), which Music never
+/// does, so the rows draw their own background and the List supplies only the
+/// vibrancy. The List is given NO `selection:` binding for the same reason: its
+/// native highlight would draw under ours and the two stack (measured: dark
+/// `#555456` against Music's `#434346`). The cost is that the List no longer
+/// handles arrow keys, so a real app should add `.onMoveCommand` if it needs them.
 struct SidebarRow: Identifiable {
     let id: String
     let label: String
@@ -238,21 +241,21 @@ struct SidebarList: View {
 
     private func fill(_ id: String) -> Color {
         guard id == selection else { return .clear }
-        return windowInactive ? Color.Kit.musicSelectInactive : Color.Kit.musicSelect
+        return windowInactive ? Color.Kit.musicSidebarSelectInactive : Color.Kit.musicSidebarSelect
     }
     private func ink(_ id: String) -> Color {
-        id == selection && !windowInactive ? Color.Kit.onMusicSelect : Color.Kit.musicInk
+        id == selection && !windowInactive ? Color.Kit.onMusicGlass : Color.Kit.musicInk
     }
     /// Music tints the SYMBOL and leaves the label in normal ink, which is why
     /// the row is built from Text and Image rather than a Label: a
     /// .foregroundStyle on a Label would tint both.
     private func glyph(_ id: String) -> Color {
-        if id == selection { return windowInactive ? Color.Kit.musicInkSoftOnFill : Color.Kit.onMusicSelect }
+        if id == selection && windowInactive { return Color.Kit.musicInkSoftOnFill }
         return Color.Kit.musicAccent
     }
 
     var body: some View {
-        List(selection: $selection) {
+        List {
             ForEach(sections.indices, id: \.self) { i in
                 let (header, rows) = sections[i]
                 Section {
@@ -268,7 +271,9 @@ struct SidebarList: View {
                         .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(fill(r.id)))
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)          // let the row's own fill show
-                        .tag(r.id)
+                        .contentShape(Rectangle())
+                        .onTapGesture { selection = r.id }
+                        .accessibilityAddTraits(r.id == selection ? .isSelected : [])
                     }
                 } header: {
                     if let header { Text(header).foregroundStyle(Color.Kit.musicInkSoft) }
