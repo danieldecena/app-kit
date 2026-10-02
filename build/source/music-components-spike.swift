@@ -218,6 +218,68 @@ struct TrackList: View {
     }
 }
 
+// MARK: - SidebarList
+
+/// A Mac source list with Music's RED selection, which is the part
+/// `.listStyle(.sidebar)` will not give you: sidebar selection draws the system
+/// accent and `.tint()` does not override it (measured: #007AFF against a tint
+/// of #CC132D). So the rows draw their own background and the List supplies
+/// only the vibrancy.
+struct SidebarRow: Identifiable {
+    let id: String
+    let label: String
+    let symbol: String
+}
+
+struct SidebarList: View {
+    let sections: [(String?, [SidebarRow])]
+    @Binding var selection: String?
+    var windowInactive: Bool = false
+
+    private func fill(_ id: String) -> Color {
+        guard id == selection else { return .clear }
+        return windowInactive ? Color.Kit.musicSelectInactive : Color.Kit.musicSelect
+    }
+    private func ink(_ id: String) -> Color {
+        id == selection && !windowInactive ? Color.Kit.onMusicSelect : Color.Kit.musicInk
+    }
+    /// Music tints the SYMBOL and leaves the label in normal ink, which is why
+    /// the row is built from Text and Image rather than a Label: a
+    /// .foregroundStyle on a Label would tint both.
+    private func glyph(_ id: String) -> Color {
+        if id == selection { return windowInactive ? Color.Kit.musicInkSoftOnFill : Color.Kit.onMusicSelect }
+        return Color.Kit.musicAccent
+    }
+
+    var body: some View {
+        List(selection: $selection) {
+            ForEach(sections.indices, id: \.self) { i in
+                let (header, rows) = sections[i]
+                Section {
+                    ForEach(rows) { r in
+                        HStack(spacing: 8) {
+                            Image(systemName: r.symbol)
+                                .foregroundStyle(glyph(r.id)).frame(width: 16)
+                            Text(r.label).foregroundStyle(ink(r.id))
+                            Spacer(minLength: 0)
+                        }
+                        .frame(height: 32)                       // measured
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(fill(r.id)))
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)          // let the row's own fill show
+                        .tag(r.id)
+                    }
+                } header: {
+                    if let header { Text(header).foregroundStyle(Color.Kit.musicInkSoft) }
+                }
+            }
+        }
+        .listStyle(.sidebar)        // the vibrancy; set NO background
+        .scrollContentBackground(.hidden)
+    }
+}
+
 // MARK: - MiniPlayer
 
 /// The floating transport capsule: 700x54, stadium radius, real material.
@@ -322,7 +384,22 @@ struct SpikeView: View {
         LinearGradient(colors: [a, b], startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
+    @State private var navSelection: String? = "Home"
+    private let nav: [(String?, [SidebarRow])] = [
+        (nil, [SidebarRow(id: "Search", label: "Search", symbol: "magnifyingglass"),
+               SidebarRow(id: "Home", label: "Home", symbol: "house.fill"),
+               SidebarRow(id: "New", label: "New", symbol: "square.grid.2x2"),
+               SidebarRow(id: "Radio", label: "Radio", symbol: "dot.radiowaves.left.and.right")]),
+        ("Library", [SidebarRow(id: "Songs", label: "Songs", symbol: "music.note"),
+                     SidebarRow(id: "Albums", label: "Albums", symbol: "square.stack"),
+                     SidebarRow(id: "Artists", label: "Artists", symbol: "music.mic")]),
+    ]
+
     var body: some View {
+        NavigationSplitView {
+            SidebarList(sections: nav, selection: $navSelection)
+                .navigationSplitViewColumnWidth(min: 180, ideal: 260)
+        } detail: {
         ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
@@ -355,6 +432,7 @@ struct SpikeView: View {
                 .padding(.bottom, 19)
         }
         .background(Color.Kit.groundWindow)
+        }
     }
 }
 
@@ -371,6 +449,11 @@ enum SpikeMain {
         win.title = "App Kit Music components"
         win.titlebarAppearsTransparent = true
         win.contentView = NSHostingView(rootView: SpikeView())
+        // Both appearances, because dyn() tokens are only half-verified by one.
+        if CommandLine.arguments.contains("--light") {
+            app.appearance = NSAppearance(named: .aqua)
+            win.appearance = NSAppearance(named: .aqua)
+        }
         win.makeKeyAndOrderFront(nil)
         app.activate(ignoringOtherApps: true)
 

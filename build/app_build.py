@@ -778,7 +778,14 @@ _SPIKE = _SPIKE_PATH.read_text()
 # because the guard used to raise only at doc-assembly time -- by which point
 # tokens.json and the three bundle files had already been written, leaving a
 # plausible 4-file tree behind a non-zero exit.
-_SPIKE_SECTIONS = ("ArtworkCard", "HeroCard", "Shelf", "TrackList", "MiniPlayer")
+_SPIKE_SECTIONS = (
+    "ArtworkCard",
+    "HeroCard",
+    "Shelf",
+    "TrackList",
+    "MiniPlayer",
+    "SidebarList",
+)
 
 
 def swift_section(name):
@@ -2287,17 +2294,11 @@ The real sidebar is a vibrant material that samples the **desktop behind the
 window**. `glass` here is a `backdrop-filter` stand-in that samples the page, and
 it cannot reproduce that; this preview approximates, it does not match.
 
-In SwiftUI you get the real thing for free:
-
-```swift
-NavigationSplitView {
-    List(selection: $selection) { ... }
-        .listStyle(.sidebar)          // real vibrancy; set NO background
-} detail: { ... }
-```
-
-Measured against Music: stock `.listStyle(.sidebar)` with no background set lands
-within 2 units of Music's own sidebar. **Setting a background defeats it.**
+In SwiftUI you get the real thing for free from `.listStyle(.sidebar)`, as long
+as you set **no** background on the `List`: measured against Music, the stock
+material lands within 2 units of Music's own sidebar, and setting a background
+defeats it. The recipe below does exactly that, and puts the selection fill on
+the rows instead.
 
 Two SwiftUI behaviours worth knowing before you build this natively:
 
@@ -2463,6 +2464,7 @@ SWIFT_DOC = {
     "HeroCard": ("HeroCard", ["HeroCard"]),
     "TrackList": ("TrackList", ["TrackList"]),
     "MiniPlayer": ("MiniPlayer", ["MiniPlayer"]),
+    "SidebarList": ("SidebarList", ["SidebarList"]),
 }
 for comp, (_, sections) in SWIFT_DOC.items():
     key = f"{comp}/README.md"

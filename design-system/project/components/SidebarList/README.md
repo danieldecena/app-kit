@@ -32,17 +32,11 @@ The real sidebar is a vibrant material that samples the **desktop behind the
 window**. `glass` here is a `backdrop-filter` stand-in that samples the page, and
 it cannot reproduce that; this preview approximates, it does not match.
 
-In SwiftUI you get the real thing for free:
-
-```swift
-NavigationSplitView {
-    List(selection: $selection) { ... }
-        .listStyle(.sidebar)          // real vibrancy; set NO background
-} detail: { ... }
-```
-
-Measured against Music: stock `.listStyle(.sidebar)` with no background set lands
-within 2 units of Music's own sidebar. **Setting a background defeats it.**
+In SwiftUI you get the real thing for free from `.listStyle(.sidebar)`, as long
+as you set **no** background on the `List`: measured against Music, the stock
+material lands within 2 units of Music's own sidebar, and setting a background
+defeats it. The recipe below does exactly that, and puts the selection fill on
+the rows instead.
 
 Two SwiftUI behaviours worth knowing before you build this natively:
 
@@ -69,3 +63,71 @@ users see most often.
 ## Keyboard
 
 Arrow keys move the selection, matching SegmentedControl.
+
+## SwiftUI
+
+Lifted from `build/source/music-components-spike.swift`, which is compiled
+against `swift/AppKit.swift` and rendered in a real window before it ships.
+Edit the spike, not this block.
+
+```swift
+/// A Mac source list with Music's RED selection, which is the part
+/// `.listStyle(.sidebar)` will not give you: sidebar selection draws the system
+/// accent and `.tint()` does not override it (measured: #007AFF against a tint
+/// of #CC132D). So the rows draw their own background and the List supplies
+/// only the vibrancy.
+struct SidebarRow: Identifiable {
+    let id: String
+    let label: String
+    let symbol: String
+}
+
+struct SidebarList: View {
+    let sections: [(String?, [SidebarRow])]
+    @Binding var selection: String?
+    var windowInactive: Bool = false
+
+    private func fill(_ id: String) -> Color {
+        guard id == selection else { return .clear }
+        return windowInactive ? Color.Kit.musicSelectInactive : Color.Kit.musicSelect
+    }
+    private func ink(_ id: String) -> Color {
+        id == selection && !windowInactive ? Color.Kit.onMusicSelect : Color.Kit.musicInk
+    }
+    /// Music tints the SYMBOL and leaves the label in normal ink, which is why
+    /// the row is built from Text and Image rather than a Label: a
+    /// .foregroundStyle on a Label would tint both.
+    private func glyph(_ id: String) -> Color {
+        if id == selection { return windowInactive ? Color.Kit.musicInkSoftOnFill : Color.Kit.onMusicSelect }
+        return Color.Kit.musicAccent
+    }
+
+    var body: some View {
+        List(selection: $selection) {
+            ForEach(sections.indices, id: \.self) { i in
+                let (header, rows) = sections[i]
+                Section {
+                    ForEach(rows) { r in
+                        HStack(spacing: 8) {
+                            Image(systemName: r.symbol)
+                                .foregroundStyle(glyph(r.id)).frame(width: 16)
+                            Text(r.label).foregroundStyle(ink(r.id))
+                            Spacer(minLength: 0)
+                        }
+                        .frame(height: 32)                       // measured
+                        .padding(.horizontal, 8)
+                        .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(fill(r.id)))
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)          // let the row's own fill show
+                        .tag(r.id)
+                    }
+                } header: {
+                    if let header { Text(header).foregroundStyle(Color.Kit.musicInkSoft) }
+                }
+            }
+        }
+        .listStyle(.sidebar)        // the vibrancy; set NO background
+        .scrollContentBackground(.hidden)
+    }
+}
+```
