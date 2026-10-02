@@ -86,6 +86,14 @@ Two things that cost a session each when measuring in the harness:
   hidden: `document.hidden` is true, and Chromium does not run scroll animations
   on a hidden document even though `requestAnimationFrame` keeps ticking. Every
   instant scroll form still works, so the asymmetry is the tell.
+- **Switching `data-theme` and reading `getComputedStyle` in the same call gives
+  you the previous theme's `background-color`.** `color` updates immediately and
+  the custom properties on `:root` resolve correctly, so a probe that reads both
+  comes back internally inconsistent -- a near-white fill under a white label --
+  and looks exactly like a broken component. A forced reflow does not fix it.
+  Set the theme in one tool call and read in the next, so a frame elapses, or
+  reload the page per appearance. This cost a real false alarm on the `music`
+  Button variant, which was correct the whole time.
 
 Use `/usr/bin/python3` for anything needing pillow. `uv run --with pillow`
 re-resolves against pypi and fails with no network; the system python has it.

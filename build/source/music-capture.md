@@ -1208,3 +1208,36 @@ loaded rule checked to be the new one rather than a cached sheet.
   use `surface-sunk`. It shows only while an image loads and was never measured.
 
 Both are recorded rather than guessed at.
+
+### The star and the Play button: tokens measured, then never painted
+
+Also found by reading tokens against usage rather than by a capture. Four
+`music-*` tokens had no CSS rule referencing them at all:
+
+| Token | Why nothing painted it |
+|---|---|
+| `music-star` | the MiniPlayer put the glyph inside its title span, where it inherited `on-music-glass`, so the favorited star rendered **white** instead of gold |
+| `music-primary`, `on-music-primary`, `music-primary-inactive` | no component drew Music's transport button; an adopting app had to wire the Play pill by hand |
+
+The SwiftUI mirror used both (`Color.Kit.musicStar` in the TrackList recipe,
+`musicPrimary` in the spike), so the two renderings of one design system
+disagreed and nothing noticed. The contrast gate already carried both pairs --
+`on-music-primary` on `music-primary` and `music-ink` on
+`music-primary-inactive` -- so it had been proving claims about colours no
+component rendered.
+
+Now: `Button` takes `variant="music"`, and `data-window-inactive="true"` inverts
+it rather than dimming. Verified in headless Chromium, each appearance read in
+its own call (see the `CLAUDE.md` trap about reading a theme switch too soon):
+
+| | fill | label |
+|---|---|---|
+| light, key | `#0E0E0E` | `#FFFFFF` |
+| light, not key | `#ECECEC` | `#272727` |
+| dark, key | `#F3F3F3` | `#0E0E0E` |
+| dark, not key | `#2F2F30` | `#DDDDDD` |
+
+All four are the measured token values, and the four ratios are 19.30, 12.65,
+17.40 and 9.85:1. The star reads `#FFCC00` in light against a `#000000` title,
+and carries `role="img"` with `aria-label="Favorited"` so a screen reader says
+"Favorited" rather than "black star".

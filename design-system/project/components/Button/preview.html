@@ -1,4 +1,4 @@
-<!-- @dsCard group="Actions" height=190 subtitle="Tinted in six colours, filled, gray, plain, glass, destructive" -->
+<!-- @dsCard group="Actions" height=250 subtitle="Tinted in six colours, filled, gray, plain, glass, destructive, and Music's inverting transport pill" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Button</title></head>
@@ -9,7 +9,11 @@
   ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'dc-stack'},
     h('div',{className:'dc-row'},h(D.Button,null,'Preview'),h(D.Button,{tint:'purple'},'Tag'),h(D.Button,{tint:'pink'},'Favorite'),h(D.Button,{tint:'orange'},'Flag'),h(D.Button,{tint:'mint'},'Share'),h(D.Button,{tint:'blue'},'Info')),
     h('div',{className:'dc-row'},h(D.Button,{variant:'filled'},'Import 42 clips'),h(D.Button,{variant:'gray'},'Cancel'),h(D.Button,{variant:'plain'},'Show all'),h(D.Button,{variant:'destructive'},'Delete'),
-      h('span',{style:{display:'inline-flex',padding:10,borderRadius:22,background:'linear-gradient(120deg,#5AC8FA,#AF52DE 60%,#FF2D55)'}},h(D.Button,{variant:'glass'},'Play')))));
+      h('span',{style:{display:'inline-flex',padding:10,borderRadius:22,background:'linear-gradient(120deg,#5AC8FA,#AF52DE 60%,#FF2D55)'}},h(D.Button,{variant:'glass'},'Play'))),
+    h('div',{className:'dc-row',style:{alignItems:'center'}},
+      h(D.Button,{variant:'music'},'▶ Play'),
+      h(D.Button,{variant:'music','data-window-inactive':'true'},'▶ Play'),
+      h('span',{style:{font:'var(--type-caption-1)',color:'var(--music-ink-soft)'}},'music: key window, then not key -- it inverts rather than dimming'))));
 </script>
 </body>
 </html>

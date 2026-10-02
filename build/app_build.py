@@ -925,6 +925,22 @@ BTN = """/* Button: iOS 26 capsules in the Notes highlight colours, translucent 
 .dc-btn-plain:hover { background: var(--fill); }
 .dc-btn-glass { background: var(--glass); color: var(--ink); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); }
 .dc-btn-destructive { --tint: var(--bad); --tint-ink: var(--bad); --tint-wash: var(--bad-wash); background: var(--tint-wash); color: var(--tint-ink); }
+/* Music's transport button, and the variant's single biggest fidelity lever.
+   App Kit's own convention -- the accent stepped 20% toward black with a white
+   label -- would paint Play RED, which reads as not-Music at a glance. Music
+   draws it as maximum contrast against the ground, so it INVERTS with
+   appearance: a near-black pill with a white label in light, a near-white pill
+   with a near-black label in dark.
+
+   data-window-inactive is the same convention SidebarList and TrackList use, and
+   here it inverts again rather than dimming: #ECECEC light and #2F2F30 dark, both
+   measured, with the label dropping to music-ink. That is why it is not an
+   opacity. Music's own inactive button is only 1.23:1 against the ground, so its
+   boundary is nearly invisible -- recorded, not corrected. */
+.dc-btn-music { background: var(--music-primary); color: var(--on-music-primary); }
+.dc-btn-music:hover { filter: brightness(1.08); }
+.dc-btn-music[data-window-inactive="true"] { background: var(--music-primary-inactive); color: var(--music-ink); filter: none; }
+.dc-btn-music:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 .dc-tint-purple { --tint: var(--hl-purple-tint); --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: var(--hl-purple-fill); --tint-on: var(--hl-purple-on); }
 .dc-tint-pink { --tint: var(--hl-pink-fill); --tint-ink: var(--hl-pink); --tint-wash: var(--hl-pink-wash); --tint-fill: var(--hl-pink-fill); --tint-on: var(--hl-pink-on); }
 .dc-tint-orange { --tint: var(--hl-orange-fill); --tint-ink: var(--hl-orange); --tint-wash: var(--hl-orange-wash); --tint-fill: var(--hl-orange-fill); --tint-on: var(--hl-orange-on); }
@@ -1100,6 +1116,12 @@ css = css_sub(
 .dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
 .dc-miniplayer-btn[aria-pressed="true"] { color: var(--music-accent); }
+/* The favorited star is GOLD, not the capsule ink and not the accent -- #FFD700
+   dark and #FFCC00 light, both measured. It sat inside the title span and so
+   rendered in on-music-glass's white, and a screen reader read it as part of the
+   track name ("Nights black star"). The SwiftUI recipe had it right the whole
+   time, which is how the two renderings of one component came to disagree. */
+.dc-miniplayer-star { color: var(--music-star); }
 /* The now-playing group owns the progress line, which is why the line stops at
    the group's edges instead of running the capsule's full width. */
 .dc-miniplayer-now { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; align-self: stretch; }
@@ -1472,7 +1494,9 @@ js = js.replace(
       h("div", { className: "dc-miniplayer-now" },
         h("img", { className: "dc-miniplayer-art", src: p.art, alt: "" }),
         h("span", { className: "dc-miniplayer-text" },
-          h("span", { className: "dc-miniplayer-title" }, p.title, p.favorite ? p.favoriteGlyph || " ★" : null),
+          h("span", { className: "dc-miniplayer-title" }, p.title,
+            p.favorite ? h("span", { className: "dc-miniplayer-star", role: "img",
+                                     "aria-label": "Favorited" }, p.favoriteGlyph || " \u2605") : null),
           p.subtitle ? h("span", { className: "dc-miniplayer-sub" }, p.subtitle) : null),
         h("span", { className: "dc-miniplayer-track", role: "progressbar", "aria-label": "Playback position",
                     "aria-valuemin": 0, "aria-valuemax": 100, "aria-valuenow": Math.round(pct) },
@@ -1618,7 +1642,7 @@ w("components/bundle.js", js)
 dts = rd("components/index.d.ts")
 dts = dts.replace(
     '/** Action button. `primary` (clay) at most once per view. */\nexport function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {\n  variant?: "primary" | "secondary" | "plain" | "destructive";',
-    '/** Action button, an iOS 26 capsule. `tinted` (translucent) is the default; `filled` at most once per view. */\nexport function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {\n  variant?: "tinted" | "filled" | "gray" | "plain" | "glass" | "destructive" | "primary" | "secondary";\n  /** The Notes highlight colours; accent by default. */\n  tint?: "accent" | "purple" | "pink" | "orange" | "mint" | "blue";',
+    '/** Action button, an iOS 26 capsule. `tinted` (translucent) is the default; `filled` at most once per view. */\nexport function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {\n  variant?: "tinted" | "filled" | "gray" | "plain" | "glass" | "destructive" | "primary" | "secondary" | "music";\n  /** `music` only: the window is not key, so the pill inverts to music-primary-inactive. Pass as `data-window-inactive`. */\n  /** The Notes highlight colours; accent by default. */\n  tint?: "accent" | "purple" | "pink" | "orange" | "mint" | "blue";',
 )
 dts = dts.replace(
     'tone?: "neutral" | "hollow" | "clay" | "signal" | "ok" | "warn" | "bad";',
@@ -1795,11 +1819,12 @@ Starts an action; verb first, sentence case ("Retry sync", "Import clips"). Caps
 - `glass`: controls floating over content (maps, photos, video). SwiftUI: `.buttonStyle(.glass)` on iOS 26 and macOS 26.
 - `destructive`: Delete, Remove, in system red; never `filled` by default. SwiftUI: `Button(role: .destructive)`.
 - `tint`: `accent` (default), `purple`, `pink`, `orange`, `mint`, `blue`. Every label passes 4.5:1 on its fill.
+- `music`: Music's transport button, for the Music variant only. Maximum contrast against the ground, so it INVERTS with appearance -- `#0E0E0E` with a white label in light, `#F3F3F3` with a near-black one in dark. Never the accent: App Kit's own `filled` convention would paint Play red, which reads as not-Music immediately. Add `data-window-inactive="true"` when the window is not key and the pill inverts again, to measured `#ECECEC` / `#2F2F30` with a `music-ink` label, rather than dimming.
 - Height is `touch` (44px), `radius-pill`. The consumer provides the label and `onClick`.
 """
 docs[
     "Button/preview.html"
-] = """<!-- @dsCard group="Actions" height=190 subtitle="Tinted in six colours, filled, gray, plain, glass, destructive" -->
+] = """<!-- @dsCard group="Actions" height=250 subtitle="Tinted in six colours, filled, gray, plain, glass, destructive, and Music's inverting transport pill" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>Button</title></head>
@@ -1810,7 +1835,11 @@ docs[
   ReactDOM.createRoot(document.getElementById('root')).render(h('div',{className:'dc-stack'},
     h('div',{className:'dc-row'},h(D.Button,null,'Preview'),h(D.Button,{tint:'purple'},'Tag'),h(D.Button,{tint:'pink'},'Favorite'),h(D.Button,{tint:'orange'},'Flag'),h(D.Button,{tint:'mint'},'Share'),h(D.Button,{tint:'blue'},'Info')),
     h('div',{className:'dc-row'},h(D.Button,{variant:'filled'},'Import 42 clips'),h(D.Button,{variant:'gray'},'Cancel'),h(D.Button,{variant:'plain'},'Show all'),h(D.Button,{variant:'destructive'},'Delete'),
-      h('span',{style:{display:'inline-flex',padding:10,borderRadius:22,background:'linear-gradient(120deg,#5AC8FA,#AF52DE 60%,#FF2D55)'}},h(D.Button,{variant:'glass'},'Play')))));
+      h('span',{style:{display:'inline-flex',padding:10,borderRadius:22,background:'linear-gradient(120deg,#5AC8FA,#AF52DE 60%,#FF2D55)'}},h(D.Button,{variant:'glass'},'Play'))),
+    h('div',{className:'dc-row',style:{alignItems:'center'}},
+      h(D.Button,{variant:'music'},'\u25B6 Play'),
+      h(D.Button,{variant:'music','data-window-inactive':'true'},'\u25B6 Play'),
+      h('span',{style:{font:'var(--type-caption-1)',color:'var(--music-ink-soft)'}},'music: key window, then not key -- it inverts rather than dimming'))));
 </script>
 </body>
 </html>
@@ -2731,6 +2760,32 @@ for comp, (_, sections) in SWIFT_DOC.items():
         "against `swift/AppKit.swift` and rendered in a real window before it ships.\n"
         "Edit the spike, not this block.\n\n"
         "```swift\n" + code + "\n```\n"
+    )
+
+# Every music-* token must be painted by something, or say why not. The variant
+# shipped music-primary, on-music-primary, music-primary-inactive and music-star
+# as measured values that no CSS rule referenced: three of them because no
+# component drew Music's transport button at all, and the star because the
+# MiniPlayer put the glyph inside its title span, where it inherited white. The
+# SwiftUI mirror used both, so the two renderings of one design system disagreed
+# and nothing noticed -- a token's existence was checked, and its use was not.
+MUSIC_TOKENS_WITHOUT_CSS = {
+    "ground-window": "the adopting app sets the window ground; no component owns it, and the contrast gate uses it as the reference background for every music ink",
+}
+_painted = set(re.findall(r"var\(--([a-z0-9-]+)", css))
+_orphan_tokens = sorted(
+    t["name"]
+    for t in tok["color"]["tokens"]
+    if t["name"].startswith(("music-", "on-music-"))
+    and t["name"] not in _painted
+    and t["name"] not in MUSIC_TOKENS_WITHOUT_CSS
+)
+if _orphan_tokens:
+    raise SystemExit(
+        "music tokens no CSS rule paints:\n"
+        + "".join(f"  {t}\n" for t in _orphan_tokens)
+        + "Either a component should use it, or it belongs in "
+        "MUSIC_TOKENS_WITHOUT_CSS with the reason."
     )
 
 # Every component the manifest advertises must have a page. The manifest, the

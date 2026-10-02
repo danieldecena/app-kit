@@ -2,7 +2,8 @@ import type { ReactNode, ButtonHTMLAttributes } from "react";
 
 /** Action button, an iOS 26 capsule. `tinted` (translucent) is the default; `filled` at most once per view. */
 export function Button(props: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "tinted" | "filled" | "gray" | "plain" | "glass" | "destructive" | "primary" | "secondary";
+  variant?: "tinted" | "filled" | "gray" | "plain" | "glass" | "destructive" | "primary" | "secondary" | "music";
+  /** `music` only: the window is not key, so the pill inverts to music-primary-inactive. Pass as `data-window-inactive`. */
   /** The Notes highlight colours; accent by default. */
   tint?: "accent" | "purple" | "pink" | "orange" | "mint" | "blue";
   children: ReactNode;

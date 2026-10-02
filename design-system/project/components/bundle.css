@@ -48,6 +48,22 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-btn-plain:hover { background: var(--fill); }
 .dc-btn-glass { background: var(--glass); color: var(--ink); -webkit-backdrop-filter: blur(16px) saturate(1.8); backdrop-filter: blur(16px) saturate(1.8); box-shadow: inset 0 0 0 .5px var(--glass-edge), var(--shadow-glass); }
 .dc-btn-destructive { --tint: var(--bad); --tint-ink: var(--bad); --tint-wash: var(--bad-wash); background: var(--tint-wash); color: var(--tint-ink); }
+/* Music's transport button, and the variant's single biggest fidelity lever.
+   App Kit's own convention -- the accent stepped 20% toward black with a white
+   label -- would paint Play RED, which reads as not-Music at a glance. Music
+   draws it as maximum contrast against the ground, so it INVERTS with
+   appearance: a near-black pill with a white label in light, a near-white pill
+   with a near-black label in dark.
+
+   data-window-inactive is the same convention SidebarList and TrackList use, and
+   here it inverts again rather than dimming: #ECECEC light and #2F2F30 dark, both
+   measured, with the label dropping to music-ink. That is why it is not an
+   opacity. Music's own inactive button is only 1.23:1 against the ground, so its
+   boundary is nearly invisible -- recorded, not corrected. */
+.dc-btn-music { background: var(--music-primary); color: var(--on-music-primary); }
+.dc-btn-music:hover { filter: brightness(1.08); }
+.dc-btn-music[data-window-inactive="true"] { background: var(--music-primary-inactive); color: var(--music-ink); filter: none; }
+.dc-btn-music:focus-visible { outline: 2px solid var(--music-accent); outline-offset: 2px; }
 .dc-tint-purple { --tint: var(--hl-purple-tint); --tint-ink: var(--hl-purple); --tint-wash: var(--hl-purple-wash); --tint-fill: var(--hl-purple-fill); --tint-on: var(--hl-purple-on); }
 .dc-tint-pink { --tint: var(--hl-pink-fill); --tint-ink: var(--hl-pink); --tint-wash: var(--hl-pink-wash); --tint-fill: var(--hl-pink-fill); --tint-on: var(--hl-pink-on); }
 .dc-tint-orange { --tint: var(--hl-orange-fill); --tint-ink: var(--hl-orange); --tint-wash: var(--hl-orange-wash); --tint-fill: var(--hl-orange-fill); --tint-on: var(--hl-orange-on); }
@@ -254,6 +270,12 @@ body { margin: 0; padding: 16px; background: var(--ground); color: var(--ink); f
 .dc-miniplayer-btn { border: 0; background: none; padding: 0; color: var(--on-music-glass); cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 20px; }
 .dc-miniplayer-btn:disabled { opacity: .4; cursor: default; }
 .dc-miniplayer-btn[aria-pressed="true"] { color: var(--music-accent); }
+/* The favorited star is GOLD, not the capsule ink and not the accent -- #FFD700
+   dark and #FFCC00 light, both measured. It sat inside the title span and so
+   rendered in on-music-glass's white, and a screen reader read it as part of the
+   track name ("Nights black star"). The SwiftUI recipe had it right the whole
+   time, which is how the two renderings of one component came to disagree. */
+.dc-miniplayer-star { color: var(--music-star); }
 /* The now-playing group owns the progress line, which is why the line stops at
    the group's edges instead of running the capsule's full width. */
 .dc-miniplayer-now { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; align-self: stretch; }
