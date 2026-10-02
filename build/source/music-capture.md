@@ -1787,3 +1787,31 @@ different page types, not a conflict. No capture shows a light album page or a d
 playlist inactive row, so appearance and page type are not separated: the light/dark
 shape difference is observed only on the playlist page, and the 45/55pt difference
 only between appearances-and-pages that also differ. `TrackList` was not edited.
+
+### Light capsule with the window key, and the light ground (2026-10-02)
+
+The capsule rows above come from a not-key capture only, so the same two commands
+were run on the key-window capture before the usage text was corrected:
+
+| Quantity | Capture and command | Window state | Observed |
+|---|---|---|---|
+| MiniPlayer capsule, light | `row-selected-key-light-vd.png --lights --hist 712:260:930` | key (0.83) | `[('#FAFAFA', 532), ('#F9F9F9', 110), ('#FAF9F9', 17)] 670` |
+| Pause glyph and capsule, light | `row-selected-key-light-vd.png --glyph 316:722:338:746` | key | `glyph #FCFCFC 104 #000000` |
+
+The glyph is `#000000` here too (the tool's two labels are swapped for the same
+reason as above). The capsule reads about `#FAFAFA` to `#FCFCFC` with the window
+key against `#EAEAEA` to `#F1F1F1` with it not key. Both captures were viewed: the
+same playlist, the pause glyph showing, unselected white rows behind the capsule.
+They differ in window state and in scroll position, so window state is the likely
+cause of the difference, on one capture each. Neither reading is `#FFFFFF`.
+
+The shape section's ground control was run on the dark capture only. The light
+ones, seeded 4px below the top of an unselected row:
+
+| Capture | Command | Observed |
+|---|---|---|
+| `row-selected-key-light-vd.png` | `--extent 650:533` | `fill #FFFFFF  x 208-966 (758pt)  y 529-584 (55pt)` |
+| `row-selected-inactive-light-vd.png` | `--extent 650:512` | `fill #FFFFFF  x 208-966 (758pt)  y 508-563 (55pt)` |
+
+So the light selection (208-963) starts at the content area's left edge and stops
+3pt short of where the ground walk stops (966). "Full-bleed" means that, not 758pt.

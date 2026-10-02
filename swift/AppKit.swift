@@ -138,7 +138,7 @@ public extension Color {
         /// Selected row fill while the window is key, with a white label. Not derivable from the accent: stepping the acc
         public static let musicSelect = dyn((0.863, 0.071, 0.161, 1.00), (0.800, 0.075, 0.176, 1.00))
         /// Selected row fill when another app is frontmost. The normal state for a monitor app, so do not treat it as an 
-        public static let musicSelectInactive = dyn((0.863, 0.863, 0.867, 1.00), (0.275, 0.275, 0.275, 1.00))
+        public static let musicSelectInactive = dyn((0.863, 0.863, 0.863, 1.00), (0.275, 0.275, 0.275, 1.00))
         /// SIDEBAR selection while the window is key. NEUTRAL, not music-select: Music's sidebar never draws the red, key
         public static let musicSidebarSelect = dyn((0.000, 0.000, 0.000, 0.09), (1.000, 1.000, 1.000, 0.13))
         /// SIDEBAR selection while another app is frontmost. Measured: dark #333333 over #252525 and #1F1F1F over #101010
@@ -148,7 +148,7 @@ public extension Color {
         /// The transport button (Play). Maximum contrast against the ground, so it inverts with appearance. Never the acc
         public static let musicPrimary = dyn((0.055, 0.055, 0.055, 1.00), (0.953, 0.953, 0.953, 1.00))
         /// Label on music-primary. Inverts with it.
-        public static let onMusicPrimary = dyn((1.000, 1.000, 1.000, 1.00), (0.055, 0.055, 0.055, 1.00))
+        public static let onMusicPrimary = dyn((1.000, 1.000, 1.000, 1.00), (0.000, 0.000, 0.000, 1.00))
         /// Label on a selected row, white in both themes.
         public static let onMusicSelect = dyn((1.000, 1.000, 1.000, 1.00), (1.000, 1.000, 1.000, 1.00))
         /// The Music window's content ground. Flat, not graded and not tinted by artwork. Differs from App Kit's iOS-deri

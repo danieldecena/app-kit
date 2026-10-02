@@ -318,7 +318,7 @@ colors += [
     ),
     T(
         "music-select-inactive",
-        "#DCDCDD",
+        "#DCDCDC",
         "#464646",
         "Selected row fill when another app is frontmost. The normal state for a monitor app, so do not treat it as an edge case.",
     ),
@@ -349,7 +349,7 @@ colors += [
     T(
         "on-music-primary",
         "#FFFFFF",
-        "#0E0E0E",
+        "#000000",
         "Label on music-primary. Inverts with it.",
     ),
     T(
@@ -392,7 +392,7 @@ colors += [
         "on-music-glass",
         "#000000",
         "#FFFFFF",
-        "Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF on the opaque capsule (#3A3A3D), 11.34:1 -- every glyph, the title AND the artist line, all pure white, where music-ink would be #DDDDDD. Light is MEASURED #000000 on a #FFFFFF capsule, so Music uses pure black and pure white on this surface in both appearances -- symmetric, and in neither case the ground ink. Gated against ground-window as a conservative stand-in, because the capsule fill itself is only measured in dark.",
+        "Ink on the MiniPlayer capsule, which is a glass surface and not the window ground. Dark is MEASURED #FFFFFF on the opaque capsule (#3A3A3D), 11.34:1 -- every glyph, the title AND the artist line, all pure white, where music-ink would be #DDDDDD. Light is MEASURED #000000 on a translucent capsule that is a range and not one fill: about #FAFAFA with the window key, #EAEAEA to #F1F1F1 with it not key. It is not #FFFFFF. So Music uses pure black and pure white on this surface in both appearances -- symmetric, and in neither case the ground ink. Gated against ground-window as a stand-in, because a translucent capsule has no single fill to gate against; the stand-in is the optimistic side, and on the darkest light reading (#EAEAEA) black is still 17.46:1.",
     ),
     T(
         "music-ink-soft-on-fill",
@@ -1920,7 +1920,7 @@ Starts an action; verb first, sentence case ("Retry sync", "Import clips"). Caps
 - `glass`: controls floating over content (maps, photos, video). SwiftUI: `.buttonStyle(.glass)` on iOS 26 and macOS 26.
 - `destructive`: Delete, Remove, in system red; never `filled` by default. SwiftUI: `Button(role: .destructive)`.
 - `tint`: `accent` (default), `purple`, `pink`, `orange`, `mint`, `blue`. Every label passes 4.5:1 on its fill.
-- `music`: Music's transport button, for the Music variant only. Maximum contrast against the ground, so it INVERTS with appearance -- `#0E0E0E` with a white label in light, `#F3F3F3` with a near-black one in dark. Never the accent: App Kit's own `filled` convention would paint Play red, which reads as not-Music immediately. Add `data-window-inactive="true"` when the window is not key and the pill inverts again, to measured `#ECECEC` / `#2F2F30` with a `music-ink` label, rather than dimming.
+- `music`: Music's transport button, for the Music variant only. Maximum contrast against the ground, so it INVERTS with appearance -- `#0E0E0E` with a white label in light, `#F3F3F3` with a black one in dark. Never the accent: App Kit's own `filled` convention would paint Play red, which reads as not-Music immediately. Add `data-window-inactive="true"` when the window is not key and the pill inverts again, to measured `#ECECEC` / `#2F2F30` with a `music-ink` label, rather than dimming.
 - Height is `touch` (44px), `radius-pill`. The consumer provides the label and `onClick`.
 """
 docs[
@@ -3182,19 +3182,19 @@ MUSIC_PROVENANCE = {
     "music-accent": ("M", "M", "pixel scan of the title stroke interiors: 707 px dark, ~445 px light"),
     "music-accent-ink": ("D", "D", "measured accent, lightness stepped only as far as 4.5:1 needs (hue and saturation kept)"),
     "music-select": ("M", "M", "selected-row pill scan, `row-selected-key-*-vd.png`"),
-    "music-select-inactive": ("N", "N", "state table in the log names no instrument; light re-read one unit off (`#DCDCDC`) in `row-selected-inactive-light-vd.png`"),
+    "music-select-inactive": ("M", "N", "light: `row-selected-inactive-light-vd.png`, window not key, 370 of 370 samples; dark: `album-selected-inactive-dark.png` was shot with the window key, so `#464646` is the fill of a selected row in a key window with an unfocused list; no app-inactive dark capture exists"),
     "music-sidebar-select": ("D", "D", "alpha back-solved from a measured pair (dark `#434346` over `#262629`, light `#E0E0E0` over `#F7F7F7`); the build recomposites it to within 2/255"),
     "music-sidebar-select-inactive": ("D", "D", "alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture"),
     "music-hover": ("M", "M", "inset-pill scan of still captures; dark measured twice"),
     "music-primary": ("M", "M", "run scan of the header band; light also at the Play button's AX frame"),
-    "on-music-primary": ("M", "N", "light sampled at the Play button's AX frame; dark label is logged as recorded earlier with no capture"),
-    "on-music-select": ("U", "N", "dark label logged as white with no instrument; light assumed the same, never sampled"),
+    "on-music-primary": ("M", "M", "light sampled at the Play button's AX frame; dark Play label interior on `#F3F3F3` in two key-window captures, `row-selected-key-dark-vd.png` and `album-selected-inactive-dark.png`"),
+    "on-music-select": ("M", "M", "label interior on the selected fill, window key: `row-selected-key-light-vd.png` and `row-selected-key-dark-vd.png`"),
     "ground-window": ("M", "M", "row-wise sweep where every sample agrees; light confirmed on Home"),
     "music-ink": ("M", "M", "darkest-common glyph interior (4547 px light)"),
     "music-ink-soft": ("D", "M", "dark measured; light measured `#808080` (3.95:1) stepped to the first grey that clears 4.5"),
     "music-star": ("M", "M", "`album-light-inactive.png` (light), `album-detail-unfocused-dark.png` (dark, solid interior)"),
     "music-primary-inactive": ("M", "M", "`album-light-inactive.png` and AX frame (light), `album-transport-inactive-dark.png` (dark)"),
-    "on-music-glass": ("N", "M", "dark 516-1175 px solid on the `#3A3A3D` capsule; light read from `album-light-inactive.png`, and its `#FFFFFF` capsule fill was never sampled"),
+    "on-music-glass": ("M", "M", "dark 516-1175 px solid on the `#3A3A3D` capsule; light pause glyph in `row-selected-key-light-vd.png` (window key) and `row-selected-inactive-light-vd.png` (not key). The light capsule is translucent, about `#FAFAFA` key and `#EAEAEA` to `#F1F1F1` not key, not `#FFFFFF`"),
     "music-ink-soft-on-fill": ("D", "D", "no capture: stepped to clear 4.5:1 on hover and the inactive fill, a decision rather than a measurement"),
 }
 _music_names = {

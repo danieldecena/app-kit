@@ -5,6 +5,9 @@
 - [x] Sample inactive fill, labels, Play label, capsule from witnessed captures -- 38cf667
 - [x] Measure selected-row shape by appearance and page type -- a8e1d32
 - [ ] Write results into MUSIC_PROVENANCE and tokens, rebuild, stop before publish
+- [ ] Publish provenance and token corrections to the artifact
+- [ ] Decide TrackList selected-row shape, light and playlist
+- [ ] Capture dark selected row with the window not key
 
 
 

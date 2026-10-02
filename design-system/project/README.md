@@ -141,19 +141,19 @@ The hex values are read from the tokens at build time; the basis for each is rec
 | `music-accent` | `#FA233B` measured | `#FA2E48` measured | pixel scan of the title stroke interiors: 707 px dark, ~445 px light |
 | `music-accent-ink` | `#EA0623` derived | `#FA3851` derived | measured accent, lightness stepped only as far as 4.5:1 needs (hue and saturation kept) |
 | `music-select` | `#DC1229` measured | `#CC132D` measured | selected-row pill scan, `row-selected-key-*-vd.png` |
-| `music-select-inactive` | `#DCDCDD` no instrument recorded | `#464646` no instrument recorded | state table in the log names no instrument; light re-read one unit off (`#DCDCDC`) in `row-selected-inactive-light-vd.png` |
+| `music-select-inactive` | `#DCDCDC` measured | `#464646` no instrument recorded | light: `row-selected-inactive-light-vd.png`, window not key, 370 of 370 samples; dark: `album-selected-inactive-dark.png` was shot with the window key, so `#464646` is the fill of a selected row in a key window with an unfocused list; no app-inactive dark capture exists |
 | `music-sidebar-select` | `rgba(0, 0, 0, 0.093)` derived | `rgba(255, 255, 255, 0.134)` derived | alpha back-solved from a measured pair (dark `#434346` over `#262629`, light `#E0E0E0` over `#F7F7F7`); the build recomposites it to within 2/255 |
 | `music-sidebar-select-inactive` | `rgba(0, 0, 0, 0.045)` derived | `rgba(255, 255, 255, 0.063)` derived | alpha back-solved from a measured pair (dark `#1F1F1F` over `#101010`, light `#E9E9EA` over `#F4F4F5`); light rests on one capture |
 | `music-hover` | `#F0F0F0` measured | `#2C2C2D` measured | inset-pill scan of still captures; dark measured twice |
 | `music-primary` | `#0E0E0E` measured | `#F3F3F3` measured | run scan of the header band; light also at the Play button's AX frame |
-| `on-music-primary` | `#FFFFFF` measured | `#0E0E0E` no instrument recorded | light sampled at the Play button's AX frame; dark label is logged as recorded earlier with no capture |
-| `on-music-select` | `#FFFFFF` not observed | `#FFFFFF` no instrument recorded | dark label logged as white with no instrument; light assumed the same, never sampled |
+| `on-music-primary` | `#FFFFFF` measured | `#000000` measured | light sampled at the Play button's AX frame; dark Play label interior on `#F3F3F3` in two key-window captures, `row-selected-key-dark-vd.png` and `album-selected-inactive-dark.png` |
+| `on-music-select` | `#FFFFFF` measured | `#FFFFFF` measured | label interior on the selected fill, window key: `row-selected-key-light-vd.png` and `row-selected-key-dark-vd.png` |
 | `ground-window` | `#FFFFFF` measured | `#1F1F20` measured | row-wise sweep where every sample agrees; light confirmed on Home |
 | `music-ink` | `#272727` measured | `#DDDDDD` measured | darkest-common glyph interior (4547 px light) |
 | `music-ink-soft` | `#767676` derived | `#9A9A9A` measured | dark measured; light measured `#808080` (3.95:1) stepped to the first grey that clears 4.5 |
 | `music-star` | `#FFCC00` measured | `#FFD700` measured | `album-light-inactive.png` (light), `album-detail-unfocused-dark.png` (dark, solid interior) |
 | `music-primary-inactive` | `#ECECEC` measured | `#2F2F30` measured | `album-light-inactive.png` and AX frame (light), `album-transport-inactive-dark.png` (dark) |
-| `on-music-glass` | `#000000` no instrument recorded | `#FFFFFF` measured | dark 516-1175 px solid on the `#3A3A3D` capsule; light read from `album-light-inactive.png`, and its `#FFFFFF` capsule fill was never sampled |
+| `on-music-glass` | `#000000` measured | `#FFFFFF` measured | dark 516-1175 px solid on the `#3A3A3D` capsule; light pause glyph in `row-selected-key-light-vd.png` (window key) and `row-selected-inactive-light-vd.png` (not key). The light capsule is translucent, about `#FAFAFA` key and `#EAEAEA` to `#F1F1F1` not key, not `#FFFFFF` |
 | `music-ink-soft-on-fill` | `#5F5F5F` derived | `#B4B4B4` derived | no capture: stepped to clear 4.5:1 on hover and the inactive fill, a decision rather than a measurement |
 
 ### Sizes are not the spec; ratios and gaps are
