@@ -1592,3 +1592,40 @@ different fix from "make the trailing edges equal". The spike was not changed;
 the choice between insetting the pill or widening the shelves is open.
 Limit: one window width (980pt). Whether the 35pt trailing inset holds at the
 1588pt width the other captures used was not measured.
+
+### Second width: the 35pt trailing rule is wrong; the leading inset is the finding (2026-10-02, light)
+
+Same method as above (`ax-dump.swift` AX frames, window-relative points), window
+resized to **1588 x 779** via AX `AXSize`. 780 was also requested; Music clamps the
+window at **980 minimum**, so 980 and 1588 are the two widths reachable.
+
+| Element | 980 left / right | 1588 left / right |
+|---|---|---|
+| content scroll area | 208 / 963 | 208 / 1571 |
+| playlist header + Suggested Songs group (the pill's edges) | 248 / 923 | 248 / 1531 |
+| Top Picks hero cards, last complete | 242 / 928 | 241 / 1387 |
+| Recently Played episode cards, last complete | 242 / 928 | 242 / 1532 |
+| Featured Artists cards, last complete (playlist page) | 242 / 911 | 242 / 1515 |
+
+Control: at 980 the dump reproduces the 928 and 923 recorded above, so the tool
+is reading the same elements. AX group edges stand in for the pill at 1588; at 980
+they matched the pixel scan exactly (248 / 923), but the 1588 pill itself was not
+pixel-scanned.
+
+**What holds at both widths:** the pill is 40pt in from the content edge on both
+sides (248 = 208 + 40; 923 = 963 - 40 and 1531 = 1571 - 40), and the shelf's
+header and first card start 34pt in (242 / 241), so the pill sits **6pt inside the
+cards on the leading side**.
+
+**What does not:** the earlier "shelf trailing edge is a rule, content right minus
+35" is retracted. At 1588 the last complete cards end at 1387, 1532 and 1515
+(184, 39 and 56pt short of 1571), because a shelf shows whole cards plus a peek of
+the next and the leftover depends on card width. 928 at 980 was a coincidence of
+two card widths. There is no trailing relation between pill and cards to copy.
+
+**Verdict:** the spike's trailing pill edge (content - 40) already matches Music.
+Its leading shelf inset was 40 where Music has 34. Fixed in the spike (`Shelf`
+`inset` 40 -> 34): render at 1180pt measures hero cards from 294.0 and the pill
+from 300.0, a 6pt gap, as in Music (242 vs 248). Pixel scan of the new render,
+not a re-measure of Music. The spike's trailing card edges stay unlike Music's by
+construction: it has three or four cards and no peek.

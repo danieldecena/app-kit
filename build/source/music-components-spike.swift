@@ -105,9 +105,10 @@ struct HeroCard: View {
 struct Shelf<Content: View>: View {
     let title: String
     var compact: Bool = false
-    /// Leading inset of the content column: 40pt, the same line TrackList's
-    /// pill starts on, measured from the Music window.
-    var inset: CGFloat = 40
+    /// Leading inset of the shelf's header and first card: 34pt from the content
+    /// edge, 6pt outside the 40pt line TrackList's pill starts on. Measured in
+    /// Music at 980 and 1588pt (music-capture.md, 2026-10-02).
+    var inset: CGFloat = 34
     var onMore: () -> Void = {}
     @ViewBuilder var content: Content
 
@@ -130,7 +131,7 @@ struct Shelf<Content: View>: View {
                     .scrollTargetLayout()
             }
             .scrollTargetBehavior(.viewAligned)       // the snap Music has
-            // The cards rest 40pt in, level with TrackList's pill, but scroll
+            // The cards rest 34pt in, 6pt outside TrackList's pill, but scroll
             // all the way under the edge -- which contentMargins gives and a
             // plain .padding does not.
             .contentMargins(.horizontal, inset, for: .scrollContent)
