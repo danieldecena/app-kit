@@ -1418,3 +1418,13 @@ So a key-window capture needs the person to click into Music **and then not
 touch the keyboard**, with the shot fired from the agent side. That is the only
 arrangement in which Music is frontmost at the moment the shutter runs, and it is
 why nearly every still in this project is an inactive window.
+
+**Corroborated at a second window size.** `sidebar-light-key-unfocused.png`
+(980x662pt, traffic-light spread 157 so the window **is** key) reads `#E0E0E0` on
+a `#F7F7F7` sidebar -- the same pair as `home-light-active.png` at 1588x1007.
+Two independent captures, so the light key-but-unfocused fill is settled.
+
+It also shows the protocol working: fired from the agent side while the person
+had left Music frontmost, the window came back key. The state still missing is
+light **with the list focused**, which needs a click directly on a sidebar row
+rather than anywhere else in the window.
