@@ -1629,3 +1629,43 @@ Its leading shelf inset was 40 where Music has 34. Fixed in the spike (`Shelf`
 from 300.0, a 6pt gap, as in Music (242 vs 248). Pixel scan of the new render,
 not a re-measure of Music. The spike's trailing card edges stay unlike Music's by
 construction: it has three or four cards and no peek.
+
+### Window state of the captures behind the provenance table (2026-10-02)
+
+Which captures may support a key-window claim and which an inactive one. State
+witnessed by traffic-light saturation after sRGB conversion,
+`build/source/swatch-scan.py --lights`, run from `build/source/music-reference`
+as `/usr/bin/python3 ../swatch-scan.py <file> --lights`. Appearance is read from a
+background pixel (mid-content and left edge), not from the file name. A file name
+is not an instrument: `album-selected-inactive-dark.png` is named inactive and is
+a key-window shot.
+
+| Capture | Appearance | Window state | Max saturation |
+|---|---|---|---|
+| `album-selected-inactive-dark.png` | dark | key | 1.00 |
+| `album-selected-row-dark.png` | dark | key | 1.00 |
+| `album-transport-inactive-dark.png` | dark | not key | 0.01 |
+| `home-inactive-dark-sidebar.png` | dark | not key | 0.00 |
+| `home-miniplayer-inactive-dark.png` | dark | not key | 0.02 |
+| `album-light-inactive.png` | light | not key | 0.02 |
+| `album-light-inactive-sidebar.png` | light | not key | 0.02 |
+| `album-inactive-light.png` | light | not key | 0.02 |
+| `row-selected-inactive-light-vd.png` | light | not key | 0.02 |
+| `row-selected-key-dark-vd.png` | dark | key | 1.00 |
+| `row-selected-key-light-vd.png` | light | key | 0.83 |
+
+No file came back `unclear`. The light key shot's 0.83 is lower than the dark
+captures' 1.00 because the light traffic lights are paler, but it is far from the
+not-key readings (0.00 to 0.02), so the verdict is not borderline.
+
+**Does any dark capture show a selected track row with the window not key?** No.
+The three dark `not key` files (`album-transport-inactive-dark.png`,
+`home-inactive-dark-sidebar.png`, `home-miniplayer-inactive-dark.png`) were viewed.
+`album-transport-inactive-dark.png` is the VULTURES 2 album page with no track row
+highlighted (the only highlight is the Home sidebar row), and the other two are
+the Home page. None has a selected track row, so there is nothing to `--hist`.
+
+So `album-selected-inactive-dark.png` is a key-window shot: `#464646` is the fill of
+a selected row in a key window whose list is not focused, and **no dark
+app-inactive selected-row capture exists**. Any claim about a dark inactive
+selected row is unmeasured.
