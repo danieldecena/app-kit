@@ -1720,3 +1720,70 @@ in framing, the max saturation for `row-selected-key-light-vd.png` reads 0.83
 (the plan saw 0.84, before the key-state check became a fixed-position template).
 The capsule hist top three matched in order and value (`#F1F1F1`, `#F0F0F0`,
 `#EAEAEA`); no coordinate was adjusted.
+
+### Selected-row shape by appearance and page (2026-10-02)
+
+Instrument: `/usr/bin/python3 ../swatch-scan.py <file> --extent X:Y` from
+`build/source/music-reference`. It walks out from the seed pixel along its row and
+column while the colour stays within 3 per channel of the seed, so it reports a
+run, not a shape: corner radius is not measured. Seeds are 4px below each row's top
+edge, above the 40px artwork thumbnail. Window state is from the Task 2 table.
+All four PNGs were viewed to establish the page type.
+
+| Capture | Window state | Page | Command | Observed |
+|---|---|---|---|---|
+| `row-selected-key-light-vd.png` | key | playlist "Jump rope", artwork rows, 56pt pitch | `--extent 650:589` | `fill #DC1229  x 208-963 (755pt)  y 585-640 (55pt)` |
+| `row-selected-inactive-light-vd.png` | not key | playlist "Jump rope" | `--extent 650:456` | `fill #DCDCDC  x 208-963 (755pt)  y 452-507 (55pt)` |
+| `row-selected-key-dark-vd.png` | key | playlist "Jump rope" | `--extent 650:508` | `fill #CC132C  x 249-922 (673pt)  y 504-559 (55pt)` |
+| `album-selected-inactive-dark.png` | key (list not focused) | album "Charm", track-number rows, no artwork, about 45-46pt pitch | `--extent 1500:975` | `fill #464546  x 620-3096 (1238pt)  y 960-1050 (45pt)` |
+
+The three playlist captures are 980pt-wide windows whose content scroll area is
+x 208-963 (the width recorded in the playlist pill section above). The album
+capture is a 1588pt-wide window (3176px at 2x) whose content pane starts at x 270:
+the sidebar is narrower there, found by a pixel scan across y=950pt (the sidebar
+ground `#252629` gives way to the pane ground `#1E1F20` at 270.0). Its row runs
+310 to 1548pt, 40pt in from the pane's left edge; the right inset was not measured
+against a pane edge, only against the window width (1588 - 1548 = 40).
+
+The dark playlist left edge reads 249, not 248, because the walk runs 4px below the
+row's top edge, inside the 6pt corner radius, where the rounded corner has not yet
+reached full width. It is recorded as read. The same 4px offset makes the right edge
+922, against 923 for the hover pill in the section above.
+
+Viewed shapes: the light key and light inactive rows run edge to edge across the
+whole content area with square corners. The dark playlist row is an inset pill with
+rounded corners, 41pt in from each side of the content area (249 - 208 and
+963 - 922). The dark album row is an inset pill with rounded corners, the 40pt
+inset noted above. Corner radius was seen, not measured.
+
+Control, the prescribed one:
+`row-selected-key-dark-vd.png --extent 650:480` returned
+`fill #1F1F20  x 512-734 (222pt)  y 448-503 (55pt)`. The plan expected an extent
+far larger than a row. It is not: seed y=480 sits on the subtitle text line of the
+row above the selected one ("Gangster Party Chronicles..."), so the horizontal walk
+is cut by text at x 512 and 734, and the vertical walk is cut by the row hairlines
+(pixel `#353536` at y=447 and y=503, ground `#1F1F20` between). What the control does
+show is the colour: `#1F1F20` ground, not `#CC132C`, so the tool does tell a fill
+from the ground. Three further seeds on text-free lines, run to see the walk reach
+the ground's real extent:
+
+| Seed | Observed |
+|---|---|
+| `650:450` | `fill #1F1F20  x 208-966 (758pt)  y 448-503 (55pt)` |
+| `650:490` | `fill #1F1F20  x 519-966 (447pt)  y 448-503 (55pt)` (cut by subtitle text at x 518) |
+| `650:600` | `fill #1F1F20  x 598-966 (368pt)  y 560-615 (55pt)` (cut by title text) |
+
+`650:450` is the clean one: the non-selected row's ground runs the full 758pt
+content width, against 673pt for the selected pill, so an extent of 673 is not the
+tool walking out to the ground.
+
+**Verdict.** "Full-bleed" is supported only by the two light playlist captures
+(`row-selected-key-light-vd.png`, `row-selected-inactive-light-vd.png`: 755pt, the
+whole content width, square corners). "Inset pill" is supported by the dark
+playlist capture (673pt, 40pt in each side) and by the dark album capture (40pt
+in from the pane's left edge). "55pt" is supported by all three playlist captures
+(artwork rows) and "45pt" only by the album capture (track-number rows): they are
+different page types, not a conflict. No capture shows a light album page or a dark
+playlist inactive row, so appearance and page type are not separated: the light/dark
+shape difference is observed only on the playlist page, and the 45/55pt difference
+only between appearances-and-pages that also differ. `TrackList` was not edited.
