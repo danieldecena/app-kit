@@ -2301,8 +2301,15 @@ within 2 units of Music's own sidebar. **Setting a background defeats it.**
 
 Two SwiftUI behaviours worth knowing before you build this natively:
 
-- Sidebar selection draws the **system accent**, not your colour. Matching
-  Music's red needs an explicit override.
+- Sidebar selection draws the **system accent**, not your colour, and `.tint()`
+  on the `List` does not change it. Measured: with the list focused the selected
+  row fills `#007AFF`, the system accent, while `.tint(Color.Kit.musicSelect)`
+  was set to `#CC132D`. Matching Music's red needs an explicit row background.
+- **A key window is not a focused list**, and the difference is visible. The same
+  row fills `#434346` when the window is key but focus is elsewhere -- a neutral
+  grey that is neither the accent nor the tint. An earlier reading of this spike
+  took that grey as evidence about `.tint`; it is evidence about focus. Check
+  which of the two you are looking at before concluding anything about colour.
 - `.foregroundStyle` on a `Label` tints the symbol **and** the text. Music tints
   only the symbol. Build the Label from explicit `Text`/`Image` closures and
   tint the `Image`.

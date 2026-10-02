@@ -91,6 +91,11 @@ struct MiniPlayerSpike: View {
 
 struct SpikeView: View {
     @State private var selection: String? = "Home"
+    // A key WINDOW is not a focused LIST. The first run of this spike sampled a
+    // grey selection and concluded .tint does not reach it -- but the system
+    // accent on this Mac is blue and .tint's colour is red, so grey was neither:
+    // it was the unfocused style, because nothing had put focus in the List.
+    @FocusState private var listFocused: Bool
     private let nav = [("Search", "magnifyingglass"), ("Home", "house.fill"), ("New", "square.grid.2x2"), ("Radio", "dot.radiowaves.left.and.right")]
     private let library = ["Songs", "Recently Added", "Albums", "Artists"]
 
@@ -118,6 +123,8 @@ struct SpikeView: View {
                 }
             }
             .listStyle(.sidebar)
+            .focused($listFocused)
+            .onAppear { DispatchQueue.main.async { listFocused = true } }
             // Open question for slice 3: sidebar selection draws the SYSTEM
             // accent, not music-accent, even with every label tinted. .tint on
             // the List is the documented lever; this spike exists to check
