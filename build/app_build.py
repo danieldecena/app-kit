@@ -2563,7 +2563,7 @@ docs[
     var s = React.useState(2), sel = s[0], setSel = s[1];
     return h('div', { style: { display: 'flex', flexDirection: 'column', gap: 28 } },
       h(D.TrackList, { rows: rows, columns: columns, selection: sel, onSelect: setSel }),
-      h(D.TrackList, { rows: rows, columns: columns, selection: sel, windowInactive: true,
+      h(D.TrackList, { rows: rows, columns: columns, selection: sel, onSelect: setSel, windowInactive: true,
                        label: 'Tracks, window not key' }));
   }
   ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
