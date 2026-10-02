@@ -1,8 +1,11 @@
 ## Tasks
 
 - [x] Publish provenance and token corrections to the artifact -- v58
-- [ ] TrackList pill height follows the row, 55pt on artwork rows
-- [ ] Build design runbook artifact for the measure-to-publish process
+- [x] TrackList pill height follows the row, 55pt on artwork rows -- 0fcbf9a
+- [x] Build design runbook artifact for the measure-to-publish process -- fe8bdbe
+- [ ] Publish the TrackList pill change to the artifact
+- [ ] Add the design runbook binding to the terminal-kit register
+- [ ] Render the spike and run accessibility-review on the 55pt pill
 
 ## Completed
 
