@@ -1815,3 +1815,14 @@ ones, seeded 4px below the top of an unselected row:
 
 So the light selection (208-963) starts at the content area's left edge and stops
 3pt short of where the ground walk stops (966). "Full-bleed" means that, not 758pt.
+
+### The plan's six predictions, one line each (2026-10-02)
+
+Each was written into the plan from a first reading and then re-observed above.
+
+1. `album-selected-inactive-dark.png` is a key-window shot despite its name: held (`key`, 1.00).
+2. `row-selected-inactive-light-vd.png` is not key and its selected row is exactly `#DCDCDC`: held (370 of 370).
+3. The dark Play label is `#000000` in two key-window captures: held (111 and 654 solid pixels on `#F3F3F3`).
+4. The selected-row label is `#FFFFFF` in key-window captures of both appearances: held.
+5. The light capsule is about `#F0F0F0`, not `#FFFFFF`, with a `#000000` pause glyph: held for the not-key capture, and narrowed: with the window key it reads about `#FAFAFA`, still not `#FFFFFF`.
+6. The selected row is not one shape (light full-bleed 208-963 at 55pt, dark playlist pill 249-922 at 55pt, dark album pill 1238 x 45pt): held, every extent as predicted.

@@ -999,7 +999,7 @@ BTN = """/* Button: iOS 26 capsules in the Notes highlight colours, translucent 
    label -- would paint Play RED, which reads as not-Music at a glance. Music
    draws it as maximum contrast against the ground, so it INVERTS with
    appearance: a near-black pill with a white label in light, a near-white pill
-   with a near-black label in dark.
+   with a black label in dark.
 
    data-window-inactive is the same convention SidebarList and TrackList use, and
    here it inverts again rather than dimming: #ECECEC light and #2F2F30 dark, both
