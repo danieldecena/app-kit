@@ -34,6 +34,17 @@ The first attempt used `footnote` for both and let flex compress each line from
 the preview's subtitle was all-caps. Music's own caption type was never
 measured, so this split is ours.
 
+## States
+
+| State | What it does |
+|---|---|
+| `compact` | `data-compact="true"` on the shelf; the gap goes 20px to 16px |
+| head hover | hovering the title row brings the see-all chevron from `ink-soft` to `ink` |
+| track focus | the scroll track is a tab stop, so the arrow keys work without a trackpad |
+
+The cards are the caller's, so the shelf has no selected or disabled state of
+its own.
+
 ## Scrolling
 
 Music's shelf snaps to a card boundary: a measured scroll landed 878.9px against

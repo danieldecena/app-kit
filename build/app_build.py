@@ -1068,6 +1068,9 @@ css = css_sub(
 .dc-sidebar-head-action { border: 0; padding: 0; background: none; font: 400 11px/13px var(--font-sans); color: var(--music-accent-ink); cursor: pointer; }
 .dc-sidebar-row { display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 32px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: none; color: var(--ink); font: var(--type-subhead); text-align: left; cursor: pointer; box-sizing: border-box; }
 .dc-sidebar-row:hover { background: var(--music-hover); }
+/* The only Music component that had no focus ring, and the one driven by the
+   arrow keys. Matches TrackList: same colour, same inset offset. */
+.dc-sidebar-row:focus-visible { outline: 2px solid var(--music-accent); outline-offset: -2px; }
 .dc-sidebar-row[aria-current="true"] { background: var(--music-select); color: var(--on-music-select); font-weight: 600; }
 .dc-sidebar-row[aria-current="true"] .dc-sidebar-icon { color: var(--on-music-select); }
 /* Inactive selection. Set data-window="inactive" on the sidebar when the window
@@ -1967,6 +1970,17 @@ The first attempt used `footnote` for both and let flex compress each line from
 the preview's subtitle was all-caps. Music's own caption type was never
 measured, so this split is ours.
 
+## States
+
+| State | What it does |
+|---|---|
+| `compact` | `data-compact="true"` on the shelf; the gap goes 20px to 16px |
+| head hover | hovering the title row brings the see-all chevron from `ink-soft` to `ink` |
+| track focus | the scroll track is a tab stop, so the arrow keys work without a trackpad |
+
+The cards are the caller's, so the shelf has no selected or disabled state of
+its own.
+
 ## Scrolling
 
 Music's shelf snaps to a card boundary: a measured scroll landed 878.9px against
@@ -1993,6 +2007,17 @@ title sitting 22.5pt up from the bottom, eyebrow 7.5pt above the title. The CSS
 rounds to 18px and lets the line boxes set the rest, so the title sits a little
 lower than Music's; the badge inset (14px) and the eyebrow's 82% alpha are the
 component's own and were not measured.
+
+## States
+
+| State | What it does |
+|---|---|
+| focus | a 2px `music-accent` ring, offset 2px, on the whole card |
+| press | the card is a button, so the caller's `onClick` fires; there is no pressed fill |
+
+**Hover is deliberately absent, and unmeasured rather than decided.** Whether
+Music lifts or dims a hero on hover has never been captured, and inventing one
+would be the only unmeasured visual in the variant. Capture it before adding it.
 
 ## The scrim is ours, not Music's
 

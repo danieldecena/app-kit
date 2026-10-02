@@ -17,6 +17,17 @@ rounds to 18px and lets the line boxes set the rest, so the title sits a little
 lower than Music's; the badge inset (14px) and the eyebrow's 82% alpha are the
 component's own and were not measured.
 
+## States
+
+| State | What it does |
+|---|---|
+| focus | a 2px `music-accent` ring, offset 2px, on the whole card |
+| press | the card is a button, so the caller's `onClick` fires; there is no pressed fill |
+
+**Hover is deliberately absent, and unmeasured rather than decided.** Whether
+Music lifts or dims a hero on hover has never been captured, and inventing one
+would be the only unmeasured visual in the variant. Capture it before adding it.
+
 ## The scrim is ours, not Music's
 
 Music's heroes are commissioned artwork that happens to carry white text. The one
