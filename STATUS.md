@@ -19,7 +19,7 @@
 ## Next Up
 
 - Colour and geometry are measured end to end, and five defects found by auditing *relations* rather than components were fixed on 2026-10-01: see the decision log.
-- The artifact is at v65 and matches the tree (byte-compared on read-back); nothing waits to be published.
+- The artifact is at v67 and matches the tree (byte-compared on read-back); nothing waits to be published.
 - The two deferred token renames (`ground-window` -> `music-ground`, `music-ink-soft-on-fill` -> `on-music-fill`) wait for the variant's next breaking change; that call stands.
 
 Full list: `TASKS.md`.
