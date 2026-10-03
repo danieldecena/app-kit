@@ -9,7 +9,7 @@
 - [x] Spinner tab: re-copy, title, overflowing shelves -- spinner cf45de3
 - [x] Find what moves the tab's selections after launch -- not reproduced, spinner b6ee644
 - [x] Publish the Music review fixes and record -- v65
-- [ ] Shelf draws the chevron only when it has a See All
+- [x] Shelf draws the chevron only when it has a See All -- (pending sha)
 
 ## Completed
 

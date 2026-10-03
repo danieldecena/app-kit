@@ -19,7 +19,7 @@
     ['#8E2DE2', '#4A00E0', 'Station', 'Soulection Radio']
   ];
   ReactDOM.createRoot(document.getElementById('root')).render(
-    h(D.Shelf, { title: 'Top Picks for You', onMore: function () {} },
+    h(D.Shelf, { title: 'Top Picks for You' },
       cards.map(function (c, i) {
         return h(D.HeroCard, { key: i, art: art(c[0], c[1]), eyebrow: c[2], title: c[3],
                                tone: c[0], width: 258 });

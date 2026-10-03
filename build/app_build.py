@@ -2213,7 +2213,10 @@ docs[
 docs["Shelf/README.md"] = r"""# Shelf
 
 A horizontally scrolling row of cards with a title and an optional "see all"
-chevron, as on Music's Home.
+chevron, as on Music's Home. The chevron is drawn only when the shelf has
+somewhere to go (`onMore`): Music shows it after "Recently Played" and not
+after "Top Picks for You", and a chevron with no destination promises a page
+that does not exist.
 
 ## The shelf owns the gap; the card owns its shape
 
@@ -2468,7 +2471,7 @@ docs[
     ['#8E2DE2', '#4A00E0', 'Station', 'Soulection Radio']
   ];
   ReactDOM.createRoot(document.getElementById('root')).render(
-    h(D.Shelf, { title: 'Top Picks for You', onMore: function () {} },
+    h(D.Shelf, { title: 'Top Picks for You' },
       cards.map(function (c, i) {
         return h(D.HeroCard, { key: i, art: art(c[0], c[1]), eyebrow: c[2], title: c[3],
                                tone: c[0], width: 258 });
