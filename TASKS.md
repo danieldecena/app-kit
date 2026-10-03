@@ -5,9 +5,9 @@
 - [x] Add inactive sidebar ink and glyph tokens -- dda4658
 - [x] SidebarList/TrackList read appearsActive, dim whole sidebar -- 1a53795
 - [x] Web SidebarList dims every row when inactive -- dda4658
-- [x] Large page title in the spike window -- (this commit)
-- [ ] Spinner tab: re-copy, title, overflowing shelves
-- [ ] Find what moves the tab's selections after launch
+- [x] Large page title in the spike window -- 60a3af0
+- [x] Spinner tab: re-copy, title, overflowing shelves -- spinner cf45de3
+- [x] Find what moves the tab's selections after launch -- not reproduced, spinner b6ee644
 - [ ] Publish the Music review fixes and record
 - [ ] Shelf draws the chevron only when it has a See All
 
