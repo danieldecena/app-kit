@@ -137,6 +137,7 @@ footer { color: var(--bk-soft); font-size: 13px; line-height: 18px; border-top: 
     <ol>
       <li><a href="#toolbox"><span class="n">A</span>Tools on this Mac</a></li>
       <li><a href="#sources"><span class="n">B</span>Where to look</a></li>
+      <li><a href="#wireframes"><span class="n">C</span>Wireframe in code</a></li>
     </ol>
     <div class="rail-foot">
       <div class="total" id="total" aria-live="polite">Checks are saved in this browser only.</div>
@@ -502,6 +503,40 @@ diff -q $S/out/swift/AppKit.swift swift/AppKit.swift</pre><button type="button" 
       <dl class="notes">
         <div class="trap"><dt>Not verified</dt><dd>Apple's Accessibility Inspector page, Material Design's token tiering, and any contrast method proposed for WCAG 3 were not confirmed in this check. Look before relying on them.</dd></div>
       </dl>
+    </section>
+
+    <section class="stage" id="wireframes">
+      <div class="stage-head"><span class="num">C</span><div><h2>Wireframe the screen in code</h2><p class="goal">Before Claude Code changes an existing app's layout, give it one file that maps every region to the struct that draws it. It then opens one struct instead of reading the whole view layer, and the change lands in the right place.</p></div></div>
+
+      <div class="panel">
+        <ol class="rules">
+          <li><span class="n">1</span><span><b>Map with an agent, then check the map.</b> Ask an Explore agent for each surface's regions, top to bottom: struct, file, layout container, and how it behaves when narrow. Grep a sample of what it returns before writing anything down.</span></li>
+          <li><span class="n">2</span><span><b>One file, one box per surface.</b> <code>docs/WIREFRAMES.md</code>: the window shell, each tab, each popover, drawn as monospace boxes.</span></li>
+          <li><span class="n">3</span><span><b>Label regions by struct and file, not by line.</b> Line numbers go stale with the next edit; <code>grep -n "struct Name"</code> finds the current one.</span></li>
+          <li><span class="n">4</span><span><b>Write the code's own numbers.</b> Widths, spacing, radii and grid minimums as literals. Mark anything computed from them as derived.</span></li>
+          <li><span class="n">5</span><span><b>Name each region's width rule.</b> A fixed column, the flexible side of a stack, or a grid span. A change to one does not reflow the others.</span></li>
+          <li><span class="n">6</span><span><b>List the primitives and the spacing in use.</b> The card modifier, the grid layout, the type and colour tokens. If spacing values are written inline with no token file, say so and list them, so new code matches them.</span></li>
+          <li><span class="n">7</span><span><b>Wire it in.</b> Point the project's <code>CLAUDE.md</code> at the file, and update the wireframe in the same commit as any layout change. A wireframe that disagrees with the app is worse than none.</span></li>
+        </ol>
+      </div>
+
+      <div class="cmd"><pre id="kc"><span class="c"># claude-spinner, Session tab (excerpt from docs/WIREFRAMES.md)</span>
+R1 +---------------------------------+  +--------------------+
+   | ConversationCard   (flexible)   |  | SkillsCard   w380  |
+   |  TranscriptCard                 |  |  ShortcutChips     |
+   |  [ReplyBox r10 ...] [ConfigCard]|  |  GitButtons        |
+   +---------------------------------+  +--------------------+
+R2 +--------------------+  +---------------------------------+
+   | GitGraphCard  w360 |  | .detailCard()                   |
+   |  lane graph        |  |  GitCard  AutomationToggles     |
+   +--------------------+  +---------------------------------+
+<span class="c"># every row is TileGrid .tileSpan(.max); R1/R2 are plain HStacks, so nothing stacks when narrow</span></pre><button type="button" class="copy" data-copy="kc">Copy</button></div>
+
+      <dl class="notes">
+        <div class="done"><dt>Done when</dt><dd>A fresh session can name the struct and file for any region from this file alone, and every sampled label matches grep. For claude-spinner, 12 of 12 matched on 2 October 2026.</dd></div>
+        <div class="trap"><dt>Trap</dt><dd>A pane that scales to fit lays out wider than it looks. claude-spinner's <code>PaneFit</code> lays out at width divided by scale, so the grid can choose a different column count from the one the visible width suggests. The wireframe has to say which width the grid actually sees.</dd></div>
+      </dl>
+      <p class="skills">Worked example: <code>docs/WIREFRAMES.md</code> in <code>~/developer/claude-spinner</code>. After the change, take a capture and run <code>design:design-critique</code> on it.</p>
     </section>
 
     <footer>Source: <code>Artifacts/design-runbook/artifact.html</code> in <code>~/developer/app-kit</code>. The full measurement record is <code>build/source/music-capture.md</code>, and the build's own rules are in the repo's <code>CLAUDE.md</code>. Commands here are App Kit's; for another system, swap the paths and keep the order.</footer>
