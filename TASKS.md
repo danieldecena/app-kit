@@ -8,7 +8,7 @@
 - [x] Large page title in the spike window -- 60a3af0
 - [x] Spinner tab: re-copy, title, overflowing shelves -- spinner cf45de3
 - [x] Find what moves the tab's selections after launch -- not reproduced, spinner b6ee644
-- [ ] Publish the Music review fixes and record
+- [x] Publish the Music review fixes and record -- v65
 - [ ] Shelf draws the chevron only when it has a See All
 
 ## Completed
