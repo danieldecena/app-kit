@@ -8,6 +8,9 @@
 - [x] Large page title in the spike window -- 60a3af0
 - [x] Spinner tab: re-copy, title, overflowing shelves -- spinner cf45de3
 - [x] Find what moves the tab's selections after launch -- not reproduced, spinner b6ee644
+- [x] Add sync-appkit.sh to copy and check the App Kit files -- spinner 7fa79af
+- [x] Add invariants check 41 for App Kit copy drift -- bin a15c0df
+- [x] Give the App Kit tab a real split-view sidebar -- pop-out, spinner 39a100f
 - [x] Publish the Music review fixes and record -- v65
 - [x] Shelf draws the chevron only when it has a See All -- ff55442
 
@@ -69,3 +72,16 @@
 - [x] Sync Panel grid and docs to per-row tiles -- de84451
 - [x] Publish Footage patterns to the App Kit artifact -- v19
 - [x] StatTile attention ring moves to warn -- v20
+
+<!-- resume-footer -->
+---
+Plan approved 2026-10-02 20:45.
+
+Sessions start in bypass; no flag needed below.
+
+Only if Claude Code actually closed:
+
+    claude --resume 986bbe20-4692-49fa-bdac-d2545cd78c6d
+
+(`-c` resumes the most recent session; bare `--resume` opens a searchable picker.)
+<!-- /resume-footer -->
