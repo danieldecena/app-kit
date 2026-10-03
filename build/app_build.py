@@ -3464,12 +3464,16 @@ is red. Backwards gives a red Play button, which reads as not-Music at a glance.
 ### Inactive is the normal state
 
 macOS greys a selection when the window is not key, and a monitor app spends
-most of its life there. `TrackList` takes `windowInactive`, which swaps
-`music-select` for `music-select-inactive` and returns labels to normal ink.
-`SidebarList` takes it too and swaps `music-sidebar-select` for
-`music-sidebar-select-inactive`. Sidebar glyphs keep their accent in the web
-component; the SwiftUI recipe steps a selected row's glyph to
-`music-ink-soft-on-fill` once the window is inactive.
+most of its life there. In `TrackList` that swaps `music-select` for
+`music-select-inactive` and returns labels to normal ink. In `SidebarList` it
+dims the whole sidebar, as Music does: the selection swaps
+`music-sidebar-select` for `music-sidebar-select-inactive`, every other label
+steps to `music-sidebar-ink-inactive`, and every glyph loses the accent for
+`music-sidebar-glyph-inactive` (the selected row's for
+`music-ink-soft-on-fill`). On the web, pass `windowInactive`. The SwiftUI
+recipes read `@Environment(\\.appearsActive)` and need nothing passed: an
+earlier version took a parameter that no adopter set, so every one rendered
+as active.
 
 Music's own secondary ink on a filled row was never measured, and the measured
 `music-ink-soft` reaches only 3.31:1 on the inactive fill and 3.99:1 on hover in
